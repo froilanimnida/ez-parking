@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
 
-export default function ParkingManagerLayout() {
+export default function UserLayout() {
     return <Stack />;
 }
