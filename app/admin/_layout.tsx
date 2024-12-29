@@ -2,7 +2,7 @@ import { Tabs } from "expo-router";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { tabsConfig } from "@/lib/config/TabsConfig";
 
-export default function UserLayout() {
+export default function AdminLayout() {
     return (
         <Tabs screenOptions={{ ...tabsConfig }}>
             <Tabs.Screen
@@ -13,24 +13,32 @@ export default function UserLayout() {
                 }}
             />
             <Tabs.Screen
-                name="book/index"
+                name="users/index"
                 options={{
-                    title: "Book",
-                    tabBarIcon: ({ color }) => <MaterialCommunityIcons name="book" color={color} size={20} />,
+                    title: "Users",
+                    tabBarIcon: ({ color }) => <MaterialCommunityIcons name="account" color={color} size={20} />,
                 }}
             />
             <Tabs.Screen
-                name="transactions/index"
+                name="users/[uuid]"
                 options={{
-                    title: "My Transactions",
-                    tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cash" color={color} size={20} />,
-                }}
-            />
-            <Tabs.Screen
-                name="transactions/[uuid]"
-                options={{
+                    title: "User",
                     href: null,
-                    title: "Transaction",
+                }}
+            />
+            <Tabs.Screen
+                name="establishments/index"
+                options={{
+                    title: "Establishments",
+                    tabBarIcon: ({ color }) => <MaterialCommunityIcons name="store" color={color} size={20} />,
+                }}
+            />
+
+            <Tabs.Screen
+                name="vehicle-types/index"
+                options={{
+                    title: "Vehicle Types",
+                    tabBarIcon: ({ color }) => <MaterialCommunityIcons name="car" color={color} size={20} />,
                 }}
             />
             <Tabs.Screen

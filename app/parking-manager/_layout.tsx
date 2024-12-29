@@ -1,18 +1,10 @@
 import { Tabs } from "expo-router";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { tabsConfig } from "@/lib/config/TabsConfig";
 
 export default function ParkingManagerLayout() {
     return (
-        <Tabs
-            screenOptions={{
-                tabBarActiveTintColor: "blue",
-                headerShown: false,
-                headerTransparent: true,
-                popToTopOnBlur: true,
-                animation: "shift",
-                headerTitleAlign: "center",
-            }}
-        >
+        <Tabs screenOptions={{ ...tabsConfig }}>
             <Tabs.Screen
                 name="index"
                 options={{

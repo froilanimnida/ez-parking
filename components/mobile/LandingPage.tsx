@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, ScrollView, SafeAreaView, StatusBar } from "react-native";
+import { StyleSheet, Text, View, SafeAreaView, StatusBar } from "react-native";
 import React from "react";
 import LinkComponent from "../LinkComponent";
 import { themes } from "../themes";
@@ -10,7 +10,7 @@ const LandingPage = () => {
                 <View style={styles.heroSection}>
                     <LinkComponent
                         asButton={true}
-                        href="/user"
+                        href="/admin"
                         label="Get Started"
                         style={styles.parkingManagerButton}
                     />
