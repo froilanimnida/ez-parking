@@ -1,7 +1,6 @@
 import { StyleSheet, Text, View, Pressable } from "react-native";
 import { Link, type ExternalPathString, type RelativePathString } from "expo-router";
 import React from "react";
-import { themes } from "./themes";
 import { useFonts } from "expo-font";
 
 type LinkComponentProps = {
@@ -12,6 +11,9 @@ type LinkComponentProps = {
 };
 
 const LinkComponent = ({ asButton, href, label, style }: LinkComponentProps) => {
+    let [fontsLoaded] = useFonts({
+        Inter: require("../assets/fonts/InterVariable.ttf"),
+    });
     return asButton ? (
         <Pressable style={{ ...style }}>
             <Link href={href}>

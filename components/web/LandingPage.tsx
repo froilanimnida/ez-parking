@@ -1,14 +1,14 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 
-const ParkingManagerSignUp = () => {
+const LandingPage = () => {
     return (
         <View>
-            <Text>ParkingManagerSignUp</Text>
+            <Text>LandingPage</Text>
         </View>
     );
 };
 
-export default ParkingManagerSignUp;
+export default LandingPage;
 
 const styles = StyleSheet.create({});

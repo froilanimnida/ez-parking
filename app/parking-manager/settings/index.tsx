@@ -1,12 +1,12 @@
-import { StyleSheet, Text, View } from 'react-native';
-import React from 'react';
+import { StyleSheet, Text, View } from "react-native";
+import React from "react";
 
 const ParkingManagerSettings = () => {
-	return (
-		<View>
-			<Text>ParkingManagerSettings</Text>
-		</View>
-	);
+    return (
+        <View>
+            <Text>ParkingManagerSettings</Text>
+        </View>
+    );
 };
 
 export default ParkingManagerSettings;

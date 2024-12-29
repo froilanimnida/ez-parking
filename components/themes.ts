@@ -1,10 +1,3 @@
-import { useFonts } from "expo-font";
-
-const inter = require("./../assets/fonts/InterVariable.ttf");
-const [fontsLoaded] = useFonts({
-    Inter: inter,
-});
-
 export const themes = {
     backgroundColor: "#f0f0f0",
     color: "#000",

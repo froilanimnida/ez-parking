@@ -6,23 +6,21 @@ import { themes } from "../themes";
 const LandingPage = () => {
     return (
         <SafeAreaView>
-            <ScrollView style={{ width: "100%", flex: 1 }}>
-                <View style={styles.container}>
-                    <View style={styles.heroSection}>
-                        <LinkComponent
-                            asButton={true}
-                            href="/parking-manager/dashboard"
-                            label="Get Started"
-                            style={styles.parkingManagerButton}
-                        />
-                        <Text style={styles.heroText}>Find Your Perfect Parking Spot</Text>
-                        <Text style={styles.heroSubText}>
-                            View real-time availability and book parking spaces instantly. Save time and hassle with EZ
-                            Parking.
-                        </Text>
-                    </View>
+            <View style={styles.container}>
+                <View style={styles.heroSection}>
+                    <LinkComponent
+                        asButton={true}
+                        href="/user"
+                        label="Get Started"
+                        style={styles.parkingManagerButton}
+                    />
+                    <Text style={styles.heroText}>Find Your Perfect Parking Spot</Text>
+                    <Text style={styles.heroSubText}>
+                        View real-time availability and book parking spaces instantly. Save time and hassle with EZ
+                        Parking.
+                    </Text>
                 </View>
-            </ScrollView>
+            </View>
         </SafeAreaView>
     );
 };
