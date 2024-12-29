@@ -1,15 +1,18 @@
-import { Text, View } from "react-native";
+import LandingPage from "@/components/mobile/LandingPage";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
-  return (
-    <View
-      style={{
+    return (
+        <View style={styles.container}>
+            <LandingPage />
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-      }}
-    >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
-    </View>
-  );
-}
+    },
+});

@@ -1,5 +1,16 @@
 import { Stack } from "expo-router";
 
 export default function RootLayout() {
-  return <Stack />;
+    return (
+        <Stack
+            screenOptions={{
+                headerShown: false,
+                statusBarTranslucent: true,
+                navigationBarTranslucent: true,
+                statusBarBackgroundColor: "transparent",
+                navigationBarColor: "transparent",
+                statusBarStyle: "dark",
+            }}
+        ></Stack>
+    );
 }
