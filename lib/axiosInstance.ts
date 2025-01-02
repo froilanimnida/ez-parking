@@ -1,18 +1,17 @@
 import axios from "axios";
-import https from "https";
-
-export const httpsAgent = new https.Agent({
-    rejectUnauthorized: process.env.ENVIRONMENT === "production",
-});
 
 const axiosInstance = axios.create({
-    baseURL: process.env.API_BASE_URL,
     withCredentials: true,
-    httpsAgent,
     headers: {
         Accept: "application/json",
     },
 });
+
+if (__DEV__) {
+    console.log("Development mode");
+    axios.defaults.validateStatus = (status) => true;
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+}
 
 axiosInstance.interceptors.request.use((config) => {
     if (config.data instanceof FormData) {
