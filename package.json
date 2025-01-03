@@ -48,7 +48,8 @@
     "expo-notifications": "~0.29.11",
     "expo-camera": "~16.0.10",
     "expo-document-picker": "~13.0.1",
-    "expo-brightness": "~13.0.2"
+    "expo-brightness": "~13.0.2",
+    "@react-native-community/datetimepicker": "8.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
