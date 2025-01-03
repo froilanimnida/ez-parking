@@ -4,9 +4,7 @@ import axiosInstance from "@/lib/axiosInstance";
 
 const fetchVehicleTypes = async () => {
     try {
-        const response = await axiosInstance.get(
-            `https://ez-parking-system.onrender.com/api/v1/vehicle-type/get-all-vehicle-types`
-        );
+        const response = await axiosInstance.get(`/vehicle-type/all`);
         return response.data;
     } catch (error) {
         console.log(error);

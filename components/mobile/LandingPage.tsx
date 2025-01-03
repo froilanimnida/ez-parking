@@ -1,24 +1,21 @@
-import { StyleSheet, Text, View, SafeAreaView, StatusBar } from "react-native";
+import { StyleSheet, View, SafeAreaView, StatusBar } from "react-native";
 import React from "react";
 import LinkComponent from "../LinkComponent";
-import { themes } from "../themes";
+import TextComponent from "../TextComponent";
 
 const LandingPage = () => {
     return (
         <SafeAreaView>
             <View style={styles.container}>
                 <View style={styles.heroSection}>
-                    <LinkComponent
-                        asButton={true}
-                        href="/admin"
-                        label="Get Started"
-                        style={styles.parkingManagerButton}
-                    />
-                    <Text style={styles.heroText}>Find Your Perfect Parking Spot</Text>
-                    <Text style={styles.heroSubText}>
+                    <LinkComponent asButton={true} href="/login" variant="primary" label="Get Started" />
+                    <TextComponent variant="h1" style={styles.heroText}>
+                        Find Your Perfect Parking Spot
+                    </TextComponent>
+                    <TextComponent style={styles.heroSubText} variant="body">
                         View real-time availability and book parking spaces instantly. Save time and hassle with EZ
                         Parking.
-                    </Text>
+                    </TextComponent>
                 </View>
             </View>
         </SafeAreaView>
@@ -44,16 +41,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     heroText: {
-        fontSize: 24,
-        fontFamily: "Inter",
         fontWeight: "bold",
     },
     heroSubText: {
-        fontSize: 16,
-        fontFamily: "Inter",
         textAlign: "center",
-    },
-    parkingManagerButton: {
-        backgroundColor: themes.primaryColor,
     },
 });
