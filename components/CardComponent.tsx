@@ -5,11 +5,12 @@ interface CardComponentProps {
     header: string;
     subHeader?: string;
     children: React.ReactNode;
+    customStyles?: {};
 }
 
-const CardComponent = ({ header, subHeader, children }: CardComponentProps) => {
+const CardComponent = ({ header, subHeader, children, customStyles }: CardComponentProps) => {
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, customStyles]}>
             <View style={styles.headerContainer}>
                 <Text style={styles.headerText}>{header}</Text>
                 {subHeader && <Text>{subHeader}</Text>}

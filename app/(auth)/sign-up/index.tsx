@@ -1,6 +1,5 @@
 import { StyleSheet, View, SafeAreaView, Platform, StatusBar, TextInput, ScrollView } from "react-native";
 import React, { useState } from "react";
-import { router } from "expo-router";
 import CardComponent from "@/components/CardComponent";
 import TextComponent from "@/components/TextComponent";
 import ButtonComponent from "@/components/ButtonComponent";
@@ -20,7 +19,7 @@ const UserSignUp = () => {
 
     const handleSubmit = async () => {
         try {
-            // Add your API call here
+            // TODO: Add your API call here...
             console.log("success");
         } catch (err) {
             console.error(err);
@@ -29,9 +28,13 @@ const UserSignUp = () => {
 
     return (
         <View style={styles.container}>
-            <SafeAreaView>
-                <ScrollView>
-                    <CardComponent header="Sign up" subHeader="Create an account to get started">
+            <SafeAreaView style={{ width: "100%", height: "100%" }}>
+                <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignItems: "center" }}>
+                    <CardComponent
+                        header="Sign up"
+                        subHeader="Create an account to get started"
+                        customStyles={{ width: "89%" }}
+                    >
                         <View style={styles.form}>
                             <TextInput
                                 style={styles.input}
@@ -103,6 +106,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+        width: "100%",
+        height: "100%",
+        justifyContent: "center",
+        alignItems: "center",
     },
     form: {
         gap: 16,
@@ -121,6 +128,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     loginLink: {
+        width: "100%",
         alignItems: "center",
         marginTop: 16,
     },

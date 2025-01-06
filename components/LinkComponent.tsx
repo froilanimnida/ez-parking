@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable, ActivityIndicator } from "react-native";
+import { StyleSheet, Pressable } from "react-native";
 import { Link, type ExternalPathString, type RelativePathString } from "expo-router";
 import TextComponent from "@/components/TextComponent";
 import React from "react";
@@ -14,7 +14,6 @@ interface LinkComponentProps {
     variant?: LinkVariant;
     loading?: boolean;
     disabled?: boolean;
-    icon?: React.ReactNode;
     textStyle?: object;
 }
 
@@ -26,23 +25,10 @@ const LinkComponent = ({
     variant = "primary",
     loading = false,
     disabled = false,
-    icon,
 }: LinkComponentProps) => {
-    let [fontsLoaded] = useFonts({
+    let [] = useFonts({
         Inter: require("../assets/fonts/InterVariable.ttf"),
     });
-    const content = (
-        <>
-            {loading ? (
-                <ActivityIndicator color={variant === "secondary" ? "#4F46E5" : "white"} />
-            ) : (
-                <View style={styles.contentContainer}>
-                    {icon && <View style={styles.iconContainer}>{icon}</View>}
-                    <TextComponent style={[styles.label, disabled && styles.disabledText]}>{label}</TextComponent>
-                </View>
-            )}
-        </>
-    );
 
     if (asButton) {
         return (
@@ -50,7 +36,9 @@ const LinkComponent = ({
                 style={[styles.container, styles[variant], disabled && styles.disabled, style]}
                 disabled={disabled || loading}
             >
-                <Link href={href}>{content}</Link>
+                <Link href={href}>
+                    <TextComponent style={[styles.label, disabled && styles.disabledText]}>{label}</TextComponent>
+                </Link>
             </Pressable>
         );
     }
@@ -60,7 +48,7 @@ const LinkComponent = ({
             href={href}
             style={[styles.container, variant !== "text" && styles[variant], disabled && styles.disabled, style]}
         >
-            {content}
+            <TextComponent style={[styles.label, disabled && styles.disabledText]}>{label}</TextComponent>
         </Link>
     );
 };
@@ -77,6 +65,7 @@ const styles = StyleSheet.create({
     contentContainer: {
         flexDirection: "row",
         alignItems: "center",
+        justifyContent: "center",
         flexShrink: 0,
         flexGrow: 0,
     },
@@ -85,10 +74,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "600",
         flexShrink: 0,
-        color: "white",
-    },
-    iconContainer: {
-        marginRight: 8,
     },
     primary: {
         backgroundColor: "#4F46E5",
@@ -100,6 +85,7 @@ const styles = StyleSheet.create({
     },
     text: {
         backgroundColor: "transparent",
+        color: "#000000",
         padding: 0,
     },
     destructive: {

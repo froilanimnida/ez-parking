@@ -13,6 +13,20 @@ export default function AdminLayout() {
                 }}
             />
             <Tabs.Screen
+                name="settings/about"
+                options={{
+                    href: null,
+                    title: "About",
+                }}
+            />
+            <Tabs.Screen
+                name="settings/contact"
+                options={{
+                    href: null,
+                    title: "Contact",
+                }}
+            />
+            <Tabs.Screen
                 name="users/index"
                 options={{
                     title: "Users",
