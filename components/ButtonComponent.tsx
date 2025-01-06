@@ -75,18 +75,20 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         fontWeight: "600",
+        color: "white",
     },
     primaryText: {
         color: "white",
     },
     secondaryText: {
-        color: "#4F46E5",
+        color: "black",
     },
     destructiveText: {
         color: "white",
     },
     buttonTextDisabled: {
-        color: "#9CA3AF",
+        color: "white",
+        cursor: "not-allowed",
     },
     iconContainer: {
         marginRight: 8,

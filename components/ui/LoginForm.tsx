@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, createRef } from "react";
-import { View, Text, TextInput, StyleSheet } from "react-native";
+import { View, TextInput, StyleSheet } from "react-native";
 import Checkbox from "expo-checkbox";
 import TextComponent from "components/TextComponent";
 import ButtonComponent from "components/ButtonComponent";
+import CardComponent from "../CardComponent";
 
 const LoginForm = () => {
     const [showOtpForm, setShowOtpForm] = useState(false);
@@ -53,65 +54,66 @@ const LoginForm = () => {
     return (
         <View style={styles.container}>
             {!showOtpForm ? (
-                <View style={styles.formContainer}>
-                    <View style={styles.header}>
-                        <TextComponent style={styles.title}>Welcome back</TextComponent>
-                        <TextComponent style={styles.subtitle}>
-                            Please enter your registered email address
-                        </TextComponent>
-                    </View>
+                <View>
+                    <CardComponent
+                        header="Welcome back"
+                        subHeader="Please enter your registered email address"
+                        children={
+                            <>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Email address"
+                                    keyboardType="email-address"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    autoCapitalize="none"
+                                />
+                                <View style={styles.checkbox}>
+                                    <Checkbox onValueChange={setRememberMe} value={rememberMe} color="#4F46E5" />
+                                    <TextComponent>Remember me</TextComponent>
+                                </View>
 
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Email address"
-                        keyboardType="email-address"
-                        value={email}
-                        onChangeText={setEmail}
-                        autoCapitalize="none"
-                    />
-                    <View style={styles.checkbox}>
-                        <Checkbox onValueChange={setRememberMe} value={rememberMe} color="#4F46E5" />
-                        <Text>Remember me</Text>
-                    </View>
-
-                    <ButtonComponent
-                        title="Continue"
-                        onPress={handleLogin}
-                        variant="primary"
-                        loading={loggingIn}
-                        disabled={!isEmailValid(email) || loggingIn}
+                                <ButtonComponent
+                                    title="Continue"
+                                    onPress={handleLogin}
+                                    variant="primary"
+                                    loading={loggingIn}
+                                    disabled={!isEmailValid(email) || loggingIn}
+                                />
+                            </>
+                        }
                     />
                 </View>
             ) : (
-                <View style={styles.formContainer}>
-                    <View style={styles.header}>
-                        <TextComponent style={styles.title}>Verify your email</TextComponent>
-                        <TextComponent style={styles.subtitle}>
-                            Enter the 6-digit code sent to{" "}
-                            <TextComponent style={styles.emailHighlight}>{email}</TextComponent>
-                        </TextComponent>
-                    </View>
+                <View>
+                    <CardComponent
+                        header="Verify your email"
+                        subHeader={`Enter the 6-digit code sent to ${email}`}
+                        children={
+                            <>
+                                <View style={styles.otpContainer}>
+                                    {otp.map((digit, index) => (
+                                        <TextInput
+                                            key={index}
+                                            ref={otpRefs.current[index]}
+                                            style={styles.otpInput}
+                                            maxLength={1}
+                                            keyboardType="number-pad"
+                                            value={digit}
+                                            onChangeText={(value) => handleOtpChange(index, value)}
+                                        />
+                                    ))}
+                                </View>
 
-                    <View style={styles.otpContainer}>
-                        {otp.map((digit, index) => (
-                            <TextInput
-                                key={index}
-                                ref={otpRefs.current[index]}
-                                style={styles.otpInput}
-                                maxLength={1}
-                                keyboardType="number-pad"
-                                value={digit}
-                                onChangeText={(value) => handleOtpChange(index, value)}
-                            />
-                        ))}
-                    </View>
-
-                    <TextComponent style={styles.timerText}>Get new code in {timer} seconds</TextComponent>
-                    <ButtonComponent
-                        title="Resend Code"
-                        onPress={startTimer}
-                        variant="secondary"
-                        disabled={timer > 0}
+                                <TextComponent style={styles.timerText}>Get new code in {timer} seconds</TextComponent>
+                                <ButtonComponent
+                                    title="Resend Code"
+                                    onPress={startTimer}
+                                    variant="primary"
+                                    disabled={timer > 0}
+                                />
+                            </>
+                        }
                     />
                 </View>
             )}
@@ -124,13 +126,6 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
         justifyContent: "center",
-    },
-    formContainer: {
-        padding: 20,
-        borderRadius: 12,
-        backgroundColor: "white",
-        alignSelf: "center",
-        borderColor: "#E5E7EB",
     },
     header: {
         alignItems: "center",

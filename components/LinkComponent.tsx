@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View, Pressable, ActivityIndicator } from "react-native";
 import { Link, type ExternalPathString, type RelativePathString } from "expo-router";
+import TextComponent from "@/components/TextComponent";
 import React from "react";
 import { useFonts } from "expo-font";
 
@@ -26,12 +27,10 @@ const LinkComponent = ({
     loading = false,
     disabled = false,
     icon,
-    textStyle,
 }: LinkComponentProps) => {
     let [fontsLoaded] = useFonts({
         Inter: require("../assets/fonts/InterVariable.ttf"),
     });
-
     const content = (
         <>
             {loading ? (
@@ -39,9 +38,7 @@ const LinkComponent = ({
             ) : (
                 <View style={styles.contentContainer}>
                     {icon && <View style={styles.iconContainer}>{icon}</View>}
-                    <Text style={[styles.label, styles[`${variant}Text`], disabled && styles.disabledText, textStyle]}>
-                        {label}
-                    </Text>
+                    <TextComponent style={[styles.label, disabled && styles.disabledText]}>{label}</TextComponent>
                 </View>
             )}
         </>
@@ -74,18 +71,24 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         alignItems: "center",
         justifyContent: "center",
+        width: "auto",
+        flexDirection: "row",
     },
     contentContainer: {
         flexDirection: "row",
         alignItems: "center",
-    },
-    iconContainer: {
-        marginRight: 8,
+        flexShrink: 0,
+        flexGrow: 0,
     },
     label: {
         fontFamily: "Inter",
         fontSize: 16,
         fontWeight: "600",
+        flexShrink: 0,
+        color: "white",
+    },
+    iconContainer: {
+        marginRight: 8,
     },
     primary: {
         backgroundColor: "#4F46E5",
