@@ -49,7 +49,6 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-barcode-scanner"
     ],
     "experiments": {
       "typedRoutes": true
