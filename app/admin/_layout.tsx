@@ -4,7 +4,7 @@ import { tabsConfig } from "@/lib/config/TabsConfig";
 
 export default function AdminLayout() {
     return (
-        <Tabs screenOptions={{ ...tabsConfig }}>
+        <Tabs screenOptions={{ ...tabsConfig, title: "Admin" }}>
             <Tabs.Screen
                 name="index"
                 options={{
@@ -45,6 +45,7 @@ export default function AdminLayout() {
                 options={{
                     title: "Establishments",
                     tabBarIcon: ({ color }) => <MaterialCommunityIcons name="store" color={color} size={20} />,
+                    headerTitle: "Establishments",
                 }}
             />
 
@@ -59,6 +60,23 @@ export default function AdminLayout() {
                 name="settings/index"
                 options={{
                     title: "Settings",
+                    tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cog" color={color} size={20} />,
+                    headerTitle: "Settings",
+                }}
+            />
+            <Tabs.Screen
+                name="vehicle-types/[uuid]"
+                options={{
+                    title: "Vehicle Type",
+                    href: null,
+                    tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cog" color={color} size={20} />,
+                }}
+            />
+            <Tabs.Screen
+                name="establishments/[uuid]"
+                options={{
+                    title: "Establishment",
+                    href: null,
                     tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cog" color={color} size={20} />,
                 }}
             />

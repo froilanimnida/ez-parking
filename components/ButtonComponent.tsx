@@ -1,98 +1,63 @@
 import React from "react";
-import { TouchableOpacity, Text, ActivityIndicator, StyleSheet, View } from "react-native";
+import { TouchableOpacity, ActivityIndicator } from "react-native";
+import { BaseComponentProps } from "@/lib/types/ui";
+import { baseStyles } from "@/styles/components";
+import TextComponent from "./TextComponent";
 
-type ButtonVariant = "primary" | "secondary" | "destructive";
-
-interface ButtonComponentType {
-    title: string;
+interface ButtonProps extends BaseComponentProps {
     onPress: () => void;
-    loading?: boolean;
-    disabled?: boolean;
-    style?: object;
-    textStyle?: object;
-    variant?: ButtonVariant;
-    icon?: React.ReactNode;
+    title?: string;
 }
 
-const ButtonComponent = ({
-    title,
+const ButtonComponent: React.FC<ButtonProps> = ({
     onPress,
+    title,
     loading = false,
     disabled = false,
     style,
     textStyle,
     variant = "primary",
+    size = "md",
     icon,
-}: ButtonComponentType) => {
+    iconPosition = "left",
+    fullWidth = false,
+    children,
+}) => {
+    const content = children || (
+        <>
+            {icon && iconPosition === "left" && <View style={baseStyles.iconLeft}>{icon}</View>}
+            {title && (
+                <TextComponent
+                    style={[
+                        baseStyles[`text${size.toUpperCase()}`],
+                        baseStyles[`${variant}Text`],
+                        disabled && baseStyles.disabledText,
+                        textStyle,
+                    ]}
+                >
+                    {title}
+                </TextComponent>
+            )}
+            {icon && iconPosition === "right" && <View style={baseStyles.iconRight}>{icon}</View>}
+        </>
+    );
+
     return (
         <TouchableOpacity
-            style={[styles.button, styles[variant], disabled && styles.buttonDisabled, style]}
+            style={[
+                baseStyles.container,
+                baseStyles[size],
+                baseStyles[variant],
+                fullWidth && baseStyles.fullWidth,
+                disabled && baseStyles.disabled,
+                style,
+            ]}
             onPress={onPress}
             disabled={disabled || loading}
         >
-            {loading ? (
-                <ActivityIndicator color={variant === "secondary" ? "#4F46E5" : "white"} />
-            ) : (
-                <React.Fragment>
-                    {icon && <View style={styles.iconContainer}>{icon}</View>}
-                    <Text
-                        style={[
-                            styles.buttonText,
-                            styles[`${variant}Text`],
-                            disabled && styles.buttonTextDisabled,
-                            textStyle,
-                        ]}
-                    >
-                        {title}
-                    </Text>
-                </React.Fragment>
-            )}
+            {loading ? <ActivityIndicator color={variant === "primary" ? "white" : "#4F46E5"} /> : content}
         </TouchableOpacity>
     );
 };
-
-const styles = StyleSheet.create({
-    button: {
-        padding: 12,
-        borderRadius: 8,
-        alignItems: "center",
-        flexDirection: "row",
-        justifyContent: "center",
-    },
-    primary: {
-        backgroundColor: "#4F46E5",
-    },
-    secondary: {
-        backgroundColor: "transparent",
-        borderWidth: 1,
-        borderColor: "#4F46E5",
-    },
-    destructive: {
-        backgroundColor: "#DC2626",
-    },
-    buttonDisabled: {
-        opacity: 0.5,
-    },
-    buttonText: {
-        fontWeight: "600",
-        color: "white",
-    },
-    primaryText: {
-        color: "white",
-    },
-    secondaryText: {
-        color: "black",
-    },
-    destructiveText: {
-        color: "white",
-    },
-    buttonTextDisabled: {
-        color: "white",
-        cursor: "not-allowed",
-    },
-    iconContainer: {
-        marginRight: 8,
-    },
-});
 
 export default ButtonComponent;

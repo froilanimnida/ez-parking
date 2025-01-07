@@ -109,7 +109,6 @@ const ParkingManagerDashboard = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#F9FAFB",
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
     },
     header: {
@@ -134,13 +133,7 @@ const styles = StyleSheet.create({
         padding: 16,
         borderRadius: 8,
         width: "47%",
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.2,
-        shadowRadius: 1.41,
+        boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.1)",
         elevation: 2,
     },
     iconContainer: {
