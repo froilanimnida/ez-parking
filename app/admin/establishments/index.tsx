@@ -1,10 +1,9 @@
 import { StyleSheet, View, SafeAreaView, ScrollView, TextInput } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "expo-router";
 import { Picker } from "@react-native-picker/picker";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
-import ButtonComponent from "@/components/ButtonComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 interface Establishment {
@@ -30,6 +29,10 @@ const Establishments = () => {
     const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
     const [searchQuery, setSearchQuery] = useState("");
     const establishments: Establishment[] = [];
+    useEffect(() => {
+        // console.log("API ROOT:", process.env.EXPO_PUBLIC_API_BASE_URL);
+        // console.log("API ROOT:", process.env.EXPO_PUBLIC_API_ADMIN_ROOT);
+    }, []);
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView style={{ maxWidth: 1024, width: "100%" }}>
