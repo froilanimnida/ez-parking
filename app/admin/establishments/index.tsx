@@ -5,6 +5,8 @@ import { Picker } from "@react-native-picker/picker";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import axiosInstance from "@/lib/axiosInstance";
+import getCookies from "@/lib/credentialsManager";
 
 interface Establishment {
     company_profile: {
@@ -25,13 +27,28 @@ interface Establishment {
     };
 }
 
+const fetchEstablishments = async () => {
+    const cookiesObject = await getCookies();
+    const res = await axiosInstance.get(`${process.env.EXPO_PUBLIC_API_ADMIN_ROOT}/establishments`, {
+        headers: {
+            Authorization: cookiesObject.Authorization,
+            "X-CSRF-TOKEN": cookiesObject["X-CSRF-TOKEN"],
+            csrf_refresh_token: cookiesObject.csrf_refresh_token,
+            refresh_token_cookie: cookiesObject.refresh_token_cookie,
+        },
+    });
+    return res.data.data as Establishment[];
+};
+
 const Establishments = () => {
     const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
     const [searchQuery, setSearchQuery] = useState("");
-    const establishments: Establishment[] = [];
+    let establishments: Establishment[] = [];
     useEffect(() => {
-        // console.log("API ROOT:", process.env.EXPO_PUBLIC_API_BASE_URL);
-        // console.log("API ROOT:", process.env.EXPO_PUBLIC_API_ADMIN_ROOT);
+        const res = fetchEstablishments();
+        res.then((data) => {
+            establishments = data;
+        });
     }, []);
     return (
         <SafeAreaView style={styles.container}>

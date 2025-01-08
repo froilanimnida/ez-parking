@@ -4,13 +4,31 @@ import React, { useEffect } from "react";
 import { Link } from "expo-router";
 import TextComponent from "@/components/TextComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import LinkComponent from "@/components/LinkComponent";
+
+interface ActionCardsType {
+    title: string;
+    items: {
+        name: string;
+        href: string;
+        icon:
+            | "qrcode-scan"
+            | "exit-to-app"
+            | "car-parking-lights"
+            | "clock-outline"
+            | "receipt"
+            | "chart-box-outline"
+            | "cog-outline";
+        description: string;
+    }[];
+}
 
 const ParkingManagerDashboard = () => {
     const [permission, requestPermission] = useCameraPermissions();
     useEffect(() => {
         requestPermission();
     });
-    const actionCards = [
+    const actionCards: ActionCardsType[] = [
         {
             title: "Quick Actions",
             items: [
@@ -84,7 +102,7 @@ const ParkingManagerDashboard = () => {
                         </TextComponent>
                         <View style={styles.grid}>
                             {section.items.map((item, index) => (
-                                <Link href={item.href} key={index} asChild>
+                                <LinkComponent href={item.href} key={index} asChild>
                                     <TouchableOpacity style={styles.card}>
                                         <View style={styles.iconContainer}>
                                             <MaterialCommunityIcons name={item.icon} size={24} color="#4F46E5" />
@@ -96,7 +114,7 @@ const ParkingManagerDashboard = () => {
                                             {item.description}
                                         </TextComponent>
                                     </TouchableOpacity>
-                                </Link>
+                                </LinkComponent>
                             ))}
                         </View>
                     </View>

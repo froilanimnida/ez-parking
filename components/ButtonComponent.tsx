@@ -1,5 +1,5 @@
 import React from "react";
-import { TouchableOpacity, ActivityIndicator } from "react-native";
+import { TouchableOpacity, ActivityIndicator, View } from "react-native";
 import { BaseComponentProps } from "@/lib/types/ui";
 import { baseStyles } from "@/styles/components";
 import TextComponent from "./TextComponent";

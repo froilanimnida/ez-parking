@@ -1,12 +1,13 @@
-import { StyleSheet, Text, View, SafeAreaView, Platform, StatusBar } from "react-native";
+import { StyleSheet, View, SafeAreaView, Platform, StatusBar } from "react-native";
 import React from "react";
 import LinkComponent from "@/components/LinkComponent";
+import TextComponent from "@/components/TextComponent";
 
 const AdminSettings = () => {
     return (
         <View style={styles.container}>
             <SafeAreaView>
-                <Text>AdminSettings</Text>
+                <TextComponent>AdminSettings</TextComponent>
                 <View style={styles.linksContainer}>
                     <LinkComponent
                         href="/admin/settings/about"

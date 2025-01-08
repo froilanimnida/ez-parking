@@ -8,7 +8,7 @@ const LandingPage = () => {
         <SafeAreaView>
             <View style={styles.container}>
                 <View style={styles.heroSection}>
-                    <LinkComponent asButton={true} href="/admin" variant="primary" label="Get Started" />
+                    <LinkComponent asChild={true} href="/admin" variant="primary" label="Get Started" />
                     <TextComponent variant="h1" style={styles.heroText}>
                         Find Your Perfect Parking Spot
                     </TextComponent>

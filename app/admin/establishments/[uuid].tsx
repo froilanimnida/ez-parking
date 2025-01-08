@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import type { CompanyProfile } from "@/lib/models/company-profile";
 import type { OperatingHour } from "@/lib/models/operating-hour";
@@ -29,7 +29,7 @@ interface Establishment {
 const EstablishmentDetails = () => {
     const { uuid } = useLocalSearchParams();
     const [showAddSlotModal, setShowAddSlotModal] = useState(false);
-    let establishment: Establishment = {};
+    let establishment;
 
     useEffect(() => {
         axiosInstance.get(`establishment_uuid=${uuid}`);
@@ -43,7 +43,6 @@ const EstablishmentDetails = () => {
                 <TextComponent style={styles.subtitle}>Review and manage this parking establishment</TextComponent>
             </View>
 
-            {/* Grid Layout */}
             <View style={styles.grid}>
                 {/* Applicant Information */}
                 {/* <View style={styles.card}>
@@ -59,38 +58,37 @@ const EstablishmentDetails = () => {
                         </View>
                     </View>
                 </View> */}
-                <CardComponent
+                {/* <CardComponent
                     header="Establishment Information"
                     subHeader="Review and manage this parking establishment"
                 >
                     <View style={{ gap: 16 }}>
                         <View>
-                            <Text style={styles.label}>Applicant Name</Text>
-                            <Text style={styles.value}>
+                            <TextComponent style={styles.label}>Applicant Name</TextComponent>
+                            <TextComponent style={styles.value}>
                                 {establishment.user.first_name} {establishment.user.last_name}
-                            </Text>
+                            </TextComponent>
                         </View>
                         <View>
-                            <Text style={styles.label}>Email Address</Text>
-                            <Text style={styles.value}>{establishment.user.email}</Text>
+                            <TextComponent style={styles.label}>Email Address</TextComponent>
+                            <TextComponent style={styles.value}>{establishment.user.email}</TextComponent>
                         </View>
                         <View>
-                            <Text style={styles.label}>Phone Number</Text>
-                            <Text style={styles.value}>{establishment.user.phone_number}</Text>
+                            <TextComponent style={styles.label}>Phone Number</TextComponent>
+                            <TextComponent style={styles.value}>{establishment.user.phone_number}</TextComponent>
                         </View>
                     </View>
                 </CardComponent>
 
-                {/* Company Profile */}
                 <View style={styles.card}>
-                    <Text style={styles.cardTitle}>Company Profile</Text>
+                    <TextComponent style={styles.cardTitle}>Company Profile</TextComponent>
                     <View style={styles.cardContent}>
                         <View style={styles.field}>
-                            <Text style={styles.label}>Company Name</Text>
-                            <Text style={styles.value}>Company ABC</Text>
+                            <TextComponent style={styles.label}>Company Name</TextComponent>
+                            <TextComponent style={styles.value}>Company ABC</TextComponent>
                         </View>
                     </View>
-                </View>
+                </View> */}
 
                 {/* Add other sections similarly */}
             </View>

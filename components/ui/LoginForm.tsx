@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, createRef } from "react";
-import { View, TextInput, StyleSheet } from "react-native";
+import { View, TextInput, StyleSheet, Platform } from "react-native";
 import Checkbox from "expo-checkbox";
 import TextComponent from "components/TextComponent";
 import ButtonComponent from "components/ButtonComponent";
 import CardComponent from "../CardComponent";
+import axiosInstance from "@/lib/axiosInstance";
 
 const LoginForm = () => {
     const [showOtpForm, setShowOtpForm] = useState(false);
@@ -12,6 +13,7 @@ const LoginForm = () => {
     const [loggingIn, setLoggingIn] = useState(false);
     const [timer, setTimer] = useState(0);
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+    const platform = Platform.OS;
 
     const otpRefs = useRef([...Array(6)].map(() => createRef()));
 
@@ -30,7 +32,7 @@ const LoginForm = () => {
     };
 
     const startTimer = () => {
-        setTimer(60);
+        setTimer(300);
     };
 
     useEffect(() => {
@@ -43,7 +45,12 @@ const LoginForm = () => {
 
     const handleLogin = async () => {
         setLoggingIn(true);
-        // Implement login logic here...
+        if (platform !== "web") {
+            alert(`Logging in with email: ${email}`);
+            axiosInstance.post(`${process.env.EXPO_PUBLIC_API_AUTH_ROOT}/login`, {
+                email: email,
+            });
+        }
         setTimeout(() => {
             setShowOtpForm(true);
             setLoggingIn(false);

@@ -3,9 +3,17 @@ import React from "react";
 import { Link } from "expo-router";
 import TextComponent from "@/components/TextComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import LinkComponent from "@/components/LinkComponent";
+
+interface AdminActionsType {
+    title: string;
+    description: string;
+    icon: "account-group" | "store" | "car" | "cog";
+    href: string;
+}
 
 const AdminDashboard = () => {
-    const adminActions = [
+    const adminActions: AdminActionsType[] = [
         {
             title: "Users",
             description: "View and manage user accounts",
@@ -44,7 +52,7 @@ const AdminDashboard = () => {
 
                 <View style={styles.grid}>
                     {adminActions.map((action, index) => (
-                        <Link href={action.href} key={index} asChild>
+                        <LinkComponent href={action.href} key={index} asChild>
                             <TouchableOpacity style={styles.card}>
                                 <View style={styles.iconContainer}>
                                     <MaterialCommunityIcons name={action.icon} size={24} color="#4F46E5" />
@@ -56,7 +64,7 @@ const AdminDashboard = () => {
                                     {action.description}
                                 </TextComponent>
                             </TouchableOpacity>
-                        </Link>
+                        </LinkComponent>
                     ))}
                 </View>
             </ScrollView>

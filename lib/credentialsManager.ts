@@ -1,20 +1,20 @@
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function getCookies() {
-    const Authorization = AsyncStorage.getItem("Authorization");
-    const XCSRFTOKEN = AsyncStorage.getItem("X-CSRF-TOKEN");
-    const csrf_refresh_token = AsyncStorage.getItem("csrf_refresh_token");
-    const refresh_token_cookie = AsyncStorage.getItem("refresh_token_cookie");
-    const AuthorizationExpires = AsyncStorage.getItem("AuthorizationExpires");
-    const CSRFTokenExpires = AsyncStorage.getItem("CSRFTokenExpires");
-    const CSRFRefreshTokenExpires = AsyncStorage.getItem("CSRFRefreshTokenExpires");
-    const RefreshTokenExpires = AsyncStorage.getItem("RefreshTokenExpires");
+export default async function getCookies() {
+    const Authorization = await AsyncStorage.getItem("Authorization");
+    const XCSRFTOKEN = await AsyncStorage.getItem("X-CSRF-TOKEN");
+    const csrf_refresh_token = await AsyncStorage.getItem("csrf_refresh_token");
+    const refresh_token_cookie = await AsyncStorage.getItem("refresh_token_cookie");
+    const AuthorizationExpires = await AsyncStorage.getItem("AuthorizationExpires");
+    const CSRFTokenExpires = await AsyncStorage.getItem("CSRFTokenExpires");
+    const CSRFRefreshTokenExpires = await AsyncStorage.getItem("CSRFRefreshTokenExpires");
+    const RefreshTokenExpires = await AsyncStorage.getItem("RefreshTokenExpires");
     return {
         Authorization: `Bearer ${Authorization}`,
         "X-CSRF-TOKEN": XCSRFTOKEN,
-        csrf_refresh_token,
-        refresh_token_cookie,
+        csrf_refresh_token: csrf_refresh_token,
+        refresh_token_cookie: refresh_token_cookie,
         AuthorizationExpires,
         CSRFTokenExpires,
         CSRFRefreshTokenExpires,

@@ -21,7 +21,7 @@ const Slots = () => {
         is_active: true,
     });
 
-    const slots = []; // Mock data array
+    let slots;
 
     return (
         <SafeAreaView style={styles.container}>
@@ -31,7 +31,7 @@ const Slots = () => {
                         Parking Slot Settings
                     </TextComponent>
 
-                    <CardComponent style={styles.form} header="Add New Slot">
+                    <CardComponent customStyles={styles.form} header="Add New Slot">
                         <View style={styles.formGrid}>
                             <View style={styles.inputGroup}>
                                 <TextComponent style={styles.label}>Slot Code *</TextComponent>
@@ -106,7 +106,7 @@ const Slots = () => {
                     </TextComponent>
 
                     <View style={styles.slotsGrid}>
-                        {slots.map((slot, index) => (
+                        {/* {slots.map((slot, index) => (
                             <CardComponent
                                 key={index}
                                 style={[
@@ -132,7 +132,7 @@ const Slots = () => {
                                     </View>
                                 </View>
                             </CardComponent>
-                        ))}
+                        ))} */}
                     </View>
                 </View>
             </ScrollView>

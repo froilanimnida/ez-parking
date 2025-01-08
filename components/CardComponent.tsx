@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
+import TextComponent from "@/components/TextComponent";
 
 interface CardComponentProps {
     header: string;
@@ -12,8 +13,8 @@ const CardComponent = ({ header, subHeader, children, customStyles }: CardCompon
     return (
         <View style={[styles.container, customStyles]}>
             <View style={styles.headerContainer}>
-                <Text style={styles.headerText}>{header}</Text>
-                {subHeader && <Text>{subHeader}</Text>}
+                <TextComponent style={styles.headerText}>{header}</TextComponent>
+                {subHeader && <TextComponent>{subHeader}</TextComponent>}
             </View>
             <View>{children}</View>
         </View>
