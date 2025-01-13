@@ -1,9 +1,9 @@
 import { StyleSheet, View, SafeAreaView, ScrollView, TouchableOpacity, Platform, StatusBar } from "react-native";
 import React from "react";
-import { Link } from "expo-router";
 import TextComponent from "@/components/TextComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import LinkComponent from "@/components/LinkComponent";
+import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
 
 interface AdminActionsType {
     title: string;
@@ -41,43 +41,42 @@ const AdminDashboard = () => {
     ];
 
     return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView>
-                <View style={styles.header}>
-                    <TextComponent variant="h1">Admin Dashboard</TextComponent>
-                    <TextComponent variant="body" style={styles.subtitle}>
-                        Manage your platform settings and users
-                    </TextComponent>
-                </View>
+        <View style={styles.container}>
+            <SafeAreaView style={styles.body}>
+                <ScrollView>
+                    <View style={styles.header}>
+                        <TextComponent variant="h1">Admin Dashboard</TextComponent>
+                        <TextComponent variant="body" style={styles.subtitle}>
+                            Manage your platform settings and users
+                        </TextComponent>
+                    </View>
 
-                <View style={styles.grid}>
-                    {adminActions.map((action, index) => (
-                        <LinkComponent href={action.href} key={index} asChild>
-                            <TouchableOpacity style={styles.card}>
-                                <View style={styles.iconContainer}>
-                                    <MaterialCommunityIcons name={action.icon} size={24} color="#4F46E5" />
-                                </View>
-                                <TextComponent variant="h3" style={styles.cardTitle}>
-                                    {action.title}
-                                </TextComponent>
-                                <TextComponent variant="caption" style={styles.cardDescription}>
-                                    {action.description}
-                                </TextComponent>
-                            </TouchableOpacity>
-                        </LinkComponent>
-                    ))}
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+                    <View style={styles.grid}>
+                        {adminActions.map((action, index) => (
+                            <LinkComponent href={action.href} key={index} asChild>
+                                <TouchableOpacity style={styles.card}>
+                                    <View style={styles.iconContainer}>
+                                        <MaterialCommunityIcons name={action.icon} size={24} color="#4F46E5" />
+                                    </View>
+                                    <TextComponent variant="h3" style={styles.cardTitle}>
+                                        {action.title}
+                                    </TextComponent>
+                                    <TextComponent variant="caption" style={styles.cardDescription}>
+                                        {action.description}
+                                    </TextComponent>
+                                </TouchableOpacity>
+                            </LinkComponent>
+                        ))}
+                    </View>
+                </ScrollView>
+            </SafeAreaView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#F9FAFB",
-        paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-    },
+    container: { ...defaultContainerStyles },
+    body: { ...defaultBodyStyles },
     header: {
         padding: 16,
         marginBottom: 16,

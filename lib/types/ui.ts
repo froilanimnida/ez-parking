@@ -1,8 +1,10 @@
+import { type ViewStyle } from "react-native";
+
 type BaseVariant = "primary" | "secondary" | "text" | "destructive" | "outline" | "ghost";
 type Size = "xs" | "sm" | "md" | "lg" | "xl";
 
 interface BaseComponentProps {
-    style?: object;
+    style?: ViewStyle;
     textStyle?: object;
     loading?: boolean;
     disabled?: boolean;

@@ -37,7 +37,7 @@ const fetchEstablishments = async () => {
             refresh_token_cookie: cookiesObject.refresh_token_cookie,
         },
     });
-    return res.data.data as Establishment[];
+    return res;
 };
 
 const Establishments = () => {
@@ -47,7 +47,9 @@ const Establishments = () => {
     useEffect(() => {
         const res = fetchEstablishments();
         res.then((data) => {
-            establishments = data;
+            establishments = data.data as Establishment[];
+        }).catch((error) => {
+            console.error(error);
         });
     }, []);
     return (

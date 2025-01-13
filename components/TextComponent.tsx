@@ -25,7 +25,7 @@ const TextComponent: React.FC<TextComponentProps> = ({
     numberOfLines,
     align = "left",
 }) => {
-    let [fontsLoaded] = useFonts({
+    useFonts({
         Inter: require("./../assets/fonts/InterVariable.ttf"),
     });
 
@@ -51,6 +51,7 @@ const TextComponent: React.FC<TextComponentProps> = ({
 const styles = StyleSheet.create({
     base: {
         fontFamily: "Inter",
+        width: "auto",
     },
     h1: {
         fontSize: 32,

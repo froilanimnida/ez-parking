@@ -9,7 +9,7 @@ interface ButtonProps extends BaseComponentProps {
     title?: string;
 }
 
-const ButtonComponent: React.FC<ButtonProps> = ({
+const ButtonComponent = ({
     onPress,
     title,
     loading = false,
@@ -22,7 +22,7 @@ const ButtonComponent: React.FC<ButtonProps> = ({
     iconPosition = "left",
     fullWidth = false,
     children,
-}) => {
+}: ButtonProps) => {
     const content = children || (
         <>
             {icon && iconPosition === "left" && <View style={baseStyles.iconLeft}>{icon}</View>}

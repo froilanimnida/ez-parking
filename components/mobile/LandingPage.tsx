@@ -8,7 +8,6 @@ const LandingPage = () => {
         <SafeAreaView>
             <View style={styles.container}>
                 <View style={styles.heroSection}>
-                    <LinkComponent asChild={true} href="/admin" variant="primary" label="Get Started" />
                     <TextComponent variant="h1" style={styles.heroText}>
                         Find Your Perfect Parking Spot
                     </TextComponent>
@@ -16,6 +15,7 @@ const LandingPage = () => {
                         View real-time availability and book parking spaces instantly. Save time and hassle with EZ
                         Parking.
                     </TextComponent>
+                    <LinkComponent href="/admin" variant="primary" label="Get Started" />
                 </View>
             </View>
         </SafeAreaView>
@@ -36,6 +36,7 @@ const styles = StyleSheet.create({
         width: "100%",
         height: "100%",
         flex: 1,
+        gap: 20,
         paddingTop: StatusBar.currentHeight,
         justifyContent: "center",
         alignItems: "center",

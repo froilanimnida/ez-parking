@@ -4,6 +4,7 @@ const baseStyles = StyleSheet.create({
     container: {
         flexDirection: "row",
         alignItems: "center",
+        height: "auto",
         justifyContent: "center",
     },
     xs: {
