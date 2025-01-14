@@ -15,7 +15,7 @@ const LandingPage = () => {
                         View real-time availability and book parking spaces instantly. Save time and hassle with EZ
                         Parking.
                     </TextComponent>
-                    <LinkComponent href="/admin" variant="primary" label="Get Started" />
+                    <LinkComponent href="/sign-up" variant="primary" label="Get Started" />
                 </View>
             </View>
         </SafeAreaView>

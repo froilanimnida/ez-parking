@@ -1,8 +1,9 @@
 import React from "react";
-import { TouchableOpacity, ActivityIndicator, View } from "react-native";
+import { TouchableOpacity, ActivityIndicator, View, StyleSheet } from "react-native";
 import { BaseComponentProps } from "@/lib/types/ui";
 import { baseStyles } from "@/styles/components";
 import TextComponent from "./TextComponent";
+import { useFonts } from "expo-font";
 
 interface ButtonProps extends BaseComponentProps {
     onPress: () => void;
@@ -23,6 +24,9 @@ const ButtonComponent = ({
     fullWidth = false,
     children,
 }: ButtonProps) => {
+    useFonts({
+        Inter: require("./../assets/fonts/InterVariable.ttf"),
+    });
     const content = children || (
         <>
             {icon && iconPosition === "left" && <View style={baseStyles.iconLeft}>{icon}</View>}
@@ -33,6 +37,7 @@ const ButtonComponent = ({
                         baseStyles[`${variant}Text`],
                         disabled && baseStyles.disabledText,
                         textStyle,
+                        styles.text,
                     ]}
                 >
                     {title}
@@ -59,5 +64,11 @@ const ButtonComponent = ({
         </TouchableOpacity>
     );
 };
+
+const styles = StyleSheet.create({
+    text: {
+        fontFamily: "Inter",
+    },
+});
 
 export default ButtonComponent;

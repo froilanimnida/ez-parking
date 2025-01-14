@@ -4,6 +4,7 @@ import CardComponent from "@/components/CardComponent";
 import TextComponent from "@/components/TextComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import LinkComponent from "@/components/LinkComponent";
+import TextInputComponent from "@/components/TextInputComponent";
 
 const UserSignUp = () => {
     const [formData, setFormData] = useState({
@@ -33,50 +34,50 @@ const UserSignUp = () => {
                     <CardComponent
                         header="Sign up"
                         subHeader="Create an account to get started"
-                        customStyles={{ width: "89%" }}
+                        customStyles={{ width: "89%", maxWidth: 768 }}
                     >
                         <View style={styles.form}>
-                            <TextInput
-                                style={styles.input}
+                            <TextInputComponent
+                                customStyles={styles.input}
                                 placeholder="First Name"
                                 value={formData.firstName}
                                 onChangeText={(text) => setFormData({ ...formData, firstName: text })}
                             />
-                            <TextInput
-                                style={styles.input}
+                            <TextInputComponent
+                                customStyles={styles.input}
                                 placeholder="Last Name"
                                 value={formData.lastName}
                                 onChangeText={(text) => setFormData({ ...formData, lastName: text })}
                             />
-                            <TextInput
-                                style={styles.input}
+                            <TextInputComponent
+                                customStyles={styles.input}
                                 placeholder="Middle Name"
                                 value={formData.middleName}
                                 onChangeText={(text) => setFormData({ ...formData, middleName: text })}
                             />
-                            <TextInput
-                                style={styles.input}
+                            <TextInputComponent
+                                customStyles={styles.input}
                                 placeholder="Email Address"
                                 keyboardType="email-address"
                                 value={formData.email}
                                 onChangeText={(text) => setFormData({ ...formData, email: text })}
                             />
-                            <TextInput
-                                style={styles.input}
+                            <TextInputComponent
+                                customStyles={styles.input}
                                 placeholder="Phone Number (11 digits)"
                                 keyboardType="phone-pad"
                                 maxLength={11}
                                 value={formData.phone}
                                 onChangeText={(text) => setFormData({ ...formData, phone: text })}
                             />
-                            <TextInput
-                                style={styles.input}
+                            <TextInputComponent
+                                customStyles={styles.input}
                                 placeholder="Nickname"
                                 value={formData.nickname}
                                 onChangeText={(text) => setFormData({ ...formData, nickname: text })}
                             />
-                            <TextInput
-                                style={styles.input}
+                            <TextInputComponent
+                                customStyles={styles.input}
                                 placeholder="Plate number"
                                 value={formData.plateNumber}
                                 onChangeText={(text) => setFormData({ ...formData, plateNumber: text })}
@@ -88,8 +89,16 @@ const UserSignUp = () => {
 
                             <View style={styles.loginLink}>
                                 <LinkComponent
-                                    href="/auth/login"
+                                    href="/login"
                                     label="Login to my account instead"
+                                    variant="text"
+                                    textStyle={{ color: "#000000" }}
+                                />
+                            </View>
+                            <View style={styles.loginLink}>
+                                <LinkComponent
+                                    href="/sign-up/parking-manager"
+                                    label="Sign up as a parking manager"
                                     variant="text"
                                     textStyle={{ color: "#000000" }}
                                 />
