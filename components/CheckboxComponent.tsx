@@ -1,7 +1,6 @@
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import Checkbox from "expo-checkbox";
-import { useFonts } from "expo-font";
 import TextComponent from "./TextComponent";
 
 interface CheckboxComponentProps {
@@ -12,21 +11,12 @@ interface CheckboxComponentProps {
 }
 
 const CheckboxComponent = ({ value, onValueChange, customStyles, placeholder }: CheckboxComponentProps) => {
-    useFonts({
-        Inter: require("./../assets/fonts/InterVariable.ttf"),
-    });
     return (
-        <View>
-            <Checkbox value={value} onValueChange={onValueChange} style={[customStyles, styles.checkbox]} />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Checkbox value={value} onValueChange={onValueChange} style={customStyles} />
             <TextComponent>{placeholder}</TextComponent>
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    checkbox: {
-        fontFamily: "Inter",
-    },
-});
 
 export default CheckboxComponent;

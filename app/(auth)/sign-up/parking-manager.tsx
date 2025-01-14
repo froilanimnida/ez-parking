@@ -82,6 +82,32 @@ const ParkingManagerSignUp = () => {
         }));
     };
 
+    const [pricingData, setPricingData] = useState({
+        hourly: {
+            enabled: false,
+            rate: 0,
+        },
+        daily: {
+            enabled: false,
+            rate: 0,
+        },
+        monthly: {
+            enabled: false,
+            rate: 0,
+        },
+    });
+
+    // Add handler after existing handlers
+    const handlePricingChange = (type: string, field: "enabled" | "rate", value: boolean | number) => {
+        setPricingData((prev) => ({
+            ...prev,
+            [type]: {
+                ...prev[type],
+                [field]: value,
+            },
+        }));
+    };
+
     const handleInputChange = (key: string, value: string) => {
         setOwnerInformation({ ...ownerInformation, [key]: value });
     };
@@ -349,6 +375,34 @@ const ParkingManagerSignUp = () => {
                     </CardComponent>
 
                     <CardComponent
+                        header="Pricing Structure"
+                        subHeader="Set your parking rates"
+                        customStyles={{ width: "95%", maxWidth: 768 }}
+                    >
+                        <View style={styles.form}>
+                            {Object.entries(pricingData).map(([type, config]) => (
+                                <View key={type} style={styles.priceRow}>
+                                    <CheckboxComponent
+                                        placeholder={`${type.charAt(0).toUpperCase() + type.slice(1)} Rate`}
+                                        value={config.enabled}
+                                        onValueChange={(value) => handlePricingChange(type, "enabled", value)}
+                                    />
+                                    <View style={styles.priceInputContainer}>
+                                        <Text style={styles.currencySymbol}>₱</Text>
+                                        <TextInputComponent
+                                            value={String(config.rate)}
+                                            onChangeText={(value) => handlePricingChange(type, "rate", Number(value))}
+                                            keyboardType="numeric"
+                                            editable={config.enabled}
+                                            customStyles={[styles.priceInput, !config.enabled && styles.disabledInput]}
+                                        />
+                                    </View>
+                                </View>
+                            ))}
+                        </View>
+                    </CardComponent>
+
+                    <CardComponent
                         header="Accepted Payment Methods"
                         subHeader="Select available payment options"
                         customStyles={{ width: "95%", maxWidth: 768 }}
@@ -406,16 +460,13 @@ const styles = StyleSheet.create({
         height: "100%",
         flex: 1,
         gap: 20,
-        paddingTop: StatusBar.currentHeight,
-        justifyContent: "center",
-        alignItems: "center",
+        paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
     },
     header: {
         width: "100%",
-        height: "100%",
         flex: 1,
         gap: 20,
-        justifyContent: "center",
+        paddingTop: 16,
         alignItems: "center",
     },
     formGroup: {
@@ -426,7 +477,6 @@ const styles = StyleSheet.create({
         height: "100%",
         flex: 1,
         gap: 20,
-        justifyContent: "center",
         alignItems: "center",
     },
     form: {
@@ -455,5 +505,23 @@ const styles = StyleSheet.create({
     },
     disabledInput: {
         backgroundColor: "#F3F4F6",
+    },
+    priceRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 16,
+        paddingVertical: 8,
+    },
+    priceInputContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        flex: 1,
+    },
+    currencySymbol: {
+        paddingHorizontal: 8,
+        color: "#6B7280",
+    },
+    priceInput: {
+        flex: 1,
     },
 });
