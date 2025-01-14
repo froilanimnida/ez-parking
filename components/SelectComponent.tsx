@@ -8,14 +8,15 @@ interface SelectComponentProps {
     selectedValue: string;
     onValueChange: (value: string) => void;
     customStyles?: object;
+    placeholder?: string;
 }
 
-const SelectComponent = ({ items, selectedValue, onValueChange, customStyles }: SelectComponentProps) => {
+const SelectComponent = ({ items, selectedValue, onValueChange, placeholder, customStyles }: SelectComponentProps) => {
     useFonts({
         Inter: require("./../assets/fonts/InterVariable.ttf"),
     });
     return (
-        <Picker selectedValue={selectedValue} onValueChange={onValueChange} style={[customStyles, styles.picker]}>
+        <Picker selectedValue={selectedValue} onValueChange={onValueChange} style={[customStyles, styles.picker]} placeholder={placeholder}>
             {items.map((item, index) => (
                 <Picker.Item key={index} label={item.label} value={item.value} />
             ))}
