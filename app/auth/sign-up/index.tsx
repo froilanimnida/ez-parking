@@ -5,6 +5,29 @@ import TextComponent from "@/components/TextComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import LinkComponent from "@/components/LinkComponent";
 import TextInputComponent from "@/components/TextInputComponent";
+import axiosInstance from "@/lib/axiosInstance";
+import type { AxiosError } from "axios";
+
+const createAccount = async (
+    email: string,
+    middleName: string,
+    firstName: string,
+    lastName: string,
+    phone: string,
+    nickname: string,
+    plateNumber: string
+) => {
+    const result = await axiosInstance.post(`${process.env.EXPO_PUBLIC_API_AUTH_ROOT}/create-account`, {
+        email,
+        middle_name: middleName,
+        first_name: firstName,
+        last_name: lastName,
+        phone,
+        nickname,
+        plateNumber,
+    });
+    return result;
+};
 
 const UserSignUp = () => {
     const [formData, setFormData] = useState({
@@ -16,14 +39,23 @@ const UserSignUp = () => {
         nickname: "",
         plateNumber: "",
     });
-    const [error, setError] = useState("");
 
-    const handleSubmit = async () => {
+    const handleSignUp = async () => {
         try {
-            // TODO: Add your API call here...
-            console.log("success");
+            await createAccount(
+                formData.email,
+                formData.middleName,
+                formData.firstName,
+                formData.lastName,
+                formData.phone,
+                formData.nickname,
+                formData.plateNumber
+            );
+            alert("Account created successfully.");
         } catch (err) {
-            console.error(err);
+            const errorResponse = err as AxiosError;
+            const errorBody = errorResponse.response?.data as { code: string; message: string };
+            alert(errorBody.message || "An error occurred.");
         }
     };
 
@@ -83,9 +115,7 @@ const UserSignUp = () => {
                                 onChangeText={(text) => setFormData({ ...formData, plateNumber: text })}
                             />
 
-                            {error ? <TextComponent style={styles.error}>{error}</TextComponent> : null}
-
-                            <ButtonComponent title="Sign Up" onPress={handleSubmit} variant="primary" />
+                            <ButtonComponent title="Sign Up" onPress={handleSignUp} variant="primary" />
 
                             <View style={styles.loginLink}>
                                 <LinkComponent
@@ -97,7 +127,7 @@ const UserSignUp = () => {
                             </View>
                             <View style={styles.loginLink}>
                                 <LinkComponent
-                                    href="../sign-up/parking-manager"
+                                    href="../auth/sign-up/parking-manager"
                                     label="Sign up as a parking manager"
                                     variant="text"
                                     textStyle={{ color: "#000000" }}

@@ -33,8 +33,6 @@ const LoginForm = () => {
     const [loggingIn, setLoggingIn] = useState(false);
     const [timer, setTimer] = useState(0);
     const [otp, setOtp] = useState("");
-    const platform = PlatformType();
-    console.log(`${process.env.EXPO_PUBLIC_API_AUTH_ROOT}${process.env.EXPO_PUBLIC_API_AUTH_URL}`);
 
     const isEmailValid = (email: string) => {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -83,10 +81,10 @@ const LoginForm = () => {
     };
 
     return (
-        <SafeAreaView>
-            <View style={styles.container}>
+        <View style={styles.container}>
+            <View style={styles.body}>
                 {!showOtpForm ? (
-                    <View>
+                    <View style={styles.loginForm}>
                         <CardComponent
                             header="Welcome back"
                             subHeader="Please enter your registered email address"
@@ -147,7 +145,7 @@ const LoginForm = () => {
                     </View>
                 )}
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 
@@ -156,6 +154,23 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingTop: PlatformType() === "android" ? StatusBarHeight() : 0,
         justifyContent: "center",
+        width: "100%",
+        height: "100%",
+        alignItems: "center",
+    },
+    body: {
+        justifyContent: "center",
+        alignItems: "center",
+        flex: 1,
+        width: "80%",
+        maxWidth: 768,
+    },
+    loginForm: {
+        width: "100%",
+        height: "100%",
+        alignItems: "center",
+        justifyContent: "center",
+        flex: 1,
     },
     header: {
         alignItems: "center",
