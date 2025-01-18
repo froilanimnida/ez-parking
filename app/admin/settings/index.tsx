@@ -9,18 +9,8 @@ const AdminSettings = () => {
             <SafeAreaView>
                 <TextComponent>AdminSettings</TextComponent>
                 <View style={styles.linksContainer}>
-                    <LinkComponent
-                        href="/admin/settings/about"
-                        label="About"
-                        style={{ width: "100%" }}
-                        variant="text"
-                    />
-                    <LinkComponent
-                        href="/admin/settings/contact"
-                        label="Contact"
-                        style={{ width: "100%" }}
-                        variant="text"
-                    />
+                    <LinkComponent href="./about" label="About" style={{ width: "100%" }} variant="text" />
+                    <LinkComponent href="./contact" label="Contact" style={{ width: "100%" }} variant="text" />
                 </View>
             </SafeAreaView>
         </View>

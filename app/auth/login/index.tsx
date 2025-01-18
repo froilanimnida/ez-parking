@@ -1,4 +1,6 @@
-import { Platform, StatusBar, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import PlatformType from "@/lib/platform";
+import StatusBarHeight from "@/lib/statusBar";
 import React from "react";
 import LoginPage from "@/components/mobile/LoginPage";
 
@@ -17,6 +19,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+        paddingTop: PlatformType() === "android" ? StatusBarHeight() : 0,
     },
 });

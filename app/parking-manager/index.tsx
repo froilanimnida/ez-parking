@@ -10,7 +10,13 @@ interface ActionCardsType {
     title: string;
     items: {
         name: string;
-        href: string;
+        href:
+            | "../parking-manager/scan"
+            | "../parking-manager/settings/slots"
+            | "../parking-manager/settings/schedule"
+            | "../parking-manager/transactions"
+            | "../parking-manager/reports"
+            | "../parking-manager/settings";
         icon:
             | "qrcode-scan"
             | "exit-to-app"
@@ -34,13 +40,13 @@ const ParkingManagerDashboard = () => {
             items: [
                 {
                     name: "Scan Entry QR",
-                    href: "/parking-manager/scan",
+                    href: "../parking-manager/scan",
                     icon: "qrcode-scan",
                     description: "Scan QR code for vehicle entry",
                 },
                 {
                     name: "Process Exit",
-                    href: "/parking-manager/scan",
+                    href: "../parking-manager/scan",
                     icon: "exit-to-app",
                     description: "Process vehicle exit",
                 },
@@ -51,13 +57,13 @@ const ParkingManagerDashboard = () => {
             items: [
                 {
                     name: "Manage Slots",
-                    href: "/parking-manager/settings/slots",
+                    href: "../parking-manager/settings/slots",
                     icon: "car-parking-lights",
                     description: "Update parking details and settings",
                 },
                 {
                     name: "Manage Schedules",
-                    href: "/parking-manager/settings/schedule",
+                    href: "../parking-manager/settings/schedule",
                     icon: "clock-outline",
                     description: "Manage operating hours",
                 },
@@ -68,19 +74,19 @@ const ParkingManagerDashboard = () => {
             items: [
                 {
                     name: "Transactions",
-                    href: "/parking-manager/transactions",
+                    href: "../parking-manager/transactions",
                     icon: "receipt",
                     description: "View transaction history",
                 },
                 {
                     name: "Reports",
-                    href: "/parking-manager/reports",
+                    href: "../parking-manager/reports",
                     icon: "chart-box-outline",
                     description: "View analytics and reports",
                 },
                 {
                     name: "Settings",
-                    href: "/parking-manager/settings",
+                    href: "../parking-manager/settings",
                     icon: "cog-outline",
                     description: "Manage account settings",
                 },

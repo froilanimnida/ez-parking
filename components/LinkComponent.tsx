@@ -6,7 +6,7 @@ import { baseStyles } from "@/styles/components";
 import TextComponent from "./TextComponent";
 
 interface LinkProps extends BaseComponentProps {
-    href: RelativePathString | ExternalPathString | string;
+    href: RelativePathString | ExternalPathString;
     label?: string;
     asChild?: boolean;
 }

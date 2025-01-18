@@ -93,7 +93,7 @@ const EstablishmentItem: React.FC<EstablishmentItemProps> = ({ establishment, us
                     >
                         <TextComponent style={styles.directionsText}>Directions</TextComponent>
                     </TouchableOpacity>
-                    <LinkComponent href={`/establishment/${establishment.uuid}`} asChild>
+                    <LinkComponent href={`../establishment/${establishment.uuid}`} asChild>
                         <TouchableOpacity style={styles.detailsButton}>
                             <TextComponent style={styles.detailsText}>View Details</TextComponent>
                         </TouchableOpacity>

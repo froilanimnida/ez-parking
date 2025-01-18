@@ -1,5 +1,5 @@
 import type { BottomTabNavigationOptions } from "@react-navigation/bottom-tabs";
-import { Platform } from "react-native";
+import PlatformType from "../platform";
 
 export const tabsConfig: BottomTabNavigationOptions = {
     tabBarActiveTintColor: "blue",
@@ -7,6 +7,6 @@ export const tabsConfig: BottomTabNavigationOptions = {
     headerTransparent: true,
     headerTitleAlign: "center",
     tabBarStyle: {
-        display: Platform.OS === "web" ? "none" : "flex",
+        display: PlatformType() === "web" ? "none" : "flex",
     },
 } as const;

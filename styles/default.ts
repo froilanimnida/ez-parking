@@ -1,4 +1,6 @@
-import { Platform, StatusBar, type ViewStyle } from "react-native";
+import { type ViewStyle } from "react-native";
+import PlatformType from "@/lib/platform";
+import StatusBarHeight from "@/lib/statusBar";
 
 const defaultContainerStyles: ViewStyle = {
     width: "100%",
@@ -10,7 +12,7 @@ const defaultContainerStyles: ViewStyle = {
 
 const defaultBodyStyles: ViewStyle = {
     flex: 1,
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    paddingTop: PlatformType() === "android" ? StatusBarHeight() : 0,
     width: "90%",
     maxWidth: 1536,
 } as const;

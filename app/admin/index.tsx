@@ -9,7 +9,7 @@ interface AdminActionsType {
     title: string;
     description: string;
     icon: "account-group" | "store" | "car" | "cog";
-    href: string;
+    href: "./admin/users" | "./admin/establishments" | "./admin/vehicle-types" | "./admin/settings";
 }
 
 const AdminDashboard = () => {
@@ -18,25 +18,25 @@ const AdminDashboard = () => {
             title: "Users",
             description: "View and manage user accounts",
             icon: "account-group",
-            href: "/admin/users",
+            href: "./admin/users",
         },
         {
             title: "Establishments",
             description: "Manage parking establishments",
             icon: "store",
-            href: "/admin/establishments",
+            href: "./admin/establishments",
         },
         {
             title: "Vehicle Types",
             description: "Manage vehicle categories",
             icon: "car",
-            href: "/admin/vehicle-types",
+            href: "./admin/vehicle-types",
         },
         {
             title: "Settings",
             description: "Configure system settings",
             icon: "cog",
-            href: "/admin/settings",
+            href: "./admin/settings",
         },
     ];
 

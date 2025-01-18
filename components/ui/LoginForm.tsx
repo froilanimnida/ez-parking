@@ -1,10 +1,34 @@
-import { useState, useRef, useEffect, createRef } from "react";
-import { View, TextInput, StyleSheet, Platform } from "react-native";
+import { useState, useEffect } from "react";
+import { View, StyleSheet } from "react-native";
 import Checkbox from "expo-checkbox";
 import TextComponent from "components/TextComponent";
 import ButtonComponent from "components/ButtonComponent";
 import CardComponent from "../CardComponent";
 import axiosInstance from "@/lib/axiosInstance";
+import TextInputComponent from "../TextInputComponent";
+import PlatformType from "@/lib/platform";
+
+const loginUser = async (email: string) => {
+    const result = await axiosInstance.post(
+        `${process.env.EXPO_PUBLIC_API_AUTH_ROOT}${process.env.EXPO_PUBLIC_API_AUTH_URL}/login`,
+        {
+            email: email,
+        }
+    );
+    return result;
+};
+
+const verifyOTP = async (email: string, otp: string, rememberMe: boolean) => {
+    const result = await axiosInstance.post(
+        `${process.env.EXPO_PUBLIC_API_AUTH_ROOT}${process.env.EXPO_PUBLIC_API_AUTH_URL}/verify-otp`,
+        {
+            email: email,
+            otp: otp,
+            remember_me: rememberMe,
+        }
+    );
+    return result;
+};
 
 const LoginForm = () => {
     const [showOtpForm, setShowOtpForm] = useState(false);
@@ -12,23 +36,11 @@ const LoginForm = () => {
     const [rememberMe, setRememberMe] = useState(false);
     const [loggingIn, setLoggingIn] = useState(false);
     const [timer, setTimer] = useState(0);
-    const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-    const platform = Platform.OS;
-
-    const otpRefs = useRef([...Array(6)].map(() => createRef()));
+    const [otp, setOtp] = useState("");
+    const platform = PlatformType();
 
     const isEmailValid = (email: string) => {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    };
-
-    const handleOtpChange = (index: number, value: string) => {
-        const newOtp = [...otp];
-        newOtp[index] = value;
-        setOtp(newOtp);
-
-        if (value && index < 5) {
-            otpRefs.current[index + 1].current?.focus();
-        }
     };
 
     const startTimer = () => {
@@ -45,6 +57,7 @@ const LoginForm = () => {
 
     const handleLogin = async () => {
         setLoggingIn(true);
+        const result = await loginUser(email);
         if (platform !== "web") {
             alert(`Logging in with email: ${email}`);
             axiosInstance.post(`${process.env.EXPO_PUBLIC_API_AUTH_ROOT}/login`, {
@@ -58,6 +71,18 @@ const LoginForm = () => {
         }, 1500);
     };
 
+    const handleOTP = () => {
+        setLoggingIn(true);
+        verifyOTP(email, otp, rememberMe).then((response) => {
+            if (response.status === 200) {
+                alert("OTP verified successfully");
+            } else {
+                alert("Invalid OTP");
+            }
+            setLoggingIn(false);
+        });
+    };
+
     return (
         <View style={styles.container}>
             {!showOtpForm ? (
@@ -67,8 +92,8 @@ const LoginForm = () => {
                         subHeader="Please enter your registered email address"
                         children={
                             <>
-                                <TextInput
-                                    style={styles.input}
+                                <TextInputComponent
+                                    customStyles={styles.input}
                                     placeholder="Email address"
                                     keyboardType="email-address"
                                     value={email}
@@ -99,17 +124,12 @@ const LoginForm = () => {
                         children={
                             <>
                                 <View style={styles.otpContainer}>
-                                    {otp.map((digit, index) => (
-                                        <TextInput
-                                            key={index}
-                                            ref={otpRefs.current[index]}
-                                            style={styles.otpInput}
-                                            maxLength={1}
-                                            keyboardType="number-pad"
-                                            value={digit}
-                                            onChangeText={(value) => handleOtpChange(index, value)}
-                                        />
-                                    ))}
+                                    <TextInputComponent
+                                        customStyles={styles.otpInput}
+                                        maxLength={6}
+                                        keyboardType="number-pad"
+                                        onChangeText={setOtp}
+                                    />
                                 </View>
 
                                 <TextComponent style={styles.timerText}>Get new code in {timer} seconds</TextComponent>

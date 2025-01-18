@@ -122,13 +122,13 @@ const ParkingManagerSignUp = () => {
         }));
     };
 
-    const handleLocationSelect = (event) => {
-        const { latitude, longitude } = event.nativeEvent.coordinate;
-        setAddressData((prev) => ({
-            ...prev,
-            location: { latitude, longitude },
-        }));
-    };
+    // const handleLocationSelect = (event) => {
+    //     const { latitude, longitude } = event.nativeEvent.coordinate;
+    //     setAddressData((prev) => ({
+    //         ...prev,
+    //         location: { latitude, longitude },
+    //     }));
+    // };
     return (
         <ScrollView
             style={styles.container}

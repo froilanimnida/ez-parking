@@ -73,7 +73,9 @@ const SlotCard = ({ slotInfo, rates, establishmentUuid, slotUuid }: SlotCardProp
 
                 {slotInfo.slot_status === "open" && (
                     <LinkComponent
-                        href={`/auth/login?next=${encodeURIComponent(`/user/book/${establishmentUuid}/${slotUuid}`)}`}
+                        href={`./../auth/login?next=${encodeURIComponent(
+                            `/user/book/${establishmentUuid}/${slotUuid}`
+                        )}`}
                         asChild
                     >
                         <TouchableOpacity style={styles.bookButton}>

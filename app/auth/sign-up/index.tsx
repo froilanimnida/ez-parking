@@ -89,7 +89,7 @@ const UserSignUp = () => {
 
                             <View style={styles.loginLink}>
                                 <LinkComponent
-                                    href="/login"
+                                    href="./login"
                                     label="Login to my account instead"
                                     variant="text"
                                     textStyle={{ color: "#000000" }}
@@ -97,7 +97,7 @@ const UserSignUp = () => {
                             </View>
                             <View style={styles.loginLink}>
                                 <LinkComponent
-                                    href="/sign-up/parking-manager"
+                                    href="../sign-up/parking-manager"
                                     label="Sign up as a parking manager"
                                     variant="text"
                                     textStyle={{ color: "#000000" }}

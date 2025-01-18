@@ -14,6 +14,8 @@ interface TextInputProps {
     editable?: boolean;
     multiline?: boolean;
     numberOfLines?: number;
+    ref?: React.LegacyRef<TextInput>;
+    autoCapitalize?: "none" | "sentences" | "words" | "characters";
 }
 
 const TextInputComponent = ({
@@ -26,7 +28,9 @@ const TextInputComponent = ({
     maxLength,
     editable = true,
     multiline = false,
+    ref,
     numberOfLines,
+    autoCapitalize = "sentences",
 }: TextInputProps) => {
     useFonts({
         Inter: require("./../assets/fonts/InterVariable.ttf"),
@@ -36,13 +40,15 @@ const TextInputComponent = ({
             maxLength={maxLength}
             style={[customStyles, styles.input]}
             placeholder={placeholder}
+            ref={ref}
             value={value}
             keyboardType={keyboardType}
             onChangeText={onChangeText}
             secureTextEntry={secureTextEntry}
             editable={editable}
             multiline={multiline}
-
+            numberOfLines={numberOfLines}
+            autoCapitalize={autoCapitalize}
         />
     );
 };

@@ -1,4 +1,4 @@
-import { StyleSheet, View, type ViewStyle } from "react-native";
+import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import React from "react";
 import TextComponent from "@/components/TextComponent";
 
@@ -6,7 +6,7 @@ interface CardComponentProps {
     header: string;
     subHeader?: string;
     children: React.ReactNode;
-    customStyles?: ViewStyle;
+    customStyles?: StyleProp<ViewStyle>;
 }
 
 const CardComponent = ({ header, subHeader, children, customStyles }: CardComponentProps) => {

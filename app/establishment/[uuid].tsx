@@ -12,12 +12,17 @@ import type { PaymentMethod } from "@/lib/models/payment-method";
 import type { PricingPlan } from "@/lib/models/pricing-plan";
 import type { ParkingSlot } from "@/lib/models/parking-slot";
 
+interface SlotWithInfo extends ParkingSlot {
+    vehicle_type_code: string;
+    vehicle_type_name: string;
+    vehicle_type_size: string;
+}
 interface EstablishmentOverviewProps {
     establishment: ParkingEstablishment;
     operating_hours: OperatingHour[];
     payment_methods: PaymentMethod[];
     pricing_plans: PricingPlan[];
-    slots: ParkingSlot[];
+    slots: SlotWithInfo[];
 }
 
 const EstablishmentOverview: React.FC<EstablishmentOverviewProps> = ({

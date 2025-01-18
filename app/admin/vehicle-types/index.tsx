@@ -68,7 +68,7 @@ const VehicleTypes = () => {
                     {item.is_active ? "Active" : "Inactive"}
                 </Text>
             </Text>
-            <LinkComponent style={styles.editButton} href={`/admin/vehicle-types/${item.uuid}`} label="Edit" />
+            <LinkComponent style={styles.editButton} href={`../vehicle-types/${item.uuid}`} label="Edit" />
         </View>
     );
 
