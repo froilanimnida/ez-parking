@@ -15,16 +15,19 @@ const createAccount = async (
     lastName: string,
     phone: string,
     nickname: string,
-    plateNumber: string
+    plateNumber: string,
+    suffix: string
 ) => {
-    const result = await axiosInstance.post(`${process.env.EXPO_PUBLIC_API_AUTH_ROOT}/create-account`, {
-        email,
-        middle_name: middleName,
-        first_name: firstName,
-        last_name: lastName,
-        phone,
-        nickname,
-        plateNumber,
+    const result = await axiosInstance.post(`${process.env.EXPO_PUBLIC_API_USER_ROOT}/create-new-account`, {
+        user: {
+            email: email,
+            first_name: firstName,
+            last_name: lastName,
+            middle_name: middleName,
+            phone_number: phone as string,
+            plate_number: plateNumber,
+            nickname: nickname,
+        },
     });
     return result;
 };
@@ -38,6 +41,7 @@ const UserSignUp = () => {
         phone: "",
         nickname: "",
         plateNumber: "",
+        suffix: "",
     });
 
     const handleSignUp = async () => {
@@ -49,7 +53,8 @@ const UserSignUp = () => {
                 formData.lastName,
                 formData.phone,
                 formData.nickname,
-                formData.plateNumber
+                formData.plateNumber,
+                formData.suffix
             );
             alert("Account created successfully.");
         } catch (err) {
@@ -85,6 +90,12 @@ const UserSignUp = () => {
                                 customStyles={styles.input}
                                 placeholder="Middle Name"
                                 value={formData.middleName}
+                                onChangeText={(text) => setFormData({ ...formData, middleName: text })}
+                            />
+                            <TextInputComponent
+                                customStyles={styles.input}
+                                placeholder="Suffix"
+                                value={formData.suffix}
                                 onChangeText={(text) => setFormData({ ...formData, middleName: text })}
                             />
                             <TextInputComponent
