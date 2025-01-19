@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, StyleSheet, SafeAreaView } from "react-native";
+import { View, StyleSheet } from "react-native";
 import Checkbox from "expo-checkbox";
 import TextComponent from "components/TextComponent";
 import ButtonComponent from "components/ButtonComponent";
@@ -9,6 +9,7 @@ import TextInputComponent from "@/components/TextInputComponent";
 import PlatformType from "@/lib/platform";
 import StatusBarHeight from "@/lib/statusBar";
 import type { AxiosError } from "axios";
+import { storeCredentials } from "@/lib/credentialsManager";
 
 const loginUser = async (email: string) => {
     const result = await axiosInstance.post(`${process.env.EXPO_PUBLIC_API_AUTH_ROOT}/login`, {
@@ -18,7 +19,7 @@ const loginUser = async (email: string) => {
 };
 
 const verifyOTP = async (email: string, otp: string, rememberMe: boolean) => {
-    const result = await axiosInstance.post(`${process.env.EXPO_PUBLIC_API_AUTH_ROOT}/verify-otp`, {
+    const result = await axiosInstance.patch(`${process.env.EXPO_PUBLIC_API_AUTH_ROOT}/verify-otp`, {
         email: email,
         otp: otp,
         remember_me: rememberMe,
@@ -32,8 +33,6 @@ const LoginForm = () => {
     const [rememberMe, setRememberMe] = useState(false);
     const [loggingIn, setLoggingIn] = useState(false);
     const [timer, setTimer] = useState(0);
-    const [otp, setOtp] = useState("");
-
     const isEmailValid = (email: string) => {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     };
@@ -50,10 +49,25 @@ const LoginForm = () => {
         return () => clearInterval(interval);
     }, [timer]);
 
+    const handleOtpOnChange = (otp: string) => {
+        if (otp.length === 6) {
+            handleOTP(otp);
+        }
+    };
+
     const handleLogin = async () => {
         setLoggingIn(true);
         try {
             const result = await loginUser(email);
+            // Store the credentials after successful login
+            if (PlatformType() !== "web") {
+                // TODO: Implement this function
+                // await storeCredentials({
+                //     authorization: result.data.token,
+                //     authorizationExpires: result.data.expires,
+                //     // ... other credentials from response
+                // });
+            }
             alert("OTP sent successfully.");
             setTimeout(() => {
                 setShowOtpForm(true);
@@ -61,23 +75,30 @@ const LoginForm = () => {
                 startTimer();
             }, 1500);
         } catch (error) {
+            console.error(error);
+            const errorBody = error as AxiosError;
+            const errorMessage = errorBody.response?.data as { code: string; message: string };
+            if (errorMessage) {
+                alert(errorMessage.message);
+            } else {
+                alert("An error occurred");
+            }
+            setLoggingIn(false);
+        }
+    };
+
+    const handleOTP = (otp: string) => {
+        setLoggingIn(true);
+        try {
+            const result = verifyOTP(email, otp, rememberMe);
+            alert("Logged in successfully.");
+            setLoggingIn(false);
+        } catch (error) {
             const errorBody = error as AxiosError;
             const errorMessage = errorBody.response?.data as { code: string; message: string };
             alert(errorMessage.message || "An error occurred");
             setLoggingIn(false);
         }
-    };
-
-    const handleOTP = () => {
-        setLoggingIn(true);
-        verifyOTP(email, otp, rememberMe).then((response) => {
-            if (response.status === 200) {
-                alert("OTP verified successfully");
-            } else {
-                alert("Invalid OTP");
-            }
-            setLoggingIn(false);
-        });
     };
 
     return (
@@ -126,7 +147,7 @@ const LoginForm = () => {
                                             customStyles={styles.otpInput}
                                             maxLength={6}
                                             keyboardType="number-pad"
-                                            onChangeText={setOtp}
+                                            onChangeText={handleOtpOnChange}
                                         />
                                     </View>
 
