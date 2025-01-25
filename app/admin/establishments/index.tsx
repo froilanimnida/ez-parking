@@ -6,7 +6,7 @@ import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import axiosInstance from "@/lib/axiosInstance";
-import getCookies from "@/lib/credentialsManager";
+import { getAuthHeaders } from "@/lib/credentialsManager";
 
 interface Establishment {
     company_profile: {
@@ -28,7 +28,7 @@ interface Establishment {
 }
 
 const fetchEstablishments = async () => {
-    const cookiesObject = await getCookies();
+    const cookiesObject = await getAuthHeaders();
     const res = await axiosInstance.get(`${process.env.EXPO_PUBLIC_API_ADMIN_ROOT}/establishments`, {
         headers: {
             Authorization: cookiesObject.Authorization,

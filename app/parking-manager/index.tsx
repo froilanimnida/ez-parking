@@ -1,7 +1,5 @@
 import { StyleSheet, View, SafeAreaView, ScrollView, TouchableOpacity, Platform, StatusBar } from "react-native";
-import { useCameraPermissions } from "expo-camera";
-import React, { useEffect } from "react";
-import { Link } from "expo-router";
+import React from "react";
 import TextComponent from "@/components/TextComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import LinkComponent from "@/components/LinkComponent";
@@ -30,10 +28,6 @@ interface ActionCardsType {
 }
 
 const ParkingManagerDashboard = () => {
-    const [permission, requestPermission] = useCameraPermissions();
-    useEffect(() => {
-        requestPermission();
-    });
     const actionCards: ActionCardsType[] = [
         {
             title: "Quick Actions",
@@ -96,9 +90,14 @@ const ParkingManagerDashboard = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView>
+            <ScrollView
+                contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignContent: "center" }}
+                style={styles.body}
+            >
                 <View style={styles.header}>
-                    <TextComponent variant="h1">Parking Manager Dashboard</TextComponent>
+                    <TextComponent bold variant="h1">
+                        Parking Manager Dashboard
+                    </TextComponent>
                 </View>
 
                 {actionCards.map((section, sectionIndex) => (
@@ -134,6 +133,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+        width: "100%",
+        backgroundColor: "#f9fafb",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    body: {
+        width: "100%",
+        maxWidth: 1280,
     },
     header: {
         padding: 16,

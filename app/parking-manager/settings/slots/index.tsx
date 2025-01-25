@@ -4,6 +4,7 @@ import TextComponent from "@/components/TextComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import CardComponent from "@/components/CardComponent";
 import { Picker } from "@react-native-picker/picker";
+import SelectComponent from "@/components/SelectComponent";
 
 const slotFeatures = ["standard", "covered", "vip", "disabled", "ev_charging"] as const;
 const slotStatus = ["open", "occupied", "reserved", "closed"] as const;
@@ -25,9 +26,12 @@ const Slots = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView>
+            <ScrollView
+                contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignContent: "center" }}
+                style={styles.body}
+            >
                 <View style={styles.section}>
-                    <TextComponent variant="h2" style={styles.sectionTitle}>
+                    <TextComponent variant="h2" bold style={styles.sectionTitle}>
                         Parking Slot Settings
                     </TextComponent>
 
@@ -145,6 +149,13 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#F9FAFB",
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+        width: "100%",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    body: {
+        width: "100%",
+        maxWidth: 1280,
     },
     section: {
         padding: 16,

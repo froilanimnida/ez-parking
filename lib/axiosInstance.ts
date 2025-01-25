@@ -1,7 +1,6 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import PlatformType from "./platform";
-import { useRouter, useFocusEffect } from "expo-router";
 
 const PLATFORM = PlatformType();
 
@@ -21,7 +20,7 @@ async function verifyAndGetRole(
 ): Promise<UserRole | null> {
     if (!authToken) return null;
     try {
-        const result = await    .post(
+        const result = await axiosInstance.post(
             `${process.env.EXPO_PUBLIC_API_AUTH_ROOT}/verify-token`,
             {},
             {

@@ -54,12 +54,11 @@ const ScanQRCode = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
-                <View style={styles.header}>
-                    <TextComponent variant="h1">Scan Entry QR Code</TextComponent>
-                    <TextComponent style={styles.subtitle}>Scan the QR code presented by the user</TextComponent>
-                </View>
-
-                <CardComponent customStyles={styles.scannerContainer} header="Scan QR Code">
+                <CardComponent
+                    customStyles={styles.scannerContainer}
+                    header="Scan QR Code"
+                    subHeader="Scan the QR code"
+                >
                     {scanning && (
                         <CameraView
                             barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
@@ -101,17 +100,13 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#F9FAFB",
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+        width: "100%",
+        justifyContent: "center",
+        alignItems: "center",
     },
     content: {
         padding: 16,
-    },
-    header: {
-        alignItems: "center",
-        marginBottom: 24,
-    },
-    subtitle: {
-        color: "#6B7280",
-        marginTop: 8,
+        maxWidth: 1280,
     },
     scannerContainer: {
         padding: 16,
