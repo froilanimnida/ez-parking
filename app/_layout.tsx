@@ -11,6 +11,8 @@ export default function RootLayout() {
                 navigationBarColor: "transparent",
                 statusBarStyle: "dark",
             }}
-        ></Stack>
+        >
+            <Stack.Screen name="index" options={{ title: "EZ Parking | Home " }} />
+        </Stack>
     );
 }

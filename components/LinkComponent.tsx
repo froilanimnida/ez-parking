@@ -1,37 +1,71 @@
-import { StyleSheet, Text, View, Pressable } from "react-native";
-import { Link, type ExternalPathString, type RelativePathString } from "expo-router";
 import React from "react";
-import { useFonts } from "expo-font";
+import { View } from "react-native";
+import { Link, type ExternalPathString, type RelativePathString } from "expo-router";
+import { BaseComponentProps } from "@/lib/types/ui";
+import { baseStyles } from "@/styles/components";
+import TextComponent from "./TextComponent";
 
-type LinkComponentProps = {
-    asButton: boolean;
+interface LinkProps extends BaseComponentProps {
     href: RelativePathString | ExternalPathString;
-    label: string;
-    style?: object;
-};
+    label?: string;
+    asChild?: boolean;
+}
 
-const LinkComponent = ({ asButton, href, label, style }: LinkComponentProps) => {
-    let [fontsLoaded] = useFonts({
-        Inter: require("../assets/fonts/InterVariable.ttf"),
-    });
-    return asButton ? (
-        <Pressable style={{ ...style }}>
-            <Link href={href}>
-                <Text style={styles.label}>{label}</Text>
+const LinkComponent: React.FC<LinkProps> = ({
+    href,
+    label,
+    asChild = false,
+    style,
+    textStyle,
+    variant = "primary",
+    size = "md",
+    disabled = false,
+    icon,
+    iconPosition = "left",
+    fullWidth = false,
+    children,
+}) => {
+    const content = children || (
+        <>
+            {icon && iconPosition === "left" && <View style={baseStyles.iconLeft}>{icon}</View>}
+            {label && (
+                <TextComponent
+                    style={[
+                        baseStyles[`text${size.toUpperCase()}`],
+                        baseStyles[`${variant}Text`],
+                        disabled && baseStyles.disabledText,
+                        textStyle,
+                    ]}
+                >
+                    {label}
+                </TextComponent>
+            )}
+            {icon && iconPosition === "right" && <View style={baseStyles.iconRight}>{icon}</View>}
+        </>
+    );
+
+    if (asChild) {
+        return (
+            <Link href={href} asChild>
+                {children}
             </Link>
-        </Pressable>
-    ) : (
-        <Link href={href} style={{ ...style }}>
-            <Text style={styles.label}>{label}</Text>
+        );
+    }
+
+    const linkStyles = [
+        baseStyles.container,
+        baseStyles[size],
+        variant !== "text" && baseStyles[variant],
+        fullWidth && baseStyles.fullWidth,
+        disabled && baseStyles.disabled,
+        style,
+    ];
+
+    return (
+        <Link href={href} style={linkStyles}>
+            {content}
         </Link>
     );
 };
 
 export default LinkComponent;
-
-const styles = StyleSheet.create({
-    label: {
-        fontFamily: "Inter",
-        fontSize: 16,
-    },
-});

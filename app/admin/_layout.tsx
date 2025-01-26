@@ -4,12 +4,27 @@ import { tabsConfig } from "@/lib/config/TabsConfig";
 
 export default function AdminLayout() {
     return (
-        <Tabs screenOptions={{ ...tabsConfig }}>
+        <Tabs screenOptions={{ ...tabsConfig, title: "Admin" }}>
             <Tabs.Screen
                 name="index"
                 options={{
                     title: "Home",
+                    tabBarLabel: "Home",
                     tabBarIcon: ({ color }) => <MaterialCommunityIcons name="home" color={color} size={20} />,
+                }}
+            />
+            <Tabs.Screen
+                name="settings/about"
+                options={{
+                    href: null,
+                    title: "About",
+                }}
+            />
+            <Tabs.Screen
+                name="settings/contact"
+                options={{
+                    href: null,
+                    title: "Contact",
                 }}
             />
             <Tabs.Screen
@@ -30,7 +45,9 @@ export default function AdminLayout() {
                 name="establishments/index"
                 options={{
                     title: "Establishments",
+                    tabBarLabel: "Establishments",
                     tabBarIcon: ({ color }) => <MaterialCommunityIcons name="store" color={color} size={20} />,
+                    headerTitle: "Establishments",
                 }}
             />
 
@@ -45,6 +62,23 @@ export default function AdminLayout() {
                 name="settings/index"
                 options={{
                     title: "Settings",
+                    tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cog" color={color} size={20} />,
+                    headerTitle: "Settings",
+                }}
+            />
+            <Tabs.Screen
+                name="vehicle-types/[uuid]"
+                options={{
+                    title: "Vehicle Type",
+                    href: null,
+                    tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cog" color={color} size={20} />,
+                }}
+            />
+            <Tabs.Screen
+                name="establishments/[uuid]"
+                options={{
+                    title: "Establishment",
+                    href: null,
                     tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cog" color={color} size={20} />,
                 }}
             />

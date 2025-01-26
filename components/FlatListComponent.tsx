@@ -1,14 +1,14 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 
-const ParkingManagerSignUp = () => {
+const FlatListComponent = () => {
     return (
         <View>
-            <Text>ParkingManagerSignUp</Text>
+            <Text>FlatListComponent</Text>
         </View>
     );
 };
 
-export default ParkingManagerSignUp;
+export default FlatListComponent;
 
 const styles = StyleSheet.create({});
