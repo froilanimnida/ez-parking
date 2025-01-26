@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { Link, type ExternalPathString, type RelativePathString } from "expo-router";
 import { BaseComponentProps } from "@/lib/types/ui";
 import { baseStyles } from "@/styles/components";
