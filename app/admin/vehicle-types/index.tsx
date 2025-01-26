@@ -76,7 +76,9 @@ const VehicleTypes = () => {
         <ScrollView style={styles.container} contentContainerStyle={{ alignItems: "center" }}>
             <View style={styles.body}>
                 <View style={styles.header}>
-                    <TextComponent variant="h1">Vehicle Types</TextComponent>
+                    <TextComponent bold variant="h1">
+                        Vehicle Types
+                    </TextComponent>
                     <TextComponent style={styles.subtitle}>
                         Manage vehicle categories and their specifications
                     </TextComponent>

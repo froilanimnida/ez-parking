@@ -1,8 +1,8 @@
-import { StyleSheet, View, SafeAreaView, FlatList, TouchableOpacity, Platform, StatusBar } from "react-native";
+import { StyleSheet, View, SafeAreaView, FlatList, TouchableOpacity, ScrollView } from "react-native";
 import React from "react";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import TextComponent from "@/components/TextComponent";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { defaultContainerStyles, defaultBodyStyles } from "@/styles/default";
 
 type Transaction = {
     uuid: string;
@@ -36,46 +36,44 @@ const TransactionItem = ({ item }: { item: Transaction }) => (
 
 const Transactions = () => {
     const transactions: Transaction[] = [];
-
     return (
         <SafeAreaView style={styles.container}>
-            <TextComponent variant="h1" style={styles.title}>
-                Transactions
-            </TextComponent>
+            <ScrollView style={styles.body}>
+                <TextComponent bold variant="h1" style={styles.title}>
+                    Transactions
+                </TextComponent>
 
-            <View style={styles.tableHeader}>
-                <View style={styles.headerCell}>
-                    <TextComponent style={styles.headerText}>Slot</TextComponent>
+                <View style={styles.tableHeader}>
+                    <View style={styles.headerCell}>
+                        <TextComponent style={styles.headerText}>Slot</TextComponent>
+                    </View>
+                    <View style={styles.headerCell}>
+                        <TextComponent style={styles.headerText}>Entry</TextComponent>
+                    </View>
+                    <View style={styles.headerCell}>
+                        <TextComponent style={styles.headerText}>Exit</TextComponent>
+                    </View>
+                    <View style={styles.headerCell}>
+                        <TextComponent style={styles.headerText}>Amount</TextComponent>
+                    </View>
+                    <View style={styles.headerCell}>
+                        <TextComponent style={styles.headerText}>Status</TextComponent>
+                    </View>
                 </View>
-                <View style={styles.headerCell}>
-                    <TextComponent style={styles.headerText}>Entry</TextComponent>
-                </View>
-                <View style={styles.headerCell}>
-                    <TextComponent style={styles.headerText}>Exit</TextComponent>
-                </View>
-                <View style={styles.headerCell}>
-                    <TextComponent style={styles.headerText}>Amount</TextComponent>
-                </View>
-                <View style={styles.headerCell}>
-                    <TextComponent style={styles.headerText}>Status</TextComponent>
-                </View>
-            </View>
 
-            <FlatList
-                data={transactions}
-                renderItem={({ item }) => <TransactionItem item={item} />}
-                keyExtractor={(item) => item.uuid}
-            />
+                <FlatList
+                    data={transactions}
+                    renderItem={({ item }) => <TransactionItem item={item} />}
+                    keyExtractor={(item) => item.uuid}
+                />
+            </ScrollView>
         </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#F9FAFB",
-        paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-    },
+    container: { ...defaultContainerStyles },
+    body: { ...defaultBodyStyles },
     header: {
         padding: 16,
     },

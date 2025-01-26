@@ -3,6 +3,7 @@ import React from "react";
 import TextComponent from "@/components/TextComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import LinkComponent from "@/components/LinkComponent";
+import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
 
 interface ActionCardsType {
     title: string;
@@ -89,58 +90,49 @@ const ParkingManagerDashboard = () => {
     ];
 
     return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView
-                contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignContent: "center" }}
-                style={styles.body}
-            >
-                <View style={styles.header}>
-                    <TextComponent bold variant="h1">
-                        Parking Manager Dashboard
-                    </TextComponent>
-                </View>
-
-                {actionCards.map((section, sectionIndex) => (
-                    <View key={sectionIndex} style={styles.section}>
-                        <TextComponent variant="h2" style={styles.sectionTitle}>
-                            {section.title}
+        <View style={styles.container}>
+            <SafeAreaView style={styles.body}>
+                <ScrollView>
+                    <View style={styles.header}>
+                        <TextComponent bold variant="h1">
+                            Parking Manager Dashboard
                         </TextComponent>
-                        <View style={styles.grid}>
-                            {section.items.map((item, index) => (
-                                <LinkComponent href={item.href} key={index} asChild>
-                                    <TouchableOpacity style={styles.card}>
-                                        <View style={styles.iconContainer}>
-                                            <MaterialCommunityIcons name={item.icon} size={24} color="#4F46E5" />
-                                        </View>
-                                        <TextComponent variant="h3" style={styles.cardTitle}>
-                                            {item.name}
-                                        </TextComponent>
-                                        <TextComponent variant="caption" style={styles.cardDescription}>
-                                            {item.description}
-                                        </TextComponent>
-                                    </TouchableOpacity>
-                                </LinkComponent>
-                            ))}
-                        </View>
                     </View>
-                ))}
-            </ScrollView>
-        </SafeAreaView>
+
+                    {actionCards.map((section, sectionIndex) => (
+                        <View key={sectionIndex} style={styles.section}>
+                            <TextComponent variant="h2" style={styles.sectionTitle}>
+                                {section.title}
+                            </TextComponent>
+                            <View style={styles.grid}>
+                                {section.items.map((item, index) => (
+                                    <LinkComponent href={item.href} key={index} asChild>
+                                        <TouchableOpacity style={styles.card}>
+                                            <View style={styles.iconContainer}>
+                                                <MaterialCommunityIcons name={item.icon} size={24} color="#4F46E5" />
+                                            </View>
+                                            <TextComponent variant="h3" style={styles.cardTitle}>
+                                                {item.name}
+                                            </TextComponent>
+                                            <TextComponent variant="caption" style={styles.cardDescription}>
+                                                {item.description}
+                                            </TextComponent>
+                                        </TouchableOpacity>
+                                    </LinkComponent>
+                                ))}
+                            </View>
+                        </View>
+                    ))}
+                </ScrollView>
+            </SafeAreaView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-        width: "100%",
-        backgroundColor: "#f9fafb",
-        justifyContent: "center",
-        alignItems: "center",
-    },
+    container: { ...defaultContainerStyles },
     body: {
-        width: "100%",
-        maxWidth: 1280,
+        ...defaultBodyStyles,
     },
     header: {
         padding: 16,

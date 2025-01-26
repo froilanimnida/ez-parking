@@ -1,15 +1,18 @@
-import { StyleSheet, View, ScrollView, TextInput, TouchableOpacity } from "react-native";
+import { StyleSheet, View, ScrollView, TextInput, TouchableOpacity, SafeAreaView } from "react-native";
 import React, { useEffect, useState } from "react";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import { Picker } from "@react-native-picker/picker";
 import type { User } from "@/lib/models/user";
-import getCookies from "@/lib/credentialsManager";
+import { getAuthHeaders } from "@/lib/credentialsManager";
 import axiosInstance from "@/lib/axiosInstance";
 import ButtonComponent from "@/components/ButtonComponent";
+import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
+import TextInputComponent from "@/components/TextInputComponent";
+import SelectComponent from "@/components/SelectComponent";
 
 const fetchUsers = async () => {
-    const cookiesObject = await getCookies();
+    const cookiesObject = await getAuthHeaders();
     const res = await axiosInstance.get(`${process.env.EXPO_PUBLIC_API_ADMIN_ROOT}/users`, {
         headers: {
             Authorization: cookiesObject.Authorization,
@@ -45,104 +48,137 @@ const Users = () => {
     });
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={{ alignItems: "center" }}>
-            <View style={styles.body}>
-                <View style={styles.header}>
-                    <TextComponent variant="h1">Users</TextComponent>
-                    <TextComponent style={styles.subtitle}>Manage user accounts and permissions</TextComponent>
-                    <ButtonComponent
-                        style={styles.exportButton}
-                        onPress={() => {}}
-                        title="Export Users"
-                    ></ButtonComponent>
-                </View>
+        <View style={styles.container}>
+            <SafeAreaView style={styles.body}>
+                <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignContent: "center" }}>
+                    <View style={styles.body}>
+                        <View style={styles.header}>
+                            <TextComponent bold variant="h1">
+                                Users
+                            </TextComponent>
+                            <TextComponent style={styles.subtitle}>Manage user accounts and permissions</TextComponent>
+                            <ButtonComponent
+                                style={styles.exportButton}
+                                onPress={() => {}}
+                                title="Export Users"
+                            ></ButtonComponent>
+                        </View>
 
-                <View style={styles.filters}>
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder="Search users..."
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                    />
-                    <Picker selectedValue={roleFilter} onValueChange={setRoleFilter} style={styles.picker}>
-                        <Picker.Item label="All Roles" value="all" />
-                        <Picker.Item label="User" value="user" />
-                        <Picker.Item label="Parking Manager" value="parking_manager" />
-                        <Picker.Item label="Admin" value="admin" />
-                    </Picker>
-                    <Picker
-                        selectedValue={verificationFilter}
-                        onValueChange={setVerificationFilter}
-                        style={styles.picker}
-                    >
-                        <Picker.Item label="All Status" value="all" />
-                        <Picker.Item label="Verified" value="verified" />
-                        <Picker.Item label="Unverified" value="unverified" />
-                    </Picker>
-                </View>
+                        <View style={styles.filters}>
+                            <TextInputComponent
+                                customStyles={styles.searchInput}
+                                placeholder="Search users..."
+                                value={searchQuery}
+                                onChangeText={setSearchQuery}
+                            />
+                            <SelectComponent
+                                items={[
+                                    {
+                                        label: "All Roles",
+                                        value: "all",
+                                    },
+                                    {
+                                        label: "User",
+                                        value: "user",
+                                    },
+                                    {
+                                        label: "Parking Manager",
+                                        value: "parking_manager",
+                                    },
+                                    {
+                                        label: "Admin",
+                                        value: "admin",
+                                    },
+                                ]}
+                                onValueChange={setRoleFilter}
+                                selectedValue={roleFilter}
+                            />
+                            <SelectComponent
+                                items={[
+                                    {
+                                        label: "All Status",
+                                        value: "all",
+                                    },
+                                    {
+                                        label: "Verified",
+                                        value: "verified",
+                                    },
+                                    {
+                                        label: "Unverified",
+                                        value: "unverified",
+                                    },
+                                ]}
+                                onValueChange={setVerificationFilter}
+                                selectedValue={verificationFilter}
+                            />
+                        </View>
 
-                {filteredUsers.length === 0 ? (
-                    <CardComponent customStyles={styles.noUsersCard} header="No Users Found">
-                        <TextComponent style={styles.noUsersText}>No users found</TextComponent>
-                    </CardComponent>
-                ) : (
-                    <View style={styles.userList}>
-                        {filteredUsers.map((user, index) => (
-                            <CardComponent key={index} customStyles={styles.userCard} header="User Details">
-                                <View style={styles.userHeader}>
-                                    <View style={styles.userAvatar}>
-                                        <TextComponent style={styles.userAvatarText}>
-                                            {user.first_name?.[0]}
-                                            {user.last_name?.[0]}
-                                        </TextComponent>
-                                    </View>
-                                    <View style={styles.userInfo}>
-                                        <TextComponent style={styles.userName}>
-                                            {user.first_name} {user.middle_name} {user.last_name} {user.suffix}
-                                        </TextComponent>
-                                        <TextComponent style={styles.userNickname}>
-                                            {user.nickname || "No nickname"}
-                                        </TextComponent>
-                                    </View>
-                                </View>
-                                <TextComponent style={styles.userEmail}>{user.email}</TextComponent>
-                                <TextComponent style={styles.userPhone}>{user.phone_number}</TextComponent>
-                                <View style={styles.userRole}>
-                                    <TextComponent
-                                        style={[
-                                            styles.userRoleText,
-                                            user.role === "admin" && styles.roleAdmin,
-                                            user.role === "parking_manager" && styles.roleManager,
-                                            user.role === "user" && styles.roleUser,
-                                        ]}
-                                    >
-                                        {user.role}
-                                    </TextComponent>
-                                </View>
-                                <View style={styles.userStatus}>
-                                    <TextComponent
-                                        style={[
-                                            styles.userStatusText,
-                                            user.is_verified ? styles.statusVerified : styles.statusUnverified,
-                                        ]}
-                                    >
-                                        {user.is_verified ? "Verified" : "Unverified"}
-                                    </TextComponent>
-                                </View>
-                                <TextComponent style={styles.userPlate}>{user.plate_number || "N/A"}</TextComponent>
-                                <View style={styles.userActions}>
-                                    {user.role === "user" && (
-                                        <TouchableOpacity onPress={() => setIsBanModalOpen(true)}>
-                                            <TextComponent style={styles.banButton}>Ban</TextComponent>
-                                        </TouchableOpacity>
-                                    )}
-                                </View>
+                        {filteredUsers.length === 0 ? (
+                            <CardComponent customStyles={styles.noUsersCard} header="No Users Found">
+                                <TextComponent style={styles.noUsersText}>No users found</TextComponent>
                             </CardComponent>
-                        ))}
+                        ) : (
+                            <View style={styles.userList}>
+                                {filteredUsers.map((user, index) => (
+                                    <CardComponent key={index} customStyles={styles.userCard} header="User Details">
+                                        <View style={styles.userHeader}>
+                                            <View style={styles.userAvatar}>
+                                                <TextComponent style={styles.userAvatarText}>
+                                                    {user.first_name?.[0]}
+                                                    {user.last_name?.[0]}
+                                                </TextComponent>
+                                            </View>
+                                            <View style={styles.userInfo}>
+                                                <TextComponent style={styles.userName}>
+                                                    {user.first_name} {user.middle_name} {user.last_name} {user.suffix}
+                                                </TextComponent>
+                                                <TextComponent style={styles.userNickname}>
+                                                    {user.nickname || "No nickname"}
+                                                </TextComponent>
+                                            </View>
+                                        </View>
+                                        <TextComponent style={styles.userEmail}>{user.email}</TextComponent>
+                                        <TextComponent style={styles.userPhone}>{user.phone_number}</TextComponent>
+                                        <View style={styles.userRole}>
+                                            <TextComponent
+                                                style={[
+                                                    styles.userRoleText,
+                                                    user.role === "admin" && styles.roleAdmin,
+                                                    user.role === "parking_manager" && styles.roleManager,
+                                                    user.role === "user" && styles.roleUser,
+                                                ]}
+                                            >
+                                                {user.role}
+                                            </TextComponent>
+                                        </View>
+                                        <View style={styles.userStatus}>
+                                            <TextComponent
+                                                style={[
+                                                    styles.userStatusText,
+                                                    user.is_verified ? styles.statusVerified : styles.statusUnverified,
+                                                ]}
+                                            >
+                                                {user.is_verified ? "Verified" : "Unverified"}
+                                            </TextComponent>
+                                        </View>
+                                        <TextComponent style={styles.userPlate}>
+                                            {user.plate_number || "N/A"}
+                                        </TextComponent>
+                                        <View style={styles.userActions}>
+                                            {user.role === "user" && (
+                                                <TouchableOpacity onPress={() => setIsBanModalOpen(true)}>
+                                                    <TextComponent style={styles.banButton}>Ban</TextComponent>
+                                                </TouchableOpacity>
+                                            )}
+                                        </View>
+                                    </CardComponent>
+                                ))}
+                            </View>
+                        )}
                     </View>
-                )}
-            </View>
-        </ScrollView>
+                </ScrollView>
+            </SafeAreaView>
+        </View>
     );
 };
 
@@ -150,14 +186,10 @@ export default Users;
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: "#F9FAFB",
-        padding: 16,
-        width: "100%",
+        ...defaultContainerStyles,
     },
     body: {
-        width: "95%",
-        maxWidth: 1536,
+        ...defaultBodyStyles,
     },
     header: {
         marginBottom: 16,
@@ -182,7 +214,6 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     searchInput: {
-        flex: 1,
         backgroundColor: "white",
         borderRadius: 8,
         padding: 8,

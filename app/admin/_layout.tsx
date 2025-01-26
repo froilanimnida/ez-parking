@@ -9,6 +9,7 @@ export default function AdminLayout() {
                 name="index"
                 options={{
                     title: "Home",
+                    tabBarLabel: "Home",
                     tabBarIcon: ({ color }) => <MaterialCommunityIcons name="home" color={color} size={20} />,
                 }}
             />
@@ -44,6 +45,7 @@ export default function AdminLayout() {
                 name="establishments/index"
                 options={{
                     title: "Establishments",
+                    tabBarLabel: "Establishments",
                     tabBarIcon: ({ color }) => <MaterialCommunityIcons name="store" color={color} size={20} />,
                     headerTitle: "Establishments",
                 }}

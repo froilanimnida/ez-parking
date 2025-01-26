@@ -16,7 +16,12 @@ const SelectComponent = ({ items, selectedValue, onValueChange, placeholder, cus
         Inter: require("./../assets/fonts/InterVariable.ttf"),
     });
     return (
-        <Picker selectedValue={selectedValue} onValueChange={onValueChange} style={[customStyles, styles.picker]} placeholder={placeholder}>
+        <Picker
+            selectedValue={selectedValue}
+            onValueChange={onValueChange}
+            style={[customStyles, styles.picker]}
+            placeholder={placeholder}
+        >
             {items.map((item, index) => (
                 <Picker.Item key={index} label={item.label} value={item.value} />
             ))}
@@ -34,6 +39,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         backgroundColor: "#F9FAFB",
         paddingLeft: 16,
+        paddingRight: 16,
         marginBottom: 16,
     },
 });

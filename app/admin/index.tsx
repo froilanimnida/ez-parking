@@ -1,5 +1,5 @@
-import { StyleSheet, View, SafeAreaView, ScrollView, TouchableOpacity, Platform, StatusBar } from "react-native";
-import React from "react";
+import { StyleSheet, View, SafeAreaView, ScrollView, TouchableOpacity } from "react-native";
+import React, { useEffect } from "react";
 import TextComponent from "@/components/TextComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import LinkComponent from "@/components/LinkComponent";
@@ -45,7 +45,9 @@ const AdminDashboard = () => {
             <SafeAreaView style={styles.body}>
                 <ScrollView>
                     <View style={styles.header}>
-                        <TextComponent variant="h1">Admin Dashboard</TextComponent>
+                        <TextComponent bold variant="h1">
+                            Admin Dashboard
+                        </TextComponent>
                         <TextComponent variant="body" style={styles.subtitle}>
                             Manage your platform settings and users
                         </TextComponent>

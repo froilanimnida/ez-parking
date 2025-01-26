@@ -59,13 +59,15 @@ const ScanQRCode = () => {
                     header="Scan QR Code"
                     subHeader="Scan the QR code"
                 >
-                    {scanning && (
-                        <CameraView
-                            barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
-                            style={styles.scanner}
-                            onBarcodeScanned={handleBarCodeScanned}
-                        />
-                    )}
+                    <View style={{ height: 400, width: 400 }}>
+                        {scanning && (
+                            <CameraView
+                                barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+                                style={styles.scanner}
+                                onBarcodeScanned={handleBarCodeScanned}
+                            />
+                        )}
+                    </View>
 
                     <ButtonComponent
                         title="Upload QR Code Image"
@@ -113,8 +115,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     scanner: {
-        width: 300,
-        height: 300,
+        width: "100%",
+        height: "100%",
         marginBottom: 16,
         borderRadius: 8,
     },
