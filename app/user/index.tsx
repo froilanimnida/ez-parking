@@ -1,4 +1,4 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import React from "react";
 import LinkComponent from "@/components/LinkComponent";
 import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
