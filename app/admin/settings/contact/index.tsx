@@ -1,15 +1,15 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
-import About from "@/components/AboutScreen";
+import ContactScreen from "@/components/ContactScreen";
 
-const about = () => {
+const ContactPage = () => {
     return (
         <View>
-            <About />
+            <ContactScreen />
         </View>
     );
 };
 
-export default about;
+export default ContactPage;
 
 const styles = StyleSheet.create({});

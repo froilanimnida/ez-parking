@@ -29,8 +29,8 @@ export default function UserLayout() {
             <Tabs.Screen
                 name="transactions/[uuid]"
                 options={{
-                    href: null,
-                    title: "Transaction",
+                    title: "Transaction Details",
+                    tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cash" color={color} size={20} />,
                 }}
             />
             <Tabs.Screen

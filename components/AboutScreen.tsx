@@ -1,7 +1,8 @@
 import React from "react";
-import { ScrollView, View, Image, StyleSheet, Dimensions, TouchableOpacity, Linking } from "react-native";
+import { View, Image, StyleSheet, TouchableOpacity, Linking, SafeAreaView } from "react-native";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
+import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
 
 const developers = [
     {
@@ -33,9 +34,9 @@ const developers = [
 
 const About = () => {
     return (
-        <ScrollView style={styles.container}>
-            <View style={styles.content}>
-                <TextComponent variant="h1" style={styles.title}>
+        <View style={styles.container}>
+            <SafeAreaView style={styles.content}>
+                <TextComponent variant="h1" bold style={styles.title}>
                     About Us
                 </TextComponent>
 
@@ -99,18 +100,15 @@ const About = () => {
                         <TextComponent style={styles.link}>support@ezparking.com</TextComponent>
                     </TouchableOpacity>
                 </CardComponent>
-            </View>
-        </ScrollView>
+            </SafeAreaView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#F9FAFB",
-    },
+    container: { ...defaultContainerStyles, minHeight: 100 },
     content: {
-        padding: 16,
+        ...defaultBodyStyles,
     },
     title: {
         textAlign: "center",
@@ -151,7 +149,6 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
         elevation: 2,
-        width: Dimensions.get("window").width * 0.4,
     },
     leadDevImage: {
         width: 96,

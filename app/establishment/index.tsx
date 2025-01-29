@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { View, ScrollView, StyleSheet } from "react-native";
-import { Stack } from "expo-router";
+import { View, ScrollView, StyleSheet, Animated, Modal, Pressable } from "react-native";
 import * as Location from "expo-location";
 import EstablishmentItem from "@/components/EstablishmentItem";
+import TextComponent from "@/components/TextComponent";
 import type { ParkingEstablishment } from "@/lib/models/parking-establishment";
 import type { PricingPlan } from "@/lib/models/pricing-plan";
 import ButtonComponent from "@/components/ButtonComponent";
 import TextInputComponent from "@/components/TextInputComponent";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import PlatformType from "@/lib/platform";
 export interface EstablishmentQuery extends ParkingEstablishment {
     open_slots: number;
     total_slots: number;
@@ -16,9 +18,27 @@ export interface EstablishmentQuery extends ParkingEstablishment {
 }
 
 export default function EstablishmentSearch() {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [loading, setLoading] = useState(false);
     const [establishments, setEstablishments] = useState<EstablishmentQuery[]>([]);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [recentSearches, setRecentSearches] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    const animation = new Animated.Value(0);
+
+    const handleSearch = async () => {
+        setLoading(true);
+        // Implement your search API call here
+        setLoading(false);
+    };
+
+    const expandSearchBar = () => {
+        setModalVisible(true);
+        Animated.spring(animation, {
+            toValue: 1,
+            useNativeDriver: true,
+        }).start();
+    };
     const [location, setLocation] = useState({
         latitude: 14.5995,
         longitude: 120.9842,
@@ -53,31 +73,59 @@ export default function EstablishmentSearch() {
                 longitude: data.longitude,
             });
         } catch (error) {
-            // Use default Manila coordinates
+            setLocation({
+                latitude: 14.5995,
+                longitude: 120.9842,
+            });
         }
-    };
-
-    const handleSearch = async () => {
-        setLoading(true);
-        // Implement your search API call here
-        setLoading(false);
     };
 
     return (
         <View style={styles.container}>
-            <Stack.Screen options={{ headerShown: false }} />
-
             {/* Header */}
             <View style={styles.header}>
-                <View style={styles.searchContainer}>
-                    <TextInputComponent
-                        customStyles={styles.searchInput}
-                        placeholder="Search for parking establishments..."
-                        value={searchTerm}
-                        onChangeText={setSearchTerm}
-                    />
-                    <ButtonComponent title="Search" onPress={handleSearch} />
-                </View>
+                <Pressable onPress={expandSearchBar}>
+                    <View style={styles.searchBarContainer}>
+                        <View style={styles.searchBar}>
+                            <MaterialCommunityIcons name="magnify" size={20} color="#4b5563" />
+                            <TextComponent style={styles.searchText}>Where to park?</TextComponent>
+                        </View>
+                    </View>
+                </Pressable>
+
+                <Modal animationType="slide" visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalHeader}>
+                            <Pressable onPress={() => setModalVisible(false)}>
+                                <MaterialCommunityIcons name="arrow-left" size={24} color="#000" />
+                            </Pressable>
+                            <TextInputComponent
+                                customStyles={styles.modalSearchInput}
+                                placeholder="Search parking locations"
+                                value={searchTerm}
+                                onChangeText={setSearchTerm}
+                                autoFocus
+                            />
+                        </View>
+
+                        <ScrollView style={styles.modalContent}>
+                            {recentSearches.map((search, index) => (
+                                <ButtonComponent
+                                    key={index}
+                                    style={styles.recentSearchItem}
+                                    onPress={() => {
+                                        setSearchTerm(search);
+                                        handleSearch();
+                                        setModalVisible(false);
+                                    }}
+                                >
+                                    <MaterialCommunityIcons name="clock-time-four-outline" size={24} color="#6b7280" />
+                                    <TextComponent style={styles.recentSearchText}>{search}</TextComponent>
+                                </ButtonComponent>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </Modal>
             </View>
 
             {/* Main Content */}
@@ -170,5 +218,58 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
+    },
+    searchBarContainer: {
+        marginTop: 8,
+        paddingHorizontal: 16,
+    },
+    searchBar: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 16,
+        backgroundColor: "white",
+        borderRadius: 32,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+    searchText: {
+        marginLeft: 12,
+        fontSize: 16,
+        color: "#4b5563",
+    },
+    modalContainer: {
+        flex: 1,
+        backgroundColor: "white",
+        paddingTop: PlatformType() === "ios" ? 40 : 0,
+    },
+    modalHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#e5e7eb",
+    },
+    modalSearchInput: {
+        flex: 1,
+        marginLeft: 16,
+        fontSize: 16,
+    },
+    modalContent: {
+        flex: 1,
+    },
+    recentSearchItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#f3f4f6",
+    },
+    recentSearchText: {
+        marginLeft: 12,
+        fontSize: 16,
+        color: "#111827",
     },
 });
