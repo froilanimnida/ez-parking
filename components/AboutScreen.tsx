@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollView, View, Image, StyleSheet, Dimensions, TouchableOpacity, Linking, SafeAreaView } from "react-native";
+import { View, Image, StyleSheet, TouchableOpacity, Linking, SafeAreaView } from "react-native";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
