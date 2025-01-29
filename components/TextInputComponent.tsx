@@ -16,6 +16,7 @@ interface TextInputProps {
     numberOfLines?: number;
     ref?: React.LegacyRef<TextInput>;
     autoCapitalize?: "none" | "sentences" | "words" | "characters";
+    autoFocus?: boolean;
 }
 
 const TextInputComponent = ({
@@ -31,6 +32,7 @@ const TextInputComponent = ({
     ref,
     numberOfLines,
     autoCapitalize = "sentences",
+    autoFocus = false,
 }: TextInputProps) => {
     useFonts({
         Inter: require("./../assets/fonts/InterVariable.ttf"),
@@ -49,6 +51,7 @@ const TextInputComponent = ({
             multiline={multiline}
             numberOfLines={numberOfLines}
             autoCapitalize={autoCapitalize}
+            autoFocus={autoFocus}
         />
     );
 };
