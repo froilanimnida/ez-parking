@@ -39,10 +39,10 @@ const UserDashboard = () => {
                 <ScrollView>
                     <View style={styles.header}>
                         <TextComponent bold variant="h1">
-                            Admin Dashboard
+                            User Dashboard
                         </TextComponent>
                         <TextComponent variant="body" style={styles.subtitle}>
-                            Manage your platform settings and users
+                            Manage your account and parking transactions
                         </TextComponent>
                     </View>
 
