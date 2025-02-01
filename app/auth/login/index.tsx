@@ -79,17 +79,24 @@ const LoginForm = () => {
             setLoggingIn(false);
         }
     };
-
     const handleOTP = async (otp: string) => {
         setLoggingIn(true);
         try {
             const result = await verifyOTP(email, otp, rememberMe);
-            console.log(result.headers);
-            console.log(getAuthHeaders());
-            // storeCredentials({ authorization: cookies });
+            console.log("Response headers:", result.headers);
+
+            // Wait for auth headers to be retrieved
+            const headers = await getAuthHeaders();
+            console.log("Auth headers:", headers);
+
+            if (!headers.Authorization) {
+                console.warn("No authorization token found");
+            }
+
             alert("Logged in successfully.");
             setLoggingIn(false);
         } catch (error) {
+            console.error("Login error:", error);
             const errorBody = error as AxiosError;
             const errorMessage = errorBody.response?.data as { code: string; message: string };
             alert(errorMessage.message || "An error occurred");
