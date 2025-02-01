@@ -1,9 +1,9 @@
-import { StyleSheet, View, SafeAreaView, ScrollView, TouchableOpacity, Platform, StatusBar } from "react-native";
+import { StyleSheet, View, TouchableOpacity } from "react-native";
 import React from "react";
 import TextComponent from "@/components/TextComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import LinkComponent from "@/components/LinkComponent";
-import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 
 interface ActionCardsType {
     title: string;
@@ -90,64 +90,57 @@ const ParkingManagerDashboard = () => {
     ];
 
     return (
-        <View style={styles.container}>
-            <SafeAreaView style={styles.body}>
-                <ScrollView>
-                    <View style={styles.header}>
-                        <TextComponent bold variant="h1">
-                            Parking Manager Dashboard
-                        </TextComponent>
-                    </View>
+        <ResponsiveContainer>
+            <View style={styles.header}>
+                <TextComponent bold variant="h1">
+                    Dashboard
+                </TextComponent>
+            </View>
 
-                    {actionCards.map((section, sectionIndex) => (
-                        <View key={sectionIndex} style={styles.section}>
-                            <TextComponent variant="h2" style={styles.sectionTitle}>
-                                {section.title}
-                            </TextComponent>
-                            <View style={styles.grid}>
-                                {section.items.map((item, index) => (
-                                    <LinkComponent href={item.href} key={index} asChild>
-                                        <TouchableOpacity style={styles.card}>
-                                            <View style={styles.iconContainer}>
-                                                <MaterialCommunityIcons name={item.icon} size={24} color="#4F46E5" />
-                                            </View>
-                                            <TextComponent variant="h3" style={styles.cardTitle}>
-                                                {item.name}
-                                            </TextComponent>
-                                            <TextComponent variant="caption" style={styles.cardDescription}>
-                                                {item.description}
-                                            </TextComponent>
-                                        </TouchableOpacity>
-                                    </LinkComponent>
-                                ))}
-                            </View>
-                        </View>
-                    ))}
-                </ScrollView>
-            </SafeAreaView>
-        </View>
+            {actionCards.map((section, sectionIndex) => (
+                <View key={sectionIndex} style={styles.section}>
+                    <TextComponent variant="h2" style={styles.sectionTitle}>
+                        {section.title}
+                    </TextComponent>
+                    <View style={styles.grid}>
+                        {section.items.map((item, index) => (
+                            <LinkComponent href={item.href} key={index} asChild>
+                                <TouchableOpacity style={styles.card}>
+                                    <View style={styles.iconContainer}>
+                                        <MaterialCommunityIcons name={item.icon} size={24} color="#4F46E5" />
+                                    </View>
+                                    <TextComponent variant="h3" style={styles.cardTitle}>
+                                        {item.name}
+                                    </TextComponent>
+                                    <TextComponent variant="caption" style={styles.cardDescription}>
+                                        {item.description}
+                                    </TextComponent>
+                                </TouchableOpacity>
+                            </LinkComponent>
+                        ))}
+                    </View>
+                </View>
+            ))}
+        </ResponsiveContainer>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { ...defaultContainerStyles },
-    body: {
-        ...defaultBodyStyles,
-    },
     header: {
-        padding: 16,
         marginBottom: 16,
+        width: "100%",
     },
     section: {
+        width: "100%",
         marginBottom: 24,
-        padding: 16,
     },
     sectionTitle: {
         color: "#374151",
         marginBottom: 12,
     },
     grid: {
-        flexDirection: "row",
+        width: "100%",
+        flexDirection: "column",
         flexWrap: "wrap",
         gap: 16,
     },
@@ -155,7 +148,7 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         padding: 16,
         borderRadius: 8,
-        width: "47%",
+        width: "100%",
         boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.1)",
         elevation: 2,
     },

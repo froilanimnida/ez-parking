@@ -4,9 +4,9 @@ export interface ParkingSlot {
     establishment_id: number;
     slot_code: string;
     vehicle_type_id: number;
-    slot_status: 'open' | 'occupied' | 'reserved' | 'closed';
+    slot_status: "open" | "occupied" | "reserved" | "closed";
     is_active: boolean;
-    slot_features: 'standard' | 'premium';
+    slot_features: "standard" | "premium";
     is_premium: boolean;
     base_rate: number;
     slot_multiplier: number;

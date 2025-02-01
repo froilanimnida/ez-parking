@@ -54,11 +54,7 @@ const ScanQRCode = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
-                <CardComponent
-                    customStyles={styles.scannerContainer}
-                    header="Scan QR Code"
-                    subHeader="Scan the QR code"
-                >
+                <CardComponent header="Scan QR Code" subHeader="Scan the QR code">
                     <View style={{ height: 400, width: 400 }}>
                         {scanning && (
                             <CameraView
@@ -72,8 +68,9 @@ const ScanQRCode = () => {
                     <ButtonComponent
                         title="Upload QR Code Image"
                         onPress={pickImage}
-                        variant="secondary"
-                        icon={<MaterialCommunityIcons name="upload" size={24} />}
+                        variant="primary"
+                        style={{ marginTop: 16 }}
+                        icon={<MaterialCommunityIcons color={"#fff"} name="upload" size={24} />}
                     />
 
                     {scanSuccess && (
@@ -109,10 +106,6 @@ const styles = StyleSheet.create({
     content: {
         padding: 16,
         maxWidth: 1280,
-    },
-    scannerContainer: {
-        padding: 16,
-        alignItems: "center",
     },
     scanner: {
         width: "100%",

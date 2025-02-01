@@ -3,6 +3,7 @@ import React from "react";
 import { router } from "expo-router";
 import TextComponent from "@/components/TextComponent";
 import { defaultContainerStyles, defaultBodyStyles } from "@/styles/default";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 
 type Transaction = {
     uuid: string;
@@ -37,37 +38,35 @@ const TransactionItem = ({ item }: { item: Transaction }) => (
 const Transactions = () => {
     const transactions: Transaction[] = [];
     return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView style={styles.body}>
-                <TextComponent bold variant="h1" style={styles.title}>
-                    Transactions
-                </TextComponent>
+        <ResponsiveContainer>
+            <TextComponent bold variant="h1" style={styles.title}>
+                Transactions
+            </TextComponent>
 
-                <View style={styles.tableHeader}>
-                    <View style={styles.headerCell}>
-                        <TextComponent style={styles.headerText}>Slot</TextComponent>
-                    </View>
-                    <View style={styles.headerCell}>
-                        <TextComponent style={styles.headerText}>Entry</TextComponent>
-                    </View>
-                    <View style={styles.headerCell}>
-                        <TextComponent style={styles.headerText}>Exit</TextComponent>
-                    </View>
-                    <View style={styles.headerCell}>
-                        <TextComponent style={styles.headerText}>Amount</TextComponent>
-                    </View>
-                    <View style={styles.headerCell}>
-                        <TextComponent style={styles.headerText}>Status</TextComponent>
-                    </View>
+            <View style={styles.tableHeader}>
+                <View style={styles.headerCell}>
+                    <TextComponent style={styles.headerText}>Slot</TextComponent>
                 </View>
+                <View style={styles.headerCell}>
+                    <TextComponent style={styles.headerText}>Entry</TextComponent>
+                </View>
+                <View style={styles.headerCell}>
+                    <TextComponent style={styles.headerText}>Exit</TextComponent>
+                </View>
+                <View style={styles.headerCell}>
+                    <TextComponent style={styles.headerText}>Amount</TextComponent>
+                </View>
+                <View style={styles.headerCell}>
+                    <TextComponent style={styles.headerText}>Status</TextComponent>
+                </View>
+            </View>
 
-                <FlatList
-                    data={transactions}
-                    renderItem={({ item }) => <TransactionItem item={item} />}
-                    keyExtractor={(item) => item.uuid}
-                />
-            </ScrollView>
-        </SafeAreaView>
+            <FlatList
+                data={transactions}
+                renderItem={({ item }) => <TransactionItem item={item} />}
+                keyExtractor={(item) => item.uuid}
+            />
+        </ResponsiveContainer>
     );
 };
 

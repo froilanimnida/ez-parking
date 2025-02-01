@@ -1,4 +1,4 @@
-import { StyleSheet, View, SafeAreaView, ScrollView, TextInput, Switch, Platform, StatusBar } from "react-native";
+import { StyleSheet, View, TextInput, Switch } from "react-native";
 import React, { useState } from "react";
 import TextComponent from "@/components/TextComponent";
 import ButtonComponent from "@/components/ButtonComponent";
@@ -6,6 +6,7 @@ import CardComponent from "@/components/CardComponent";
 import { Picker } from "@react-native-picker/picker";
 import SelectComponent from "@/components/SelectComponent";
 import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 
 const slotFeatures = ["standard", "covered", "vip", "disabled", "ev_charging"] as const;
 const slotStatus = ["open", "occupied", "reserved", "closed"] as const;
@@ -26,93 +27,88 @@ const Slots = () => {
     let slots;
 
     return (
-        <View style={styles.container}>
-            <SafeAreaView style={styles.body}>
-                <ScrollView
-                    contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignContent: "center" }}
-                    style={styles.body}
-                >
-                    <View style={styles.section}>
-                        <TextComponent variant="h2" bold style={styles.sectionTitle}>
-                            Parking Slot Settings
-                        </TextComponent>
+        <ResponsiveContainer>
+            <>
+                <TextComponent variant="h1" bold style={styles.sectionTitle}>
+                    Parking Slot Settings
+                </TextComponent>
 
-                        <CardComponent customStyles={styles.form} header="Add New Slot">
-                            <View style={styles.formGrid}>
-                                <View style={styles.inputGroup}>
-                                    <TextComponent style={styles.label}>Slot Code *</TextComponent>
-                                    <TextInput
-                                        style={styles.input}
-                                        value={formData.slot_code}
-                                        onChangeText={(text) => setFormData({ ...formData, slot_code: text })}
-                                    />
-                                </View>
-
-                                <View style={styles.inputGroup}>
-                                    <TextComponent style={styles.label}>Is Premium</TextComponent>
-                                    <Switch
-                                        value={formData.is_premium}
-                                        onValueChange={(value) => setFormData({ ...formData, is_premium: value })}
-                                    />
-                                </View>
-
-                                <View style={styles.inputGroup}>
-                                    <TextComponent style={styles.label}>Base Rate *</TextComponent>
-                                    <TextInput
-                                        style={styles.input}
-                                        keyboardType="numeric"
-                                        value={formData.base_rate}
-                                        onChangeText={(text) => setFormData({ ...formData, base_rate: text })}
-                                    />
-                                </View>
-
-                                <View style={styles.inputGroup}>
-                                    <TextComponent style={styles.label}>Features *</TextComponent>
-                                    <Picker
-                                        selectedValue={formData.slot_features}
-                                        onValueChange={(value) => setFormData({ ...formData, slot_features: value })}
-                                        style={styles.picker}
-                                    >
-                                        {slotFeatures.map((feature) => (
-                                            <Picker.Item
-                                                key={feature}
-                                                label={feature.replace("_", " ").toUpperCase()}
-                                                value={feature}
-                                            />
-                                        ))}
-                                    </Picker>
-                                </View>
-
-                                <View style={styles.inputGroup}>
-                                    <TextComponent style={styles.label}>Status *</TextComponent>
-                                    <Picker
-                                        selectedValue={formData.slot_status}
-                                        onValueChange={(value) => setFormData({ ...formData, slot_status: value })}
-                                        style={styles.picker}
-                                    >
-                                        {slotStatus.map((status) => (
-                                            <Picker.Item key={status} label={status.toUpperCase()} value={status} />
-                                        ))}
-                                    </Picker>
-                                </View>
-                            </View>
-
-                            <ButtonComponent
-                                title="Add Slot"
-                                onPress={() => {}}
-                                variant="primary"
-                                style={styles.submitButton}
+                <CardComponent customStyles={styles.form} header="Add New Slot">
+                    <View style={styles.formGrid}>
+                        <View style={styles.inputGroup}>
+                            <TextComponent style={styles.label}>Slot Code *</TextComponent>
+                            <TextInput
+                                style={styles.input}
+                                value={formData.slot_code}
+                                onChangeText={(text) => setFormData({ ...formData, slot_code: text })}
                             />
-                        </CardComponent>
+                        </View>
+
+                        <View style={styles.inputGroup}>
+                            <TextComponent style={styles.label}>Is Premium</TextComponent>
+                            <Switch
+                                value={formData.is_premium}
+                                onValueChange={(value) => setFormData({ ...formData, is_premium: value })}
+                            />
+                        </View>
+
+                        <View style={styles.inputGroup}>
+                            <TextComponent style={styles.label}>Base Rate *</TextComponent>
+                            <TextInput
+                                style={styles.input}
+                                keyboardType="numeric"
+                                value={formData.base_rate}
+                                onChangeText={(text) => setFormData({ ...formData, base_rate: text })}
+                            />
+                        </View>
+
+                        <View style={styles.inputGroup}>
+                            <TextComponent style={styles.label}>Features *</TextComponent>
+                            <Picker
+                                selectedValue={formData.slot_features}
+                                onValueChange={(value) => setFormData({ ...formData, slot_features: value })}
+                                style={styles.picker}
+                            >
+                                {slotFeatures.map((feature) => (
+                                    <Picker.Item
+                                        key={feature}
+                                        label={feature.replace("_", " ").toUpperCase()}
+                                        value={feature}
+                                    />
+                                ))}
+                            </Picker>
+                        </View>
+
+                        <View style={styles.inputGroup}>
+                            <TextComponent style={styles.label}>Status *</TextComponent>
+                            <Picker
+                                selectedValue={formData.slot_status}
+                                onValueChange={(value) => setFormData({ ...formData, slot_status: value })}
+                                style={styles.picker}
+                            >
+                                {slotStatus.map((status) => (
+                                    <Picker.Item key={status} label={status.toUpperCase()} value={status} />
+                                ))}
+                            </Picker>
+                        </View>
                     </View>
 
-                    <View style={styles.section}>
-                        <TextComponent variant="h2" style={styles.sectionTitle}>
-                            Existing Parking Slots
-                        </TextComponent>
+                    <ButtonComponent
+                        title="Add Slot"
+                        onPress={() => {}}
+                        variant="primary"
+                        style={styles.submitButton}
+                    />
+                </CardComponent>
+            </>
 
-                        <View style={styles.slotsGrid}>
-                            {/* {slots.map((slot, index) => (
+            <View>
+                <TextComponent variant="h2" style={styles.sectionTitle}>
+                    Existing Parking Slots
+                </TextComponent>
+
+                <View style={styles.slotsGrid}>
+                    {/* {slots.map((slot, index) => (
                             <CardComponent
                                 key={index}
                                 style={[
@@ -139,11 +135,9 @@ const Slots = () => {
                                 </View>
                             </CardComponent>
                         ))} */}
-                        </View>
-                    </View>
-                </ScrollView>
-            </SafeAreaView>
-        </View>
+                </View>
+            </View>
+        </ResponsiveContainer>
     );
 };
 
@@ -153,9 +147,6 @@ const styles = StyleSheet.create({
     },
     body: {
         ...defaultBodyStyles,
-    },
-    section: {
-        padding: 16,
     },
     sectionTitle: {
         marginBottom: 16,

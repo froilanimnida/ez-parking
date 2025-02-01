@@ -5,37 +5,25 @@ import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import calculateDistance from "@/lib/function/calculateDistance";
 import LinkComponent from "./LinkComponent";
+import type { ParkingEstablishment } from "@/lib/models/parking-establishment";
+import type { PricingPlan } from "@/lib/models/pricing-plan";
 
-interface EstablishmentItemProps {
-    establishment: {
-        name: string;
-        nearby_landmarks: string;
-        verified: boolean;
-        dimensions: string;
-        space_type: string;
-        space_layout: string;
-        lighting: string;
-        latitude: number;
-        longitude: number;
-        facilities: string;
-        open_slots: number;
-        total_slots: number;
-        uuid: string;
-    };
-    userLong: number;
-    userLat: number;
+interface EstablishmentItem {
+    establishment: ParkingEstablishment;
+    // pricing_plans: PricingPlan[];
 }
 
-const EstablishmentItem: React.FC<EstablishmentItemProps> = ({ establishment, userLong, userLat }) => {
+interface EstablishmentItemProps extends EstablishmentItem {
+    userLat: number;
+    userLong: number;
+}
+
+const EstablishmentItem: React.FC<EstablishmentItemProps> = ({ userLat, userLong, establishment }) => {
     const distance = calculateDistance(userLat, userLong, establishment.latitude, establishment.longitude);
 
     return (
-        <CardComponent customStyles={styles.card} header={`Establishment - ${establishment.name}`}>
+        <CardComponent header={`Establishment - ${establishment.name}`} subHeader={establishment.nearby_landmarks}>
             <View style={styles.header}>
-                <View>
-                    <TextComponent variant="h3">{establishment.name}</TextComponent>
-                    <TextComponent style={styles.subtitle}>{establishment.nearby_landmarks}</TextComponent>
-                </View>
                 {establishment.verified && (
                     <View style={styles.badge}>
                         <TextComponent style={styles.badgeText}>Verified</TextComponent>
@@ -79,10 +67,10 @@ const EstablishmentItem: React.FC<EstablishmentItemProps> = ({ establishment, us
             )}
 
             <View style={styles.footer}>
-                <TextComponent style={styles.slots}>
+                {/* <TextComponent style={styles.slots}>
                     <TextComponent style={styles.slotsAvailable}>{establishment.open_slots}</TextComponent>/
                     {establishment.total_slots} slots available
-                </TextComponent>
+                </TextComponent> */}
                 <View style={styles.actions}>
                     <TouchableOpacity
                         style={styles.directionsButton}

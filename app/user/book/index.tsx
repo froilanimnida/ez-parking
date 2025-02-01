@@ -1,11 +1,16 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React from "react";
+import EstablishmentSearch from "@/components/BookComponent";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { defaultBodyStyles, responsiveContainer } from "@/styles/default";
 
 const index = () => {
     return (
-        <View>
-            <Text>index</Text>
-        </View>
+        <SafeAreaView style={[responsiveContainer, { width: "100%" }]}>
+            <View style={{ ...defaultBodyStyles }}>
+                <EstablishmentSearch />
+            </View>
+        </SafeAreaView>
     );
 };
 

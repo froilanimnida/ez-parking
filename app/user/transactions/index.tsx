@@ -1,12 +1,15 @@
-import { SafeAreaView, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import React, { useState } from "react";
-import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
+import { responsiveContainer } from "@/styles/default";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import { ParkingSlot } from "@/lib/models/parking-slot";
 import { Transaction } from "@/lib/models/transaction";
 import TextInputComponent from "@/components/TextInputComponent";
 import LinkComponent from "@/components/LinkComponent";
+import {
+    SafeAreaView,
+} from "react-native-safe-area-context";
 
 const getPaymentStatusStyle = (status: string) => {
     switch (status) {
@@ -40,167 +43,208 @@ const Transactions = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [transactions, setTransactions] = useState<APIResponse[]>([]);
 
-    return (
-        <View style={styles.container}>
-            <SafeAreaView style={defaultBodyStyles}>
-                <ScrollView>
-                    <View style={styles.titleContainer}>
-                        <View>
-                            <TextComponent bold style={styles.title}>
-                                My Transactions
-                            </TextComponent>
-                            <TextComponent style={styles.subtitle}>
-                                View and manage your parking transactions
-                            </TextComponent>
-                        </View>
+    const mockTransactions: APIResponse[] = [
+        {
+            amount_due: "100.00",
+            base_rate: 50,
+            created_at: "2021-10-01T00:00:00Z",
+            duration_type: "hourly",
+            entry_time: "2021-10-01T00:00:00Z",
+            establishment_id: 1,
+            exit_time: "2021-10-01T01:00:00Z",
+            floor_level: 1,
+            is_active: true,
+            is_premium: false,
+            payment_status: "PAID",
+            slot_code: "A1",
+            slot_features: "standard",
+            slot_id: 1,
+            slot_status: "open",
+            slot_multiplier: 1,
+            status: "completed",
+            transaction_id: 1,
+            updated_at: "2021-10-01T01:00:00Z",
+            user_id: 1,
+            uuid: "12345678-1234-1234-1234-1234567890AB",
+            vehicle_type_id: 1,
+        },
+        {
+            amount_due: "200.00",
+            base_rate: 100,
+            created_at: "2021-10-01T00:00:00Z",
+            duration_type: "hourly",
+            entry_time: "2021-10-01T00:00:00Z",
+            establishment_id: 1,
+            exit_time: "2021-10-01T02:00:00Z",
+            floor_level: 1,
+            is_active: true,
+            is_premium: true,
+            payment_status: "PAID",
+            slot_code: "B1",
+            slot_features: "premium",
+            slot_id: 2,
+            status: "completed",
+            transaction_id: 2,
+            updated_at: "2021-10-01T02:00:00Z",
+            user_id: 1,
+            uuid: "12345678-1234-1234-1234-1234567890AC",
+            vehicle_type_id: 1,
+            slot_status: "open",
+            slot_multiplier: 0,
+        },
+    ];
 
-                        <TextInputComponent
-                            customStyles={styles.searchInput}
-                            value={searchTerm}
-                            onChangeText={setSearchTerm}
-                            placeholder="Search by slot code or vehicle type..."
-                        />
+    return (
+        <SafeAreaView style={[responsiveContainer]}>
+            <ScrollView contentContainerStyle={{ flexGrow: 1, gap: 24, flexDirection: "column", display: "flex" }}>
+                <LinkComponent style={styles.backLink} href="../user">
+                    ← Back to Dashboard
+                </LinkComponent>
+                <View style={styles.titleContainer}>
+                    <View>
+                        <TextComponent bold style={styles.title}>
+                            My Transactions
+                        </TextComponent>
+                        <TextComponent style={styles.subtitle}>View and manage your parking transactions</TextComponent>
                     </View>
 
-                    <View style={styles.transactionList}>
-                        {transactions.map((transaction) => (
-                            <CardComponent
-                                key={transaction.uuid}
-                                customStyles={styles.card}
-                                header="Transaction Details"
-                            >
-                                <View style={styles.cardHeader}>
-                                    <View style={styles.idContainer}>
-                                        <View style={styles.iconContainer}>{/* Add Icon Component */}</View>
-                                        <LinkComponent href={`./transactions/${transaction.uuid}`}>
-                                            <TextComponent style={styles.transactionId}>Transaction ID</TextComponent>
-                                            <TextComponent style={styles.uuid}>{transaction.uuid}</TextComponent>
-                                        </LinkComponent>
-                                    </View>
+                    <TextInputComponent
+                        customStyles={styles.searchInput}
+                        value={searchTerm}
+                        onChangeText={setSearchTerm}
+                        placeholder="Search by slot code or vehicle type..."
+                    />
+                </View>
 
-                                    <View style={styles.statusContainer}>
-                                        {transaction.status !== "failed" && (
-                                            <TextComponent
-                                                style={[
-                                                    styles.statusBadge,
-                                                    getPaymentStatusStyle(transaction.payment_status),
-                                                ]}
-                                            >
-                                                {transaction.payment_status}
-                                            </TextComponent>
-                                        )}
+                <View style={styles.transactionList}>
+                    {mockTransactions.map((transaction) => (
+                        <CardComponent key={transaction.uuid} customStyles={styles.card} header="Transaction Details">
+                            <View style={styles.cardHeader}>
+                                <LinkComponent
+                                    href={`./transactions/${transaction.uuid}`}
+                                    style={{ backgroundColor: "transparent" }}
+                                >
+                                    <TextComponent style={styles.transactionId}>
+                                        Transaction ID: {transaction.uuid}
+                                    </TextComponent>
+                                </LinkComponent>
+
+                                <View style={styles.statusContainer}>
+                                    {transaction.status !== "failed" && (
                                         <TextComponent
-                                            style={[styles.statusBadge, getTransactionStatusStyle(transaction.status)]}
+                                            style={[
+                                                styles.statusBadge,
+                                                getPaymentStatusStyle(transaction.payment_status),
+                                            ]}
                                         >
-                                            {transaction.status}
+                                            {transaction.payment_status}
+                                        </TextComponent>
+                                    )}
+                                    <TextComponent
+                                        style={[styles.statusBadge, getTransactionStatusStyle(transaction.status)]}
+                                    >
+                                        {transaction.status}
+                                    </TextComponent>
+                                </View>
+                            </View>
+                            <View style={styles.detailsGrid}>
+                                <View style={styles.detailsSection}>
+                                    <TextComponent style={styles.sectionTitle}>Slot Information</TextComponent>
+                                    <View style={styles.detailRow}>
+                                        <TextComponent style={styles.detailLabel}>Code:</TextComponent>
+                                        <TextComponent style={styles.detailValue}>
+                                            {transaction.slot_code}
+                                        </TextComponent>
+                                    </View>
+                                    <View style={styles.detailRow}>
+                                        <TextComponent style={styles.detailLabel}>Floor:</TextComponent>
+                                        <TextComponent style={styles.detailValue}>
+                                            Level {transaction.floor_level}
+                                        </TextComponent>
+                                    </View>
+                                    <View style={styles.detailRow}>
+                                        <TextComponent style={styles.detailLabel}>Features:</TextComponent>
+                                        <View style={styles.featureContainer}>
+                                            <TextComponent style={styles.detailValue}>
+                                                {transaction.slot_features.toUpperCase()}
+                                            </TextComponent>
+                                            {transaction.is_premium && (
+                                                <View style={styles.premiumBadge}>
+                                                    <TextComponent style={styles.premiumText}>Premium</TextComponent>
+                                                </View>
+                                            )}
+                                        </View>
+                                    </View>
+                                </View>
+
+                                <View style={[styles.detailsSection, styles.middleSection]}>
+                                    <TextComponent style={styles.sectionTitle}>Rate Information</TextComponent>
+                                    <View style={styles.detailRow}>
+                                        <TextComponent style={styles.detailLabel}>Slot Multiplier:</TextComponent>
+                                        <TextComponent style={styles.detailValue}>
+                                            {transaction.slot_multiplier}x
+                                        </TextComponent>
+                                    </View>
+                                    <View style={styles.detailRow}>
+                                        <TextComponent style={styles.detailLabel}>Base Rate:</TextComponent>
+                                        <TextComponent style={styles.detailValue}>
+                                            {transaction.base_rate}x
+                                        </TextComponent>
+                                    </View>
+                                    <View style={styles.detailRow}>
+                                        <TextComponent style={styles.detailLabel}>Amount Due:</TextComponent>
+                                        <TextComponent style={styles.detailValue}>
+                                            ₱{transaction.amount_due}
                                         </TextComponent>
                                     </View>
                                 </View>
-                                // Update detailsGrid section in the render
-                                <View style={styles.detailsGrid}>
-                                    <View style={styles.detailsSection}>
-                                        <TextComponent style={styles.sectionTitle}>Slot Information</TextComponent>
-                                        <View style={styles.detailRow}>
-                                            <TextComponent style={styles.detailLabel}>Code:</TextComponent>
-                                            <TextComponent style={styles.detailValue}>
-                                                {transaction.slot_code}
-                                            </TextComponent>
-                                        </View>
-                                        <View style={styles.detailRow}>
-                                            <TextComponent style={styles.detailLabel}>Floor:</TextComponent>
-                                            <TextComponent style={styles.detailValue}>
-                                                Level {transaction.floor_level}
-                                            </TextComponent>
-                                        </View>
-                                        <View style={styles.detailRow}>
-                                            <TextComponent style={styles.detailLabel}>Features:</TextComponent>
-                                            <View style={styles.featureContainer}>
-                                                <TextComponent style={styles.detailValue}>
-                                                    {transaction.slot_features.toUpperCase()}
-                                                </TextComponent>
-                                                {transaction.is_premium && (
-                                                    <View style={styles.premiumBadge}>
-                                                        <TextComponent style={styles.premiumText}>
-                                                            Premium
-                                                        </TextComponent>
-                                                    </View>
-                                                )}
-                                            </View>
-                                        </View>
-                                    </View>
 
-                                    <View style={[styles.detailsSection, styles.middleSection]}>
-                                        <TextComponent style={styles.sectionTitle}>Rate Information</TextComponent>
-                                        <View style={styles.detailRow}>
-                                            <TextComponent style={styles.detailLabel}>Slot Multiplier:</TextComponent>
-                                            <TextComponent style={styles.detailValue}>
-                                                {transaction.slot_multiplier}x
-                                            </TextComponent>
-                                        </View>
-                                        <View style={styles.detailRow}>
-                                            <TextComponent style={styles.detailLabel}>Base Rate:</TextComponent>
-                                            <TextComponent style={styles.detailValue}>
-                                                {transaction.base_rate}x
-                                            </TextComponent>
-                                        </View>
-                                        <View style={styles.detailRow}>
-                                            <TextComponent style={styles.detailLabel}>Amount Due:</TextComponent>
-                                            <TextComponent style={styles.detailValue}>
-                                                ₱{transaction.amount_due}
-                                            </TextComponent>
-                                        </View>
+                                <View style={styles.detailsSection}>
+                                    <TextComponent style={styles.sectionTitle}>Other Information</TextComponent>
+                                    <View style={styles.detailRow}>
+                                        <TextComponent style={styles.detailLabel}>Amount Due Type:</TextComponent>
+                                        <TextComponent style={styles.detailValue}>
+                                            {transaction.duration_type.toUpperCase()}
+                                        </TextComponent>
                                     </View>
-
-                                    <View style={styles.detailsSection}>
-                                        <TextComponent style={styles.sectionTitle}>Other Information</TextComponent>
-                                        <View style={styles.detailRow}>
-                                            <TextComponent style={styles.detailLabel}>Amount Due Type:</TextComponent>
-                                            <TextComponent style={styles.detailValue}>
-                                                {transaction.duration_type.toUpperCase()}
-                                            </TextComponent>
-                                        </View>
-                                        <View style={styles.detailRow}>
-                                            <TextComponent style={styles.detailLabel}>Entry Time:</TextComponent>
-                                            <TextComponent style={styles.detailValue}>
-                                                {transaction.entry_time ?? "N/A"}
-                                            </TextComponent>
-                                        </View>
-                                        <View style={styles.detailRow}>
-                                            <TextComponent style={styles.detailLabel}>Exit Time:</TextComponent>
-                                            <TextComponent style={styles.detailValue}>
-                                                {transaction.exit_time ?? "N/A"}
-                                            </TextComponent>
-                                        </View>
+                                    <View style={styles.detailRow}>
+                                        <TextComponent style={styles.detailLabel}>Entry Time:</TextComponent>
+                                        <TextComponent style={styles.detailValue}>
+                                            {transaction.entry_time ?? "N/A"}
+                                        </TextComponent>
+                                    </View>
+                                    <View style={styles.detailRow}>
+                                        <TextComponent style={styles.detailLabel}>Exit Time:</TextComponent>
+                                        <TextComponent style={styles.detailValue}>
+                                            {transaction.exit_time ?? "N/A"}
+                                        </TextComponent>
                                     </View>
                                 </View>
-                            </CardComponent>
-                        ))}
-                    </View>
-                </ScrollView>
-            </SafeAreaView>
-        </View>
+                            </View>
+                        </CardComponent>
+                    ))}
+                </View>
+            </ScrollView>
+        </SafeAreaView>
     );
 };
 
 export default Transactions;
 
 const styles = StyleSheet.create({
-    container: {
-        ...defaultContainerStyles,
-    },
     header: {
         marginBottom: 24,
     },
     backLink: {
-        color: "#3b82f6",
-        fontSize: 16,
+        margin: 16,
+        alignSelf: "flex-start",
+        fontWeight: "600",
     },
     titleContainer: {
         marginBottom: 24,
     },
     title: {
         fontSize: 24,
-        fontWeight: "600",
         color: "#111827",
     },
     subtitle: {
@@ -217,7 +261,7 @@ const styles = StyleSheet.create({
         borderColor: "#e5e7eb",
     },
     transactionList: {
-        marginTop: 24,
+        width: "100%",
     },
     card: {
         padding: 16,

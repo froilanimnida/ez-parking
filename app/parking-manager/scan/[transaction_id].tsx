@@ -1,12 +1,16 @@
-import { StyleSheet, Text, View } from 'react-native';
-import React from 'react';
+import { StyleSheet } from "react-native";
+import React from "react";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
+import TextComponent from "@/components/TextComponent";
 
 const TransactionDetailsEntry = () => {
-	return (
-		<View>
-			<Text>TransactionDetailsEntry</Text>
-		</View>
-	);
+    return (
+        <ResponsiveContainer>
+            <TextComponent bold variant="h1">
+                TransactionDetailsEntry
+            </TextComponent>
+        </ResponsiveContainer>
+    );
 };
 
 export default TransactionDetailsEntry;

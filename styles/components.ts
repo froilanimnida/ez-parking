@@ -5,6 +5,7 @@ const baseStyles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         height: "auto",
+        width: "auto",
         justifyContent: "center",
     },
     xs: {
@@ -45,6 +46,7 @@ const baseStyles = StyleSheet.create({
     // Variants
     primary: {
         backgroundColor: "#4F46E5",
+        color: "white",
     },
     secondary: {
         backgroundColor: "transparent",
