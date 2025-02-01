@@ -1,10 +1,11 @@
-import { StyleSheet, View, SafeAreaView, ScrollView } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React, { useState } from "react";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import TextInputComponent from "@/components/TextInputComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 
 interface UserData {
     user_id: number;
@@ -47,107 +48,105 @@ const AdminSettings = () => {
     };
 
     return (
-        <View style={styles.container}>
-            <SafeAreaView style={styles.body}>
-                <ScrollView>
-                    <SafeAreaView style={styles.content}>
-                        {/* Existing header */}
-                        <View style={styles.header}>
-                            <TextComponent style={styles.title}>Account Settings</TextComponent>
-                            <TextComponent style={styles.subtitle}>
-                                Manage your account information and preferences
-                            </TextComponent>
-                        </View>
+        <ResponsiveContainer>
+            <TextComponent bold variant="h1" style={styles.header}>
+                Account Settings
+            </TextComponent>
 
-                        {/* System Information */}
-                        <CardComponent customStyles={styles.section} header="System Information">
-                            <View style={styles.grid}>
-                                <TextInputComponent
-                                    placeholder="User ID"
-                                    value={String(userData.user_id)}
-                                    editable={false}
-                                    customStyles={styles.disabledInput}
-                                />
-                                <TextInputComponent
-                                    placeholder="UUID"
-                                    value={userData.uuid}
-                                    editable={false}
-                                    customStyles={styles.disabledInput}
-                                />
-                                <TextInputComponent
-                                    placeholder="Role"
-                                    value={userData.role}
-                                    editable={false}
-                                    customStyles={styles.disabledInput}
-                                />
-                                <TextInputComponent
-                                    placeholder="Member Since"
-                                    value={new Date(userData.created_at).toLocaleDateString()}
-                                    editable={false}
-                                    customStyles={styles.disabledInput}
-                                />
-                            </View>
-                        </CardComponent>
+            <CardComponent
+                customStyles={styles.section}
+                header="System Information"
+                subHeader="View your system details"
+            >
+                <View style={styles.grid}>
+                    <TextInputComponent
+                        placeholder="User ID"
+                        value={String(userData.user_id)}
+                        editable={false}
+                        customStyles={styles.disabledInput}
+                    />
+                    <TextInputComponent
+                        placeholder="UUID"
+                        value={userData.uuid}
+                        editable={false}
+                        customStyles={styles.disabledInput}
+                    />
+                    <TextInputComponent
+                        placeholder="Role"
+                        value={userData.role}
+                        editable={false}
+                        customStyles={styles.disabledInput}
+                    />
+                    <TextInputComponent
+                        placeholder="Member Since"
+                        value={new Date(userData.created_at).toLocaleDateString()}
+                        editable={false}
+                        customStyles={styles.disabledInput}
+                    />
+                </View>
+            </CardComponent>
 
-                        {/* Personal Information */}
-                        <CardComponent customStyles={styles.section} header="Personal Information">
-                            <View style={styles.grid}>
-                                <TextInputComponent
-                                    placeholder="Enter your first name"
-                                    value={userData.first_name}
-                                    onChangeText={(text) => setUserData({ ...userData, first_name: text })}
-                                />
-                                {/* Add other personal info fields */}
-                                <TextInputComponent
-                                    placeholder="Enter your middle name"
-                                    value={userData.middle_name}
-                                    onChangeText={(text) => setUserData({ ...userData, middle_name: text })}
-                                />
-                                <TextInputComponent
-                                    placeholder="Enter your last name"
-                                    value={userData.last_name}
-                                    onChangeText={(text) => setUserData({ ...userData, last_name: text })}
-                                />
-                                <TextInputComponent
-                                    placeholder="Enter your suffix"
-                                    value={userData.suffix}
-                                    onChangeText={(text) => setUserData({ ...userData, suffix: text })}
-                                />
-                                <TextInputComponent
-                                    placeholder="Enter your nickname"
-                                    value={userData.nickname}
-                                    onChangeText={(text) => setUserData({ ...userData, nickname: text })}
-                                />
-                            </View>
-                        </CardComponent>
+            {/* Personal Information */}
+            <CardComponent
+                customStyles={styles.section}
+                header="Personal Information"
+                subHeader="Update your personal details"
+            >
+                <View style={styles.grid}>
+                    <TextInputComponent
+                        placeholder="Enter your first name"
+                        value={userData.first_name}
+                        onChangeText={(text) => setUserData({ ...userData, first_name: text })}
+                    />
+                    <TextInputComponent
+                        placeholder="Enter your middle name"
+                        value={userData.middle_name}
+                        onChangeText={(text) => setUserData({ ...userData, middle_name: text })}
+                    />
+                    <TextInputComponent
+                        placeholder="Enter your last name"
+                        value={userData.last_name}
+                        onChangeText={(text) => setUserData({ ...userData, last_name: text })}
+                    />
+                    <TextInputComponent
+                        placeholder="Enter your suffix"
+                        value={userData.suffix}
+                        onChangeText={(text) => setUserData({ ...userData, suffix: text })}
+                    />
+                    <TextInputComponent
+                        placeholder="Enter your nickname"
+                        value={userData.nickname}
+                        onChangeText={(text) => setUserData({ ...userData, nickname: text })}
+                    />
+                </View>
+            </CardComponent>
 
-                        {/* Contact Information */}
-                        <CardComponent customStyles={styles.section} header="Contact Information">
-                            <View style={styles.grid}>
-                                <TextInputComponent
-                                    placeholder="Enter your email address"
-                                    value={userData.email}
-                                    editable={false}
-                                    customStyles={styles.disabledInput}
-                                />
-                                <TextInputComponent
-                                    placeholder="Enter your phone number"
-                                    value={userData.phone_number}
-                                    onChangeText={(text) => setUserData({ ...userData, phone_number: text })}
-                                />
-                            </View>
-                        </CardComponent>
+            <CardComponent
+                customStyles={styles.section}
+                header="Contact Information"
+                subHeader="Update your contact details"
+            >
+                <View style={styles.grid}>
+                    <TextInputComponent
+                        placeholder="Enter your email address"
+                        value={userData.email}
+                        editable={false}
+                        customStyles={styles.disabledInput}
+                    />
+                    <TextInputComponent
+                        placeholder="Enter your phone number"
+                        value={userData.phone_number}
+                        onChangeText={(text) => setUserData({ ...userData, phone_number: text })}
+                    />
+                </View>
+            </CardComponent>
 
-                        {/* Save Button */}
-                        <View style={styles.buttonContainer}>
-                            <ButtonComponent onPress={handleSave} disabled={isUpdating} loading={isUpdating}>
-                                {isUpdating ? "Saving..." : "Save Changes"}
-                            </ButtonComponent>
-                        </View>
-                    </SafeAreaView>
-                </ScrollView>
-            </SafeAreaView>
-        </View>
+            <View style={styles.buttonContainer}>
+                <ButtonComponent onPress={handleSave} disabled={isUpdating} loading={isUpdating}>
+                    {isUpdating ? "Saving..." : "Save Changes"}
+                </ButtonComponent>
+            </View>
+        </ResponsiveContainer>
     );
 };
 

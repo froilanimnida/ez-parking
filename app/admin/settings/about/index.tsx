@@ -1,20 +1,13 @@
-import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import About from "@/components/AboutScreen";
-import { defaultContainerStyles } from "@/styles/default";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 
 const AboutScreen = () => {
     return (
-        <View style={styles.container}>
+        <ResponsiveContainer>
             <About />
-        </View>
+        </ResponsiveContainer>
     );
 };
 
 export default AboutScreen;
-
-const styles = StyleSheet.create({
-    container: {
-        ...defaultContainerStyles,
-    },
-});

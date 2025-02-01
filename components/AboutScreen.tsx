@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Image, StyleSheet, TouchableOpacity, Linking, SafeAreaView } from "react-native";
+import { View, Image, StyleSheet, TouchableOpacity, Linking } from "react-native";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
@@ -35,72 +35,70 @@ const developers = [
 const About = () => {
     return (
         <View style={styles.container}>
-            <SafeAreaView style={styles.content}>
-                <TextComponent variant="h1" bold style={styles.title}>
-                    About Us
+            <TextComponent variant="h1" bold style={styles.title}>
+                About Us
+            </TextComponent>
+
+            <CardComponent customStyles={styles.section} header="About EZ Parking">
+                <TextComponent style={styles.paragraph}>
+                    Welcome to EZ Parking, your premier parking solution designed to make finding available parking
+                    spots easier and more efficient. Our platform is dedicated to helping drivers locate and view nearby
+                    parking slots in real time.
                 </TextComponent>
 
-                <CardComponent customStyles={styles.section} header="About EZ Parking">
-                    <TextComponent style={styles.paragraph}>
-                        Welcome to EZ Parking, your premier parking solution designed to make finding available parking
-                        spots easier and more efficient. Our platform is dedicated to helping drivers locate and view
-                        nearby parking slots in real time.
-                    </TextComponent>
+                <TextComponent variant="h2" style={styles.sectionTitle}>
+                    Our Mission
+                </TextComponent>
+                <TextComponent style={styles.paragraph}>
+                    At EZ Parking, our mission is to simplify the parking experience. We provide real-time updates on
+                    available parking spaces, helping you save time and frustration.
+                </TextComponent>
 
-                    <TextComponent variant="h2" style={styles.sectionTitle}>
-                        Our Mission
-                    </TextComponent>
-                    <TextComponent style={styles.paragraph}>
-                        At EZ Parking, our mission is to simplify the parking experience. We provide real-time updates
-                        on available parking spaces, helping you save time and frustration.
-                    </TextComponent>
-
-                    <TextComponent variant="h2" style={styles.sectionTitle}>
-                        What We Offer
-                    </TextComponent>
-                    <View style={styles.list}>
-                        {[
-                            "Real-time availability of parking spaces near you",
-                            "User-friendly interface for easy navigation",
-                            "Regular updates on new parking spots and promotions",
-                            "Support for users to find the best parking options in their area",
-                        ].map((item, index) => (
-                            <View key={index} style={styles.listItem}>
-                                <TextComponent>• {item}</TextComponent>
-                            </View>
-                        ))}
-                    </View>
-
-                    <TextComponent variant="h2" style={styles.sectionTitle}>
-                        Meet the Developers
-                    </TextComponent>
-
-                    <View style={styles.leadDeveloper}>
-                        <View style={styles.developerCard}>
-                            <Image source={developers[0].image} style={styles.leadDevImage} />
-                            <TextComponent style={styles.devName}>{developers[0].name}</TextComponent>
-                            <TextComponent style={styles.devRole}>{developers[0].role}</TextComponent>
+                <TextComponent variant="h2" style={styles.sectionTitle}>
+                    What We Offer
+                </TextComponent>
+                <View style={styles.list}>
+                    {[
+                        "Real-time availability of parking spaces near you",
+                        "User-friendly interface for easy navigation",
+                        "Regular updates on new parking spots and promotions",
+                        "Support for users to find the best parking options in their area",
+                    ].map((item, index) => (
+                        <View key={index} style={styles.listItem}>
+                            <TextComponent>• {item}</TextComponent>
                         </View>
-                    </View>
+                    ))}
+                </View>
 
-                    <View style={styles.developersGrid}>
-                        {developers.slice(1).map((dev, index) => (
-                            <View key={index} style={styles.developerCard}>
-                                <Image source={dev.image} style={styles.devImage} />
-                                <TextComponent style={styles.devName}>{dev.name}</TextComponent>
-                                <TextComponent style={styles.devRole}>{dev.role}</TextComponent>
-                            </View>
-                        ))}
-                    </View>
+                <TextComponent variant="h2" style={styles.sectionTitle}>
+                    Meet the Developers
+                </TextComponent>
 
-                    <TextComponent variant="h2" style={styles.sectionTitle}>
-                        Contact Us
-                    </TextComponent>
-                    <TouchableOpacity onPress={() => Linking.openURL("mailto:support@ezparking.com")}>
-                        <TextComponent style={styles.link}>support@ezparking.com</TextComponent>
-                    </TouchableOpacity>
-                </CardComponent>
-            </SafeAreaView>
+                <View style={styles.leadDeveloper}>
+                    <View style={styles.developerCard}>
+                        <Image source={developers[0].image} style={styles.leadDevImage} />
+                        <TextComponent style={styles.devName}>{developers[0].name}</TextComponent>
+                        <TextComponent style={styles.devRole}>{developers[0].role}</TextComponent>
+                    </View>
+                </View>
+
+                <View style={styles.developersGrid}>
+                    {developers.slice(1).map((dev, index) => (
+                        <View key={index} style={styles.developerCard}>
+                            <Image source={dev.image} style={styles.devImage} />
+                            <TextComponent style={styles.devName}>{dev.name}</TextComponent>
+                            <TextComponent style={styles.devRole}>{dev.role}</TextComponent>
+                        </View>
+                    ))}
+                </View>
+
+                <TextComponent variant="h2" style={styles.sectionTitle}>
+                    Contact Us
+                </TextComponent>
+                <TouchableOpacity onPress={() => Linking.openURL("mailto:support@ezparking.com")}>
+                    <TextComponent style={styles.link}>support@ezparking.com</TextComponent>
+                </TouchableOpacity>
+            </CardComponent>
         </View>
     );
 };
