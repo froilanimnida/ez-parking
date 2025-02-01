@@ -19,28 +19,34 @@ export async function getAuthHeaders() {
     }
 }
 
-export async function storeCredentials(credentials: {
-    authorization: string;
-    authorizationExpires: string;
-    csrfToken: string;
-    csrfTokenExpires: string;
-    csrfRefreshToken: string;
-    csrfRefreshTokenExpires: string;
-    refreshToken: string;
-    refreshTokenExpires: string;
-}) {
+export async function storeAuthorization(authorization: string) {
     try {
-        await Promise.all([
-            SecureStore.setItemAsync("Authorization", credentials.authorization),
-            SecureStore.setItemAsync("AuthorizationExpires", credentials.authorizationExpires),
-            SecureStore.setItemAsync("X-CSRF-TOKEN", credentials.csrfToken),
-            SecureStore.setItemAsync("CSRFTokenExpires", credentials.csrfTokenExpires),
-            SecureStore.setItemAsync("csrf_refresh_token", credentials.csrfRefreshToken),
-            SecureStore.setItemAsync("CSRFRefreshTokenExpires", credentials.csrfRefreshTokenExpires),
-            SecureStore.setItemAsync("refresh_token_cookie", credentials.refreshToken),
-            SecureStore.setItemAsync("RefreshTokenExpires", credentials.refreshTokenExpires),
-        ]);
+        await SecureStore.setItemAsync("Authorization", authorization);
     } catch (error) {
-        console.error("Error storing credentials:", error);
+        console.error("Error storing authorization:", error);
+    }
+}
+
+export async function storeCSRFToken(csrfToken: string) {
+    try {
+        await SecureStore.setItemAsync("X-CSRF-TOKEN", csrfToken);
+    } catch (error) {
+        console.error("Error storing CSRF token:", error);
+    }
+}
+
+export async function storeCSRFRefreshToken(csrfRefreshToken: string) {
+    try {
+        await SecureStore.setItemAsync("csrf_refresh_token", csrfRefreshToken);
+    } catch (error) {
+        console.error("Error storing CSRF refresh token:", error);
+    }
+}
+
+export async function storeRefreshToken(refreshToken: string) {
+    try {
+        await SecureStore.setItemAsync("refresh_token_cookie", refreshToken);
+    } catch (error) {
+        console.error("Error storing refresh token:", error);
     }
 }

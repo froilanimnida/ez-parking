@@ -2,8 +2,6 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import PlatformType from "./platform";
 
-const PLATFORM = PlatformType();
-
 type UserRole = "user" | "parking_manager" | "admin";
 
 const ROLE_ROUTES: Record<string, UserRole[]> = {
@@ -69,14 +67,9 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
     async (value) => {
         const requestUrl = value.url;
-        // const router = useRouter();
         console.log(value);
         console.log("Request Origin URL: ", value.url);
         if (requestUrl?.endsWith("/login")) {
-            // const userRole = await verifyAndGetRole(authToken, xsrfToken, csrf_refresh_token, refresh_token_cookie);
-            // if (userRole) {
-            //         router.replace(getRedirectPath(userRole));
-            // }
             if (PlatformType() !== "web") {
                 const authToken = await SecureStore.getItemAsync("Authorization");
                 const xsrfToken = await SecureStore.getItemAsync("X-CSRF-TOKEN");
@@ -92,6 +85,31 @@ axiosInstance.interceptors.request.use(
         return value;
     },
     (error) => {}
+);
+
+axiosInstance.interceptors.response.use(
+    async (response) => {
+        if (PlatformType() !== "web") {
+            const setCookieHeaders = response.headers["set-cookie"];
+            if (setCookieHeaders && Array.isArray(setCookieHeaders)) {
+                for (const cookieString of setCookieHeaders[0].split(",")) {
+                    const trimmedCookie = cookieString.trim();
+                    const cookieValue = trimmedCookie.split(";")[0];
+                    const [key, value] = cookieValue.split("=");
+
+                    if (key && value) {
+                        try {
+                            await SecureStore.setItemAsync(key, value);
+                        } catch (err) {
+                            console.error(`Failed to store cookie ${key}:`, err);
+                        }
+                    }
+                }
+            }
+        }
+        return response;
+    },
+    (error) => Promise.reject(error)
 );
 
 if (__DEV__) {

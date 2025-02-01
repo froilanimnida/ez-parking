@@ -9,7 +9,7 @@ import TextInputComponent from "@/components/TextInputComponent";
 import PlatformType from "@/lib/platform";
 import StatusBarHeight from "@/lib/statusBar";
 import type { AxiosError } from "axios";
-import { storeCredentials } from "@/lib/credentialsManager";
+import { getAuthHeaders } from "@/lib/credentialsManager";
 
 const loginUser = async (email: string) => {
     const result = await axiosInstance.post(`${process.env.EXPO_PUBLIC_API_AUTH_ROOT}/login`, {
@@ -60,14 +60,7 @@ const LoginForm = () => {
         try {
             const result = await loginUser(email);
             // Store the credentials after successful login
-            if (PlatformType() !== "web") {
-                // TODO: Implement this function
-                // await storeCredentials({
-                //     authorization: result.data.token,
-                //     authorizationExpires: result.data.expires,
-                //     // ... other credentials from response
-                // });
-            }
+
             alert("OTP sent successfully.");
             setTimeout(() => {
                 setShowOtpForm(true);
@@ -87,10 +80,13 @@ const LoginForm = () => {
         }
     };
 
-    const handleOTP = (otp: string) => {
+    const handleOTP = async (otp: string) => {
         setLoggingIn(true);
         try {
-            const result = verifyOTP(email, otp, rememberMe);
+            const result = await verifyOTP(email, otp, rememberMe);
+            console.log(result.headers);
+            console.log(getAuthHeaders());
+            // storeCredentials({ authorization: cookies });
             alert("Logged in successfully.");
             setLoggingIn(false);
         } catch (error) {
