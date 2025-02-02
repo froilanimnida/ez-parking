@@ -22,6 +22,10 @@ export async function getAuthHeaders() {
     }
 }
 
+export async function authenticateUser() {
+    const authHeaders = await getAuthHeaders();
+}
+
 export async function logoutCurrentUser() {
     try {
         if (PlatformType() !== "web") {

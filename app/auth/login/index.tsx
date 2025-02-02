@@ -6,11 +6,11 @@ import ButtonComponent from "components/ButtonComponent";
 import CardComponent from "@/components/CardComponent";
 import axiosInstance from "@/lib/axiosInstance";
 import TextInputComponent from "@/components/TextInputComponent";
-import PlatformType from "@/lib/platform";
-import StatusBarHeight from "@/lib/statusBar";
 import type { AxiosError } from "axios";
 import { getAuthHeaders } from "@/lib/credentialsManager";
 import { router } from "expo-router";
+import LinkComponent from "@/components/LinkComponent";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 
 const loginUser = async (email: string) => {
     const result = await axiosInstance.post(`${process.env.EXPO_PUBLIC_API_AUTH_ROOT}/login`, {
@@ -95,11 +95,15 @@ const LoginForm = () => {
     };
 
     return (
-        <View style={styles.container}>
+        <ResponsiveContainer>
             <View style={styles.body}>
                 {!showOtpForm ? (
                     <View style={styles.loginForm}>
-                        <CardComponent header="Welcome back" subHeader="Please enter your registered email address">
+                        <CardComponent
+                            header="Welcome back"
+                            subHeader="Please enter your registered email address"
+                            customStyles={{ gap: 16 }}
+                        >
                             <TextInputComponent
                                 customStyles={styles.input}
                                 placeholder="Email address"
@@ -119,6 +123,7 @@ const LoginForm = () => {
                                 loading={loggingIn}
                                 disabled={!isEmailValid(email) || loggingIn}
                             />
+                            <LinkComponent href="./sign-up" label="Create user account" variant="text" />
                         </CardComponent>
                     </View>
                 ) : (
@@ -152,25 +157,16 @@ const LoginForm = () => {
                     </View>
                 )}
             </View>
-        </View>
+        </ResponsiveContainer>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingTop: PlatformType() === "android" ? StatusBarHeight() : 0,
-        justifyContent: "center",
-        width: "100%",
-        height: "100%",
-        alignItems: "center",
-    },
     body: {
+        minHeight: "100%",
         justifyContent: "center",
-        alignItems: "center",
+        alignContent: "center",
         flex: 1,
-        width: "80%",
-        maxWidth: 768,
     },
     loginForm: {
         width: "100%",

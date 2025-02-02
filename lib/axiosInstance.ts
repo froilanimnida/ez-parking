@@ -3,6 +3,7 @@ import * as SecureStore from "expo-secure-store";
 import PlatformType from "./platform";
 import { router } from "expo-router";
 
+const protectedRoutes = ["/admin", "/user", "/parking-manager"] as const;
 type UserRole = "user" | "parking_manager" | "admin";
 
 async function verifyAndGetRole(
@@ -45,13 +46,6 @@ function getRedirectPath(role: UserRole): string {
     }
 }
 
-function matchesPattern(path: string, pattern: string): boolean {
-    const normalizedPath = path.replace(/\/$/, "");
-    const regexPattern = pattern.replace(/\*/g, ".*").replace(/\//g, "\\/").replace(/\/$/, "");
-    const regex = new RegExp(`^${regexPattern}`);
-    return regex.test(normalizedPath);
-}
-
 const axiosInstance = axios.create({
     withCredentials: true,
     baseURL: process.env.EXPO_PUBLIC_API_BASE_URL,
@@ -81,16 +75,11 @@ axiosInstance.interceptors.request.use(
             requestUrl?.endsWith("/user") ||
             requestUrl?.endsWith("/parking-manager")
         ) {
-            console.log("Checking role for:", requestUrl);
             if (PlatformType() !== "web") {
                 const authToken = await SecureStore.getItemAsync("Authorization");
                 const xsrfToken = await SecureStore.getItemAsync("X-CSRF-TOKEN");
                 const csrf_refresh_token = await SecureStore.getItemAsync("csrf_refresh_token");
                 const refresh_token_cookie = await SecureStore.getItemAsync("refresh_token_cookie");
-                console.log("Auth token:", authToken);
-                console.log("X-CSRF-TOKEN:", xsrfToken);
-                console.log("csrf_refresh_token:", csrf_refresh_token);
-                console.log("refresh_token_cookie:", refresh_token_cookie);
                 const userRole = await verifyAndGetRole(authToken, xsrfToken, csrf_refresh_token, refresh_token_cookie);
                 if (!userRole) {
                     value.url = "/login";
@@ -135,9 +124,9 @@ axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
         if (error.response?.status === 401) {
-            console.log("Unauthorized request - headers:", error.config?.headers);
+            router.replace("./auth/login");
         }
-        router.replace("./auth/login");
+        return Promise.reject(error);
     }
 );
 
@@ -150,7 +139,6 @@ axiosInstance.interceptors.response.use(
                     const trimmedCookie = cookieString.trim();
                     const cookieValue = trimmedCookie.split(";")[0];
                     const [key, value] = cookieValue.split("=");
-
                     if (key && value) {
                         try {
                             await SecureStore.setItemAsync(key, value);
