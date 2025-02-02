@@ -194,7 +194,7 @@ export default function EstablishmentSearch() {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={{ flex: 1, gap: 16 }}>
             <View style={styles.header}>
                 <Pressable onPress={expandSearchBar}>
                     <View style={styles.searchBarContainer}>
@@ -264,10 +264,6 @@ export default function EstablishmentSearch() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#f9fafb",
-    },
     header: {
         backgroundColor: "white",
         padding: 16,
@@ -276,12 +272,8 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
+        borderRadius: 8,
         elevation: 5,
-    },
-    logo: {
-        height: 64,
-        width: 120,
-        resizeMode: "contain",
     },
     searchContainer: {
         flexDirection: "row",
@@ -308,7 +300,6 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        padding: 16,
     },
     results: {
         flex: 1,
@@ -352,6 +343,7 @@ const styles = StyleSheet.create({
     },
     modalContainer: {
         flex: 1,
+        borderRadius: 16,
         backgroundColor: "white",
         paddingTop: PlatformType() === "ios" ? 40 : 0,
     },

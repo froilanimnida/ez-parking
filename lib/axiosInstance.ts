@@ -1,6 +1,7 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import PlatformType from "./platform";
+import { router } from "expo-router";
 
 type UserRole = "user" | "parking_manager" | "admin";
 
@@ -16,6 +17,7 @@ async function verifyAndGetRole(
     csrf_refresh_token: string | undefined | undefined,
     refresh_token_cookie: string | undefined | undefined
 ): Promise<UserRole | null> {
+    console.log("Verifying role with auth token:", authToken);
     if (!authToken) return null;
     try {
         const result = await axiosInstance.post(
@@ -67,8 +69,6 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
     async (value) => {
         const requestUrl = value.url;
-        console.log(value);
-        console.log("Request Origin URL: ", value.url);
         if (requestUrl?.endsWith("/login")) {
             if (PlatformType() !== "web") {
                 const authToken = await SecureStore.getItemAsync("Authorization");
@@ -81,10 +81,70 @@ axiosInstance.interceptors.request.use(
                 }
             }
             return value;
+        } else if (
+            requestUrl?.endsWith("/admin") ||
+            requestUrl?.endsWith("/user") ||
+            requestUrl?.endsWith("/parking-manager")
+        ) {
+            console.log("Checking role for:", requestUrl);
+            if (PlatformType() !== "web") {
+                const authToken = await SecureStore.getItemAsync("Authorization");
+                const xsrfToken = await SecureStore.getItemAsync("X-CSRF-TOKEN");
+                const csrf_refresh_token = await SecureStore.getItemAsync("csrf_refresh_token");
+                const refresh_token_cookie = await SecureStore.getItemAsync("refresh_token_cookie");
+                console.log("Auth token:", authToken);
+                console.log("X-CSRF-TOKEN:", xsrfToken);
+                console.log("csrf_refresh_token:", csrf_refresh_token);
+                console.log("refresh_token_cookie:", refresh_token_cookie);
+                const userRole = await verifyAndGetRole(authToken, xsrfToken, csrf_refresh_token, refresh_token_cookie);
+                if (!userRole) {
+                    value.url = "/login";
+                }
+            }
+            return value;
         }
         return value;
     },
     (error) => {}
+);
+
+axiosInstance.interceptors.request.use(
+    async (config) => {
+        if (PlatformType() !== "web") {
+            const authorization = await SecureStore.getItemAsync("Authorization");
+            const xsrfToken = await SecureStore.getItemAsync("X-CSRF-TOKEN");
+            const csrfRefreshToken = await SecureStore.getItemAsync("csrf_refresh_token");
+            const refreshToken = await SecureStore.getItemAsync("refresh_token_cookie");
+
+            console.log("Request Headers:", {
+                Authorization: authorization,
+                "X-CSRF-TOKEN": xsrfToken,
+                csrf_refresh_token: csrfRefreshToken,
+                refresh_token_cookie: refreshToken,
+            });
+
+            // Attach headers to request
+            config.headers = {
+                ...config.headers,
+                Authorization: authorization ? `Bearer ${authorization}` : "",
+                "X-CSRF-TOKEN": xsrfToken || "",
+                csrf_refresh_token: csrfRefreshToken || "",
+                refresh_token_cookie: refreshToken || "",
+            };
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
+axiosInstance.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        if (error.response?.status === 401) {
+            console.log("Unauthorized request - headers:", error.config?.headers);
+        }
+        router.replace("./login");
+    }
 );
 
 axiosInstance.interceptors.response.use(

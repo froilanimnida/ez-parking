@@ -30,6 +30,7 @@ export default function UserLayout() {
                 name="transactions/[uuid]"
                 options={{
                     title: "Transaction Details",
+                    href: null,
                     tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cash" color={color} size={20} />,
                 }}
             />
@@ -37,6 +38,30 @@ export default function UserLayout() {
                 name="settings/index"
                 options={{
                     title: "Settings",
+                    tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cog" color={color} size={20} />,
+                }}
+            />
+            <Tabs.Screen
+                name="settings/about/index"
+                options={{
+                    title: "About",
+                    href: null,
+                    tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cog" color={color} size={20} />,
+                }}
+            />
+            <Tabs.Screen
+                name="book/[uuid]"
+                options={{
+                    title: "Book Details",
+                    href: null,
+                    tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cog" color={color} size={20} />,
+                }}
+            />
+            <Tabs.Screen
+                name="book/slot/[uuid]"
+                options={{
+                    title: "Book Slot",
+                    href: null,
                     tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cog" color={color} size={20} />,
                 }}
             />

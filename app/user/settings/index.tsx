@@ -7,6 +7,7 @@ import TextInputComponent from "@/components/TextInputComponent";
 import { defaultBodyStyles, responsiveContainer } from "@/styles/default";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ButtonComponent from "@/components/ButtonComponent";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 
 export default function UserProfileScreen() {
     const [isUpdating, setIsUpdating] = useState(false);
@@ -41,139 +42,120 @@ export default function UserProfileScreen() {
     };
 
     return (
-        <SafeAreaView style={[responsiveContainer]}>
-            <View style={{ ...defaultBodyStyles }}>
-                <ScrollView
-                    contentContainerStyle={{
-                        gap: 24,
-                        flexDirection: "column",
-                        display: "flex",
-                        width: "100%",
-                    }}
-                >
-                    <LinkComponent style={{ width: "auto" }} href="../user">
-                        ← Back to Dashboard
-                    </LinkComponent>
+        <ResponsiveContainer>
+            <LinkComponent style={{ width: "auto", marginBottom: 16 }} href="../user">
+                ← Back to Dashboard
+            </LinkComponent>
 
-                    <CardComponent header="User Profile">
-                        <View style={styles.headerRow}>
-                            <View style={styles.avatarContainer}>
-                                <TextComponent style={styles.avatarText}>
-                                    {userData.first_name?.[0]}
-                                    {userData.last_name?.[0]}
-                                </TextComponent>
-                            </View>
-                            <View>
-                                <TextComponent style={styles.headerName}>
-                                    {userData.first_name} {userData.last_name}
-                                </TextComponent>
-                                {userData.nickname ? (
-                                    <TextComponent style={styles.headerNickname}>@{userData.nickname}</TextComponent>
-                                ) : null}
-                            </View>
-                            {userData.is_verified && (
-                                <View style={styles.verifiedBadge}>
-                                    <TextComponent style={styles.verifiedBadgeText}>Verified Account</TextComponent>
-                                </View>
-                            )}
-                        </View>
-                    </CardComponent>
-
-                    {/* Edit Profile Form */}
-                    <CardComponent header="Edit Profile">
-                        <View style={styles.formGroup}>
-                            <TextComponent style={styles.label}>First Name</TextComponent>
-                            <TextInputComponent customStyles={styles.input} value={userData.first_name} />
-                        </View>
-                        <View style={styles.formGroup}>
-                            <TextComponent style={styles.label}>Last Name</TextComponent>
-                            <TextInputComponent customStyles={styles.input} defaultValue={userData.last_name} />
-                        </View>
-                        <View style={styles.formGroup}>
-                            <TextComponent style={styles.label}>Middle Name</TextComponent>
-                            <TextInputComponent customStyles={styles.input} defaultValue={userData.middle_name} />
-                        </View>
-                        <View style={styles.formGroup}>
-                            <TextComponent style={styles.label}>Suffix</TextComponent>
-                            <TextInputComponent customStyles={styles.input} defaultValue={userData.suffix} />
-                        </View>
-                        <View style={styles.formGroup}>
-                            <TextComponent style={styles.label}>Nickname</TextComponent>
-                            <TextInputComponent customStyles={styles.input} defaultValue={userData.nickname} />
-                        </View>
-                        <View style={styles.formGroup}>
-                            <TextComponent style={styles.label}>Phone Number</TextComponent>
-                            <TextInputComponent customStyles={styles.input} defaultValue={userData.phone_number} />
-                        </View>
-
-                        <View style={styles.buttonRow}>
-                            <Pressable
-                                onPress={handleSubmit}
-                                style={[styles.saveButton, isUpdating && styles.saveButtonDisabled]}
-                                disabled={isUpdating}
-                            >
-                                {isUpdating ? (
-                                    <>
-                                        <ActivityIndicator color="#fff" />
-                                        <TextComponent style={[styles.saveButtonText, { marginLeft: 8 }]}>
-                                            Saving...
-                                        </TextComponent>
-                                    </>
-                                ) : (
-                                    <ButtonComponent style={styles.saveButtonText}>Save Changes</ButtonComponent>
-                                )}
-                            </Pressable>
-                        </View>
-                    </CardComponent>
-
-                    <View style={styles.infoWrapper}>
-                        <CardComponent header="Account Information">
-                            <TextComponent style={styles.sectionTitle}>Account Information</TextComponent>
-                            <View style={styles.infoItem}>
-                                <TextComponent style={styles.infoLabel}>Email</TextComponent>
-                                <TextComponent style={styles.infoValue}>{userData.email}</TextComponent>
-                            </View>
-                            <View style={styles.infoItem}>
-                                <TextComponent style={styles.infoLabel}>Role</TextComponent>
-                                <TextComponent style={styles.infoValue}>{userData.role}</TextComponent>
-                            </View>
-                            <View style={styles.infoItem}>
-                                <TextComponent style={styles.infoLabel}>Member Since</TextComponent>
-                                <TextComponent style={styles.infoValue}>{joinDate}</TextComponent>
-                            </View>
-                            <View style={styles.infoItem}>
-                                <TextComponent style={styles.infoLabel}>Plate Number</TextComponent>
-                                <TextComponent style={styles.infoValue}>{userData.plate_number}</TextComponent>
-                            </View>
-                        </CardComponent>
-
-                        <CardComponent header="Account Details">
-                            <TextComponent style={styles.sectionTitle}>Account Details</TextComponent>
-                            <View style={styles.infoItem}>
-                                <TextComponent style={styles.infoLabel}>Account ID</TextComponent>
-                                <TextComponent style={styles.infoValue}>{userData.uuid}</TextComponent>
-                            </View>
-                            <View style={styles.infoItem}>
-                                <TextComponent style={styles.infoLabel}>Verification Status</TextComponent>
-                                <TextComponent style={styles.infoValue}>
-                                    {userData.is_verified ? "Verified" : "Not Verified"}
-                                </TextComponent>
-                            </View>
-                        </CardComponent>
+            <CardComponent header="User Profile" subHeader="Edit your profile information" customStyles={styles.card}>
+                <View style={styles.headerRow}>
+                    <View style={styles.avatarContainer}>
+                        <TextComponent style={styles.avatarText}>
+                            {userData.first_name?.[0]}
+                            {userData.last_name?.[0]}
+                        </TextComponent>
                     </View>
-                </ScrollView>
+                    <View>
+                        <TextComponent style={styles.headerName}>
+                            {userData.first_name} {userData.last_name}
+                        </TextComponent>
+                        {userData.nickname ? (
+                            <TextComponent style={styles.headerNickname}>@{userData.nickname}</TextComponent>
+                        ) : null}
+                    </View>
+                    {userData.is_verified && (
+                        <View style={styles.verifiedBadge}>
+                            <TextComponent style={styles.verifiedBadgeText}>Verified Account</TextComponent>
+                        </View>
+                    )}
+                </View>
+            </CardComponent>
+
+            {/* Edit Profile Form */}
+            <CardComponent header="Edit Profile" customStyles={styles.card} subHeader="Update your profile information">
+                <View style={styles.formGroup}>
+                    <TextComponent style={styles.label}>First Name</TextComponent>
+                    <TextInputComponent customStyles={styles.input} value={userData.first_name} />
+                </View>
+                <View style={styles.formGroup}>
+                    <TextComponent style={styles.label}>Last Name</TextComponent>
+                    <TextInputComponent customStyles={styles.input} defaultValue={userData.last_name} />
+                </View>
+                <View style={styles.formGroup}>
+                    <TextComponent style={styles.label}>Middle Name</TextComponent>
+                    <TextInputComponent customStyles={styles.input} defaultValue={userData.middle_name} />
+                </View>
+                <View style={styles.formGroup}>
+                    <TextComponent style={styles.label}>Suffix</TextComponent>
+                    <TextInputComponent customStyles={styles.input} defaultValue={userData.suffix} />
+                </View>
+                <View style={styles.formGroup}>
+                    <TextComponent style={styles.label}>Nickname</TextComponent>
+                    <TextInputComponent customStyles={styles.input} defaultValue={userData.nickname} />
+                </View>
+                <View style={styles.formGroup}>
+                    <TextComponent style={styles.label}>Phone Number</TextComponent>
+                    <TextInputComponent customStyles={styles.input} defaultValue={userData.phone_number} />
+                </View>
+
+                <View style={styles.buttonRow}>
+                    {isUpdating ? (
+                        <>
+                            <ActivityIndicator color="#fff" />
+                        </>
+                    ) : (
+                        <ButtonComponent
+                            title="Save Changes"
+                            onPress={() => {
+                                alert("Saved");
+                            }}
+                        />
+                    )}
+                </View>
+            </CardComponent>
+
+            <View style={styles.infoWrapper}>
+                <CardComponent header="Account Information">
+                    <TextComponent style={styles.sectionTitle}>Account Information</TextComponent>
+                    <View style={styles.infoItem}>
+                        <TextComponent style={styles.infoLabel}>Email</TextComponent>
+                        <TextComponent style={styles.infoValue}>{userData.email}</TextComponent>
+                    </View>
+                    <View style={styles.infoItem}>
+                        <TextComponent style={styles.infoLabel}>Role</TextComponent>
+                        <TextComponent style={styles.infoValue}>{userData.role}</TextComponent>
+                    </View>
+                    <View style={styles.infoItem}>
+                        <TextComponent style={styles.infoLabel}>Member Since</TextComponent>
+                        <TextComponent style={styles.infoValue}>{joinDate}</TextComponent>
+                    </View>
+                    <View style={styles.infoItem}>
+                        <TextComponent style={styles.infoLabel}>Plate Number</TextComponent>
+                        <TextComponent style={styles.infoValue}>{userData.plate_number}</TextComponent>
+                    </View>
+                </CardComponent>
+
+                <CardComponent header="Account Details">
+                    <TextComponent style={styles.sectionTitle}>Account Details</TextComponent>
+                    <View style={styles.infoItem}>
+                        <TextComponent style={styles.infoLabel}>Account ID</TextComponent>
+                        <TextComponent style={styles.infoValue}>{userData.uuid}</TextComponent>
+                    </View>
+                    <View style={styles.infoItem}>
+                        <TextComponent style={styles.infoLabel}>Verification Status</TextComponent>
+                        <TextComponent style={styles.infoValue}>
+                            {userData.is_verified ? "Verified" : "Not Verified"}
+                        </TextComponent>
+                    </View>
+                </CardComponent>
             </View>
-        </SafeAreaView>
+        </ResponsiveContainer>
     );
 }
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: "#fff",
         marginBottom: 16,
-        padding: 16,
-        borderRadius: 8,
-        elevation: 1,
     },
     headerRow: {
         flexDirection: "row",
@@ -242,12 +224,7 @@ const styles = StyleSheet.create({
     saveButtonDisabled: {
         opacity: 0.5,
     },
-    saveButtonText: {
-        color: "#fff",
-        fontSize: 14,
-        fontWeight: "600",
-    },
-    infoWrapper: { flexDirection: "column", flexWrap: "wrap", gap: 16 },
+    infoWrapper: { flexDirection: "column", gap: 16 },
     infoItem: { marginBottom: 12 },
     infoLabel: { fontSize: 12, color: "#6b7280" },
     infoValue: { fontSize: 14, color: "#111827" },

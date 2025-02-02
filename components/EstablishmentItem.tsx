@@ -32,27 +32,23 @@ const EstablishmentItem: React.FC<EstablishmentItemProps> = ({ userLat, userLong
             </View>
 
             <View style={styles.details}>
-                <View style={styles.detailColumn}>
-                    <View style={styles.detailRow}>
-                        <MaterialCommunityIcons name="ruler" size={20} color="#6B7280" />
-                        <TextComponent style={styles.detailText}>{establishment.dimensions}</TextComponent>
-                    </View>
-                    <View style={styles.detailRow}>
-                        <MaterialCommunityIcons name="car" size={20} color="#6B7280" />
-                        <TextComponent style={styles.detailText}>
-                            {establishment.space_type} - {establishment.space_layout}
-                        </TextComponent>
-                    </View>
+                <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="ruler" size={20} color="#6B7280" />
+                    <TextComponent style={styles.detailText}>{establishment.dimensions}</TextComponent>
                 </View>
-                <View style={styles.detailColumn}>
-                    <View style={styles.detailRow}>
-                        <MaterialCommunityIcons name="lightbulb" size={20} color="#6B7280" />
-                        <TextComponent style={styles.detailText}>{establishment.lighting}</TextComponent>
-                    </View>
-                    <View style={styles.detailRow}>
-                        <MaterialCommunityIcons name="map-marker-distance" size={20} color="#6B7280" />
-                        <TextComponent style={styles.detailText}>{distance.toFixed(1)} km away</TextComponent>
-                    </View>
+                <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="car" size={20} color="#6B7280" />
+                    <TextComponent style={styles.detailText}>
+                        {establishment.space_type} - {establishment.space_layout}
+                    </TextComponent>
+                </View>
+                <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="lightbulb" size={20} color="#6B7280" />
+                    <TextComponent style={styles.detailText}>{establishment.lighting}</TextComponent>
+                </View>
+                <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="map-marker-distance" size={20} color="#6B7280" />
+                    <TextComponent style={styles.detailText}>{distance.toFixed(1)} km away</TextComponent>
                 </View>
             </View>
 
@@ -119,8 +115,8 @@ const styles = StyleSheet.create({
         fontSize: 12,
     },
     details: {
-        flexDirection: "row",
-        justifyContent: "space-between",
+        flexDirection: "column",
+        gap: 8,
         marginBottom: 16,
     },
     detailColumn: {

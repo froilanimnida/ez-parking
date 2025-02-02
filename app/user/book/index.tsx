@@ -1,19 +1,17 @@
-import { StyleSheet, View } from "react-native";
 import React from "react";
 import EstablishmentSearch from "@/components/BookComponent";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { defaultBodyStyles, responsiveContainer } from "@/styles/default";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
+import LinkComponent from "@/components/LinkComponent";
 
 const index = () => {
     return (
-        <SafeAreaView style={[responsiveContainer, { width: "100%" }]}>
-            <View style={{ ...defaultBodyStyles }}>
-                <EstablishmentSearch />
-            </View>
-        </SafeAreaView>
+        <ResponsiveContainer>
+            <LinkComponent style={{ width: "auto", marginBottom: 16 }} href="../user">
+                ← Back to Dashboard
+            </LinkComponent>
+            <EstablishmentSearch />
+        </ResponsiveContainer>
     );
 };
 
 export default index;
-
-const styles = StyleSheet.create({});

@@ -1,9 +1,12 @@
 import { SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import LinkComponent from "@/components/LinkComponent";
 import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
 import TextComponent from "@/components/TextComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { getAuthHeaders } from "@/lib/credentialsManager";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
+import axiosInstance from "@/lib/axiosInstance";
 
 interface UserActionTypes {
     title: string;
@@ -33,57 +36,53 @@ const UserDashboard = () => {
             href: "./user/settings",
         },
     ];
+    useEffect(() => {
+        const fetchAuthHeaders = async () => {
+            try {
+                const headers = await getAuthHeaders();
+                const result = await axiosInstance.post("/auth/protected-route");
+                console.log("Result from protected route:", result);
+            } catch (error) {
+                console.error("Error fetching auth headers:", error);
+            }
+        };
+        fetchAuthHeaders();
+    }, []);
     return (
-        <View style={styles.container}>
-            <SafeAreaView style={styles.body}>
-                <ScrollView>
-                    <View style={styles.header}>
-                        <TextComponent bold variant="h1">
-                            User Dashboard
-                        </TextComponent>
-                        <TextComponent variant="body" style={styles.subtitle}>
-                            Manage your account and parking transactions
-                        </TextComponent>
-                    </View>
+        <ResponsiveContainer>
+            <TextComponent bold variant="h1" style={{ marginBottom: 16 }}>
+                User Dashboard
+            </TextComponent>
 
-                    <View style={styles.grid}>
-                        {userActions.map((action, index) => (
-                            <LinkComponent href={action.href} key={index} asChild>
-                                <TouchableOpacity style={styles.card}>
-                                    <View style={styles.iconContainer}>
-                                        <MaterialCommunityIcons name={action.icon} size={24} color="#4F46E5" />
-                                    </View>
-                                    <TextComponent variant="h3" style={styles.cardTitle}>
-                                        {action.title}
-                                    </TextComponent>
-                                    <TextComponent variant="caption" style={styles.cardDescription}>
-                                        {action.description}
-                                    </TextComponent>
-                                </TouchableOpacity>
-                            </LinkComponent>
-                        ))}
-                    </View>
-                </ScrollView>
-            </SafeAreaView>
-        </View>
+            <View style={styles.grid}>
+                {userActions.map((action, index) => (
+                    <LinkComponent href={action.href} key={index} asChild>
+                        <TouchableOpacity style={styles.card}>
+                            <View style={styles.iconContainer}>
+                                <MaterialCommunityIcons name={action.icon} size={24} color="#4F46E5" />
+                            </View>
+                            <TextComponent variant="h3" style={styles.cardTitle}>
+                                {action.title}
+                            </TextComponent>
+                            <TextComponent variant="caption" style={styles.cardDescription}>
+                                {action.description}
+                            </TextComponent>
+                        </TouchableOpacity>
+                    </LinkComponent>
+                ))}
+            </View>
+        </ResponsiveContainer>
     );
 };
 
 export default UserDashboard;
 
 const styles = StyleSheet.create({
-    container: { ...defaultContainerStyles },
-    body: { ...defaultBodyStyles },
-    header: {
-        padding: 16,
-        marginBottom: 16,
-    },
     subtitle: {
         color: "#6B7280",
         marginTop: 4,
     },
     grid: {
-        padding: 16,
         flexDirection: "row",
         flexWrap: "wrap",
         gap: 16,

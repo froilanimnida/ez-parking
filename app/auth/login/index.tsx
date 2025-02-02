@@ -10,6 +10,7 @@ import PlatformType from "@/lib/platform";
 import StatusBarHeight from "@/lib/statusBar";
 import type { AxiosError } from "axios";
 import { getAuthHeaders } from "@/lib/credentialsManager";
+import { router } from "expo-router";
 
 const loginUser = async (email: string) => {
     const result = await axiosInstance.post(`${process.env.EXPO_PUBLIC_API_AUTH_ROOT}/login`, {
@@ -27,6 +28,11 @@ const verifyOTP = async (email: string, otp: string, rememberMe: boolean) => {
     return result;
 };
 
+const getAuthHeadersValues = async () => {
+    const headers = await getAuthHeaders();
+    return headers;
+};
+
 const LoginForm = () => {
     const [showOtpForm, setShowOtpForm] = useState(false);
     const [email, setEmail] = useState("");
@@ -42,6 +48,8 @@ const LoginForm = () => {
     };
 
     useEffect(() => {
+        const headers = getAuthHeadersValues();
+        console.log("Auth headers at useEffect:", headers);
         let interval: NodeJS.Timeout;
         if (timer > 0) {
             interval = setInterval(() => setTimer((t) => t - 1), 1000);
@@ -59,7 +67,6 @@ const LoginForm = () => {
         setLoggingIn(true);
         try {
             const result = await loginUser(email);
-            // Store the credentials after successful login
 
             alert("OTP sent successfully.");
             setTimeout(() => {
@@ -92,6 +99,8 @@ const LoginForm = () => {
             if (!headers.Authorization) {
                 console.warn("No authorization token found");
             }
+            console.log(result.data.role);
+            router.replace(result.data.role);
 
             alert("Logged in successfully.");
             setLoggingIn(false);
