@@ -8,8 +8,10 @@ import SelectComponent from "@/components/SelectComponent";
 import TextComponent from "@/components/TextComponent";
 import CheckboxComponent from "@/components/CheckboxComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 const ParkingManagerSignUp = () => {
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [ownerInformation, setOwnerInformation] = useState({
         ownerType: "individual",
         firstName: "",
@@ -98,7 +100,8 @@ const ParkingManagerSignUp = () => {
         },
     });
 
-    // Add handler after existing handlers
+    const [agreed, setAgreed] = useState(false);
+
     const handlePricingChange = (type: string, field: "enabled" | "rate", value: boolean | number) => {
         setPricingData((prev) => ({
             ...prev,
@@ -130,6 +133,10 @@ const ParkingManagerSignUp = () => {
     //         location: { latitude, longitude },
     //     }));
     // };
+    const handleSubmit = () => {
+        throw new Error("Not implemented");
+    };
+    const [zoningCompliance, setZoningCompliance] = useState(false);
     return (
         <ResponsiveContainer>
             <View style={styles.header}>
@@ -430,6 +437,49 @@ const ParkingManagerSignUp = () => {
                         </View>
                     </View>
                 </CardComponent>
+                <View style={styles.infoContainer}>
+                    <View style={styles.infoHeader}>
+                        <MaterialCommunityIcons name="information" size={24} color="#1E40AF" />
+                        <TextComponent style={styles.infoTitle}>Account Verification Process</TextComponent>
+                    </View>
+                    <View style={styles.infoContent}>
+                        <TextComponent style={styles.bulletPoint}>
+                            • Your registration will be reviewed by our admin team
+                        </TextComponent>
+                        <TextComponent style={styles.bulletPoint}>
+                            • Verification typically takes 1-2 business days
+                        </TextComponent>
+                        <TextComponent style={styles.bulletPoint}>
+                            • Your establishment will be visible to customers after approval
+                        </TextComponent>
+                        <TextComponent style={styles.bulletPoint}>
+                            • You'll receive an email notification once approved
+                        </TextComponent>
+                        <TextComponent style={styles.bulletPoint}>
+                            • Make sure all documents are clear and valid to speed up the process
+                        </TextComponent>
+                    </View>
+                </View>
+                <View style={styles.submitContainer}>
+                    <View style={styles.checkboxContainer}>
+                        <CheckboxComponent
+                            placeholder="I agree to the terms and conditions"
+                            value={agreed}
+                            onValueChange={setAgreed}
+                        />
+                        <CheckboxComponent
+                            placeholder="I certify that my parking facility complies with local zoning laws"
+                            value={zoningCompliance}
+                            onValueChange={setZoningCompliance}
+                        />
+                    </View>
+                    <ButtonComponent
+                        title={isSubmitting ? "Submitting..." : "Submit Registration"}
+                        onPress={handleSubmit}
+                        disabled={isSubmitting || !agreed || !zoningCompliance}
+                        style={styles.submitButton}
+                    />
+                </View>
             </View>
         </ResponsiveContainer>
     );
@@ -443,6 +493,45 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingBottom: 16,
         alignItems: "center",
+    },
+    submitContainer: {
+        width: "100%",
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    checkboxContainer: {
+        width: "100%",
+        marginBottom: 16,
+    },
+    submitButton: {
+        width: "100%",
+    },
+
+    infoContainer: {
+        backgroundColor: "#EFF6FF",
+        borderRadius: 8,
+        padding: 16,
+        width: "95%",
+        maxWidth: 768,
+        marginBottom: 20,
+    },
+    infoHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+    },
+    infoTitle: {
+        color: "#1E40AF",
+        fontWeight: "600",
+    },
+    infoContent: {
+        marginTop: 12,
+        paddingLeft: 8,
+    },
+    bulletPoint: {
+        color: "#1E40AF",
+        marginVertical: 4,
     },
     formGroup: {
         gap: 16,
