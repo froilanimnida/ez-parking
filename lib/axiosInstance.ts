@@ -123,7 +123,6 @@ axiosInstance.interceptors.request.use(
                 refresh_token_cookie: refreshToken,
             });
 
-            // Attach headers to request
             config.headers = {
                 ...config.headers,
                 Authorization: authorization ? `Bearer ${authorization}` : "",
@@ -143,7 +142,7 @@ axiosInstance.interceptors.response.use(
         if (error.response?.status === 401) {
             console.log("Unauthorized request - headers:", error.config?.headers);
         }
-        router.replace("./login");
+        router.replace("./auth/login");
     }
 );
 

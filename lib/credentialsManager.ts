@@ -1,4 +1,7 @@
 import * as SecureStore from "expo-secure-store";
+import PlatformType from "./platform";
+import axiosInstance from "./axiosInstance";
+import { router } from "expo-router";
 
 export async function getAuthHeaders() {
     try {
@@ -19,34 +22,17 @@ export async function getAuthHeaders() {
     }
 }
 
-export async function storeAuthorization(authorization: string) {
+export async function logoutCurrentUser() {
     try {
-        await SecureStore.setItemAsync("Authorization", authorization);
+        if (PlatformType() !== "web") {
+            await SecureStore.deleteItemAsync("Authorization");
+            await SecureStore.deleteItemAsync("X-CSRF-TOKEN");
+            await SecureStore.deleteItemAsync("csrf_refresh_token");
+            await SecureStore.deleteItemAsync("refresh_token_cookie");
+        }
+        axiosInstance.post("/auth/logout");
+        router.replace("../auth/login");
     } catch (error) {
-        console.error("Error storing authorization:", error);
-    }
-}
-
-export async function storeCSRFToken(csrfToken: string) {
-    try {
-        await SecureStore.setItemAsync("X-CSRF-TOKEN", csrfToken);
-    } catch (error) {
-        console.error("Error storing CSRF token:", error);
-    }
-}
-
-export async function storeCSRFRefreshToken(csrfRefreshToken: string) {
-    try {
-        await SecureStore.setItemAsync("csrf_refresh_token", csrfRefreshToken);
-    } catch (error) {
-        console.error("Error storing CSRF refresh token:", error);
-    }
-}
-
-export async function storeRefreshToken(refreshToken: string) {
-    try {
-        await SecureStore.setItemAsync("refresh_token_cookie", refreshToken);
-    } catch (error) {
-        console.error("Error storing refresh token:", error);
+        console.error("Error logging out:", error);
     }
 }

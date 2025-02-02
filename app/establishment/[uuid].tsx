@@ -1,6 +1,5 @@
 import { StyleSheet, View, ScrollView, TouchableOpacity, Linking } from "react-native";
 import React from "react";
-import { useRouter } from "expo-router";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import SlotCard from "@/components/SlotCard";
@@ -32,7 +31,6 @@ const EstablishmentOverview: React.FC<EstablishmentOverviewProps> = ({
     pricing_plans,
     slots,
 }) => {
-    const router = useRouter();
     const mapUrl = `https://maps.google.com/maps?width=100%25&height=600&hl=en&q=${establishment.latitude},${
         establishment.longitude
     }+(${encodeURIComponent(establishment.name)})&t=&z=14&ie=UTF8&iwloc=B&output=embed`;

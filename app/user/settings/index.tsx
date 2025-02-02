@@ -1,13 +1,12 @@
 import LinkComponent from "@/components/LinkComponent";
 import React, { useState } from "react";
-import { View, ScrollView, StyleSheet, Pressable, ActivityIndicator } from "react-native";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
 import CardComponent from "@/components/CardComponent";
 import TextComponent from "@/components/TextComponent";
 import TextInputComponent from "@/components/TextInputComponent";
-import { defaultBodyStyles, responsiveContainer } from "@/styles/default";
-import { SafeAreaView } from "react-native-safe-area-context";
 import ButtonComponent from "@/components/ButtonComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
+import { logoutCurrentUser } from "@/lib/credentialsManager";
 
 export default function UserProfileScreen() {
     const [isUpdating, setIsUpdating] = useState(false);
@@ -148,6 +147,7 @@ export default function UserProfileScreen() {
                         </TextComponent>
                     </View>
                 </CardComponent>
+                <ButtonComponent onPress={() => logoutCurrentUser()} title="Logout" variant="destructive" />
             </View>
         </ResponsiveContainer>
     );
