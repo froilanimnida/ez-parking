@@ -34,6 +34,80 @@ const EstablishmentOverview: React.FC<EstablishmentOverviewProps> = ({
     const mapUrl = `https://maps.google.com/maps?width=100%25&height=600&hl=en&q=${establishment.latitude},${
         establishment.longitude
     }+(${encodeURIComponent(establishment.name)})&t=&z=14&ie=UTF8&iwloc=B&output=embed`;
+    const mockEstablishmentData = {
+        establishment: {
+            uuid: "123e4567-e89b-12d3-a456-426614174000",
+            name: "Central Plaza Parking",
+            nearby_landmarks: "Near Central Mall, beside City Bank",
+            verified: true,
+            space_type: "Indoor",
+            space_layout: "Multi-level",
+            lighting: "Well-lit",
+            latitude: 14.5995,
+            longitude: 120.9842,
+            facilities: "CCTV,Security Guard,Elevator,Restroom",
+            is24_7: false,
+        },
+
+        operating_hours: [
+            { day_of_week: "Monday", opening_time: "06:00", closing_time: "22:00", is_enabled: true },
+            { day_of_week: "Tuesday", opening_time: "06:00", closing_time: "22:00", is_enabled: true },
+            { day_of_week: "Wednesday", opening_time: "06:00", closing_time: "22:00", is_enabled: true },
+            { day_of_week: "Thursday", opening_time: "06:00", closing_time: "22:00", is_enabled: true },
+            { day_of_week: "Friday", opening_time: "06:00", closing_time: "23:00", is_enabled: true },
+            { day_of_week: "Saturday", opening_time: "07:00", closing_time: "23:00", is_enabled: true },
+            { day_of_week: "Sunday", opening_time: "08:00", closing_time: "21:00", is_enabled: true },
+        ],
+
+        payment_methods: [
+            {
+                accepts_cash: true,
+                accepts_mobile: true,
+                accepts_other: true,
+                other_methods: "Credit Card",
+            },
+        ],
+
+        pricing_plans: [
+            {
+                uuid: "price-001",
+                vehicle_type_code: "CAR",
+                base_rate: 50,
+                rate_per_hour: 30,
+                is_enabled: true,
+            },
+            {
+                uuid: "price-002",
+                vehicle_type_code: "MC",
+                base_rate: 30,
+                rate_per_hour: 20,
+                is_enabled: true,
+            },
+        ],
+
+        slots: [
+            {
+                uuid: "slot-001",
+                slot_number: "A1",
+                floor_level: "1",
+                is_available: true,
+                status: "vacant",
+                vehicle_type_code: "CAR",
+                vehicle_type_name: "Car",
+                vehicle_type_size: "Medium",
+            },
+            {
+                uuid: "slot-002",
+                slot_number: "B1",
+                floor_level: "1",
+                is_available: true,
+                status: "vacant",
+                vehicle_type_code: "MC",
+                vehicle_type_name: "Motorcycle",
+                vehicle_type_size: "Small",
+            },
+        ],
+    };
 
     return (
         <ScrollView style={styles.container}>
@@ -41,10 +115,12 @@ const EstablishmentOverview: React.FC<EstablishmentOverviewProps> = ({
                 <CardComponent customStyles={styles.card} header="Back to Establishments">
                     <View style={styles.header}>
                         <View>
-                            <TextComponent variant="h1">{establishment.name}</TextComponent>
-                            <TextComponent style={styles.subtitle}>{establishment.nearby_landmarks}</TextComponent>
+                            <TextComponent variant="h1">{mockEstablishmentData.establishment.name}</TextComponent>
+                            <TextComponent style={styles.subtitle}>
+                                {mockEstablishmentData.establishment.nearby_landmarks}
+                            </TextComponent>
                         </View>
-                        {establishment.verified && (
+                        {mockEstablishmentData.establishment.verified && (
                             <View style={styles.badge}>
                                 <TextComponent style={styles.badgeText}>Verified</TextComponent>
                             </View>
@@ -55,36 +131,39 @@ const EstablishmentOverview: React.FC<EstablishmentOverviewProps> = ({
                         <View style={styles.detailRow}>
                             <MaterialCommunityIcons name="car" size={20} color="#6B7280" />
                             <TextComponent style={styles.detailText}>
-                                {establishment.space_type} Layout - {establishment.space_layout} Parking
+                                {mockEstablishmentData.establishment.space_type} Layout -{" "}
+                                {mockEstablishmentData.establishment.space_layout} Parking
                             </TextComponent>
                         </View>
                         <View style={styles.detailRow}>
                             <MaterialCommunityIcons name="lightbulb" size={20} color="#6B7280" />
-                            <TextComponent style={styles.detailText}>{establishment.lighting}</TextComponent>
+                            <TextComponent style={styles.detailText}>
+                                {mockEstablishmentData.establishment.lighting}
+                            </TextComponent>
                         </View>
                     </View>
                 </CardComponent>
 
                 <CardComponent customStyles={styles.card} header="Payment Methods and Facilities">
                     <View style={styles.facilities}>
-                        {payment_methods[0].accepts_cash && (
+                        {mockEstablishmentData.payment_methods[0].accepts_cash && (
                             <View style={styles.facilityBadge}>
                                 <TextComponent style={styles.facilityText}>Cash</TextComponent>
                             </View>
                         )}
-                        {payment_methods[0].accepts_mobile && (
+                        {mockEstablishmentData.payment_methods[0].accepts_mobile && (
                             <View style={styles.facilityBadge}>
                                 <TextComponent style={styles.facilityText}>Mobile Payment</TextComponent>
                             </View>
                         )}
-                        {payment_methods[0].accepts_other && (
+                        {mockEstablishmentData.payment_methods[0].accepts_other && (
                             <View style={styles.facilityBadge}>
                                 <TextComponent style={styles.facilityText}>
-                                    {payment_methods[0].other_methods}
+                                    {mockEstablishmentData.payment_methods[0].other_methods}
                                 </TextComponent>
                             </View>
                         )}
-                        {establishment.facilities.split(",").map((facility, index) => (
+                        {mockEstablishmentData.establishment.facilities.split(",").map((facility, index) => (
                             <View key={index} style={styles.facilityBadge}>
                                 <TextComponent style={styles.facilityText}>{facility.trim()}</TextComponent>
                             </View>
@@ -98,7 +177,7 @@ const EstablishmentOverview: React.FC<EstablishmentOverviewProps> = ({
                             <TouchableOpacity
                                 onPress={() =>
                                     Linking.openURL(
-                                        `https://www.google.com/maps/dir/?api=1&destination=${establishment.latitude},${establishment.longitude}`
+                                        `https://www.google.com/maps/dir/?api=1&destination=${mockEstablishmentData.establishment.latitude},${mockEstablishmentData.establishment.longitude}`
                                     )
                                 }
                             >
@@ -107,7 +186,7 @@ const EstablishmentOverview: React.FC<EstablishmentOverviewProps> = ({
                             <TouchableOpacity
                                 onPress={() =>
                                     Linking.openURL(
-                                        `https://www.waze.com/ul?ll=${establishment.latitude},${establishment.longitude}&navigate=yes`
+                                        `https://www.waze.com/ul?ll=${mockEstablishmentData.establishment.latitude},${mockEstablishmentData.establishment.longitude}&navigate=yes`
                                     )
                                 }
                             >
@@ -120,7 +199,7 @@ const EstablishmentOverview: React.FC<EstablishmentOverviewProps> = ({
                             frameBorder="0"
                             marginHeight={0}
                             marginWidth={0}
-                            title={establishment.name}
+                            title={mockEstablishmentData.establishment.name}
                             src={mapUrl}
                             style={styles.map}
                         ></iframe>
@@ -128,7 +207,7 @@ const EstablishmentOverview: React.FC<EstablishmentOverviewProps> = ({
                 </CardComponent>
 
                 <CardComponent customStyles={styles.card} header="Operating Hours">
-                    {establishment.is24_7 ? (
+                    {mockEstablishmentData.establishment.is24_7 ? (
                         <TextComponent style={styles.operatingHours}>Open 24/7</TextComponent>
                     ) : (
                         <View style={styles.operatingHoursGrid}>
@@ -147,7 +226,7 @@ const EstablishmentOverview: React.FC<EstablishmentOverviewProps> = ({
                 <View style={styles.slotsSection}>
                     <TextComponent variant="h2">Available Parking Slots</TextComponent>
                     <View style={styles.slotsGrid}>
-                        {slots.map((slot, index) => (
+                        {mockEstablishmentData.slots.map((slot, index) => (
                             <SlotCard
                                 key={index}
                                 slotInfo={slot}

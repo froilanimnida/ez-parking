@@ -5,17 +5,11 @@ import { router } from "expo-router";
 
 type UserRole = "user" | "parking_manager" | "admin";
 
-const ROLE_ROUTES: Record<string, UserRole[]> = {
-    "/parking-manager": ["parking_manager"],
-    "/admin": ["admin"],
-    "/user": ["user"],
-};
-
 async function verifyAndGetRole(
-    authToken: string | undefined | undefined,
-    xsrfToken: string | undefined | undefined,
-    csrf_refresh_token: string | undefined | undefined,
-    refresh_token_cookie: string | undefined | undefined
+    authToken: string | undefined | null,
+    xsrfToken: string | undefined | null,
+    csrf_refresh_token: string | undefined | null,
+    refresh_token_cookie: string | undefined | null
 ): Promise<UserRole | null> {
     console.log("Verifying role with auth token:", authToken);
     if (!authToken) return null;
@@ -75,6 +69,7 @@ axiosInstance.interceptors.request.use(
                 const xsrfToken = await SecureStore.getItemAsync("X-CSRF-TOKEN");
                 const csrf_refresh_token = await SecureStore.getItemAsync("csrf_refresh_token");
                 const refresh_token_cookie = await SecureStore.getItemAsync("refresh_token_cookie");
+
                 const userRole = await verifyAndGetRole(authToken, xsrfToken, csrf_refresh_token, refresh_token_cookie);
                 if (userRole) {
                     value.url = getRedirectPath(userRole);

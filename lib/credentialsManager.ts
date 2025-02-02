@@ -25,13 +25,15 @@ export async function getAuthHeaders() {
 export async function logoutCurrentUser() {
     try {
         if (PlatformType() !== "web") {
+            axiosInstance.post("/auth/logout");
             await SecureStore.deleteItemAsync("Authorization");
             await SecureStore.deleteItemAsync("X-CSRF-TOKEN");
             await SecureStore.deleteItemAsync("csrf_refresh_token");
             await SecureStore.deleteItemAsync("refresh_token_cookie");
+        } else {
+            axiosInstance.post("/auth/logout");
         }
-        axiosInstance.post("/auth/logout");
-        router.replace("../auth/login");
+        router.replace("/auth/login");
     } catch (error) {
         console.error("Error logging out:", error);
     }

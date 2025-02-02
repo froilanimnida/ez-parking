@@ -16,6 +16,7 @@ const loginUser = async (email: string) => {
     const result = await axiosInstance.post(`${process.env.EXPO_PUBLIC_API_AUTH_ROOT}/login`, {
         email: email,
     });
+    if (result.status >= 400) return Promise.reject(result.data);
     return result;
 };
 
@@ -26,11 +27,6 @@ const verifyOTP = async (email: string, otp: string, rememberMe: boolean) => {
         remember_me: rememberMe,
     });
     return result;
-};
-
-const getAuthHeadersValues = async () => {
-    const headers = await getAuthHeaders();
-    return headers;
 };
 
 const LoginForm = () => {
@@ -48,8 +44,6 @@ const LoginForm = () => {
     };
 
     useEffect(() => {
-        const headers = getAuthHeadersValues();
-        console.log("Auth headers at useEffect:", headers);
         let interval: NodeJS.Timeout;
         if (timer > 0) {
             interval = setInterval(() => setTimer((t) => t - 1), 1000);
@@ -62,12 +56,10 @@ const LoginForm = () => {
             handleOTP(otp);
         }
     };
-
     const handleLogin = async () => {
         setLoggingIn(true);
         try {
-            const result = await loginUser(email);
-
+            await loginUser(email);
             alert("OTP sent successfully.");
             setTimeout(() => {
                 setShowOtpForm(true);
@@ -75,14 +67,8 @@ const LoginForm = () => {
                 startTimer();
             }, 1500);
         } catch (error) {
-            console.error(error);
-            const errorBody = error as AxiosError;
-            const errorMessage = errorBody.response?.data as { code: string; message: string };
-            if (errorMessage) {
-                alert(errorMessage.message);
-            } else {
-                alert("An error occurred");
-            }
+            const errorBody = error as { code: string; message: string };
+            alert(errorBody?.message || "An error occurred");
             setLoggingIn(false);
         }
     };
@@ -90,12 +76,7 @@ const LoginForm = () => {
         setLoggingIn(true);
         try {
             const result = await verifyOTP(email, otp, rememberMe);
-            console.log("Response headers:", result.headers);
-
-            // Wait for auth headers to be retrieved
             const headers = await getAuthHeaders();
-            console.log("Auth headers:", headers);
-
             if (!headers.Authorization) {
                 console.warn("No authorization token found");
             }
@@ -118,34 +99,27 @@ const LoginForm = () => {
             <View style={styles.body}>
                 {!showOtpForm ? (
                     <View style={styles.loginForm}>
-                        <CardComponent
-                            header="Welcome back"
-                            subHeader="Please enter your registered email address"
-                            children={
-                                <>
-                                    <TextInputComponent
-                                        customStyles={styles.input}
-                                        placeholder="Email address"
-                                        keyboardType="email-address"
-                                        value={email}
-                                        onChangeText={setEmail}
-                                        autoCapitalize="none"
-                                    />
-                                    <View style={styles.checkbox}>
-                                        <Checkbox onValueChange={setRememberMe} value={rememberMe} color="#4F46E5" />
-                                        <TextComponent>Remember me</TextComponent>
-                                    </View>
-
-                                    <ButtonComponent
-                                        title="Continue"
-                                        onPress={handleLogin}
-                                        variant="primary"
-                                        loading={loggingIn}
-                                        disabled={!isEmailValid(email) || loggingIn}
-                                    />
-                                </>
-                            }
-                        />
+                        <CardComponent header="Welcome back" subHeader="Please enter your registered email address">
+                            <TextInputComponent
+                                customStyles={styles.input}
+                                placeholder="Email address"
+                                keyboardType="email-address"
+                                value={email}
+                                onChangeText={setEmail}
+                                autoCapitalize="none"
+                            />
+                            <View style={styles.checkbox}>
+                                <Checkbox onValueChange={setRememberMe} value={rememberMe} color="#4F46E5" />
+                                <TextComponent>Remember me</TextComponent>
+                            </View>
+                            <ButtonComponent
+                                title="Continue"
+                                onPress={handleLogin}
+                                variant="primary"
+                                loading={loggingIn}
+                                disabled={!isEmailValid(email) || loggingIn}
+                            />
+                        </CardComponent>
                     </View>
                 ) : (
                     <View>

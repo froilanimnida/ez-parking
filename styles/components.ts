@@ -75,14 +75,9 @@ const baseStyles = StyleSheet.create({
     destructiveText: { color: "white" },
     outlineText: { color: "#374151" },
     ghostText: { color: "#374151" },
-    // States
     disabled: {
         opacity: 0.5,
     },
-    disabledText: {
-        color: "#9CA3AF",
-    },
-    // Icon
     iconLeft: {
         marginRight: 8,
     },

@@ -35,7 +35,6 @@ const ButtonComponent = ({
                     style={[
                         baseStyles[`text${size.toUpperCase()}`],
                         baseStyles[`${variant}Text`],
-                        disabled && baseStyles.disabledText,
                         textStyle,
                         styles.text,
                     ]}
