@@ -1,7 +1,7 @@
 {
 	"expo": {
 		"name": "ez-parking",
-        "owner" "froilanimnida",
+        "owner": "froilanimnida",
 		"slug": "ez-parking",
 		"version": "1.0.0",
 		"orientation": "portrait",
