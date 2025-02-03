@@ -73,6 +73,14 @@ export default function ParkingManagerLayout() {
                     tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cog" color={color} size={20} />,
                 }}
             />
+            <Tabs.Screen
+                name="about"
+                options={{
+                    title: "About",
+                    href: null,
+                    tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cog" color={color} size={20} />,
+                }}
+            />
         </Tabs>
     );
 }

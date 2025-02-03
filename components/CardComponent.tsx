@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     headerContainer: {
-        marginBottom: 20,
+        marginVertical: 20,
     },
     headerText: {
         fontSize: 24,

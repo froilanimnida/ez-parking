@@ -9,6 +9,7 @@ import { getAuthHeaders } from "@/lib/credentialsManager";
 import SelectComponent from "@/components/SelectComponent";
 import TextInputComponent from "@/components/TextInputComponent";
 import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 
 interface Establishment {
     company_profile: {
@@ -56,112 +57,95 @@ const Establishments = () => {
         });
     }, []);
     return (
-        <View style={styles.container}>
-            <SafeAreaView style={styles.body}>
-                <ScrollView style={{ maxWidth: 1024, width: "100%" }}>
-                    <View style={styles.header}>
-                        <TextComponent bold variant="h1">
-                            Parking Establishments
-                        </TextComponent>
-                        <TextComponent style={styles.subtitle}>
-                            Manage and review parking establishment applications
-                        </TextComponent>
-                    </View>
+        <ResponsiveContainer>
+            <View style={styles.header}>
+                <TextComponent bold variant="h1">
+                    Parking Establishments
+                </TextComponent>
+            </View>
 
-                    <View style={styles.filters}>
-                        <View style={styles.filterContainer}>
-                            <SelectComponent
-                                items={[
-                                    {
-                                        label: "All Status",
-                                        value: "all",
-                                    },
-                                    {
-                                        label: "Pending",
-                                        value: "pending",
-                                    },
-                                    {
-                                        label: "Approved",
-                                        value: "approved",
-                                    },
-                                    {
-                                        label: "Rejected",
-                                        value: "rejected",
-                                    },
+            <View style={styles.filters}>
+                <View style={styles.filterContainer}>
+                    <SelectComponent
+                        items={[
+                            {
+                                label: "All Status",
+                                value: "all",
+                            },
+                            {
+                                label: "Pending",
+                                value: "pending",
+                            },
+                            {
+                                label: "Approved",
+                                value: "approved",
+                            },
+                            {
+                                label: "Rejected",
+                                value: "rejected",
+                            },
+                        ]}
+                        onValueChange={setStatusFilter}
+                        selectedValue={statusFilter}
+                    />
+                </View>
+                <TextInputComponent
+                    customStyles={styles.searchInput}
+                    placeholder="Search establishments..."
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                />
+            </View>
+
+            <View style={styles.grid}>
+                {establishments.map((establishment, index) => (
+                    <CardComponent key={index} customStyles={styles.card} header="Establishment Details">
+                        <View style={styles.cardHeader}>
+                            <TextComponent variant="h3">{establishment.establishment.name}</TextComponent>
+                            <View
+                                style={[
+                                    styles.badge,
+                                    establishment.establishment.verified ? styles.badgeSuccess : styles.badgePending,
                                 ]}
-                                onValueChange={setStatusFilter}
-                                selectedValue={statusFilter}
-                            />
+                            >
+                                <TextComponent style={styles.badgeText}>
+                                    {establishment.establishment.verified ? "Approved" : "Pending"}
+                                </TextComponent>
+                            </View>
                         </View>
-                        <TextInputComponent
-                            customStyles={styles.searchInput}
-                            placeholder="Search establishments..."
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                        />
-                    </View>
 
-                    <View style={styles.grid}>
-                        {establishments.map((establishment, index) => (
-                            <CardComponent key={index} customStyles={styles.card} header="Establishment Details">
-                                <View style={styles.cardHeader}>
-                                    <TextComponent variant="h3">{establishment.establishment.name}</TextComponent>
-                                    <View
-                                        style={[
-                                            styles.badge,
-                                            establishment.establishment.verified
-                                                ? styles.badgeSuccess
-                                                : styles.badgePending,
-                                        ]}
-                                    >
-                                        <TextComponent style={styles.badgeText}>
-                                            {establishment.establishment.verified ? "Approved" : "Pending"}
-                                        </TextComponent>
-                                    </View>
+                        <View style={styles.cardContent}>
+                            <View style={styles.locationRow}>
+                                <MaterialCommunityIcons name="map-marker" size={20} color="#9CA3AF" />
+                                <TextComponent style={styles.locationText}>
+                                    Lat: {establishment.establishment.latitude}, Long:{" "}
+                                    {establishment.establishment.longitude}
+                                </TextComponent>
+                            </View>
+
+                            <View style={styles.infoGrid}>
+                                <View style={styles.infoItem}>
+                                    <TextComponent style={styles.infoLabel}>Space Type</TextComponent>
+                                    <TextComponent>{establishment.establishment.space_type}</TextComponent>
                                 </View>
-
-                                <View style={styles.cardContent}>
-                                    <View style={styles.locationRow}>
-                                        <MaterialCommunityIcons name="map-marker" size={20} color="#9CA3AF" />
-                                        <TextComponent style={styles.locationText}>
-                                            Lat: {establishment.establishment.latitude}, Long:{" "}
-                                            {establishment.establishment.longitude}
-                                        </TextComponent>
-                                    </View>
-
-                                    <View style={styles.infoGrid}>
-                                        <View style={styles.infoItem}>
-                                            <TextComponent style={styles.infoLabel}>Space Type</TextComponent>
-                                            <TextComponent>{establishment.establishment.space_type}</TextComponent>
-                                        </View>
-                                        <View style={styles.infoItem}>
-                                            <TextComponent style={styles.infoLabel}>Layout</TextComponent>
-                                            <TextComponent>{establishment.establishment.space_layout}</TextComponent>
-                                        </View>
-                                    </View>
-
-                                    <Link href={`/admin/establishments/${establishment.establishment.uuid}`}>
-                                        View Details
-                                    </Link>
+                                <View style={styles.infoItem}>
+                                    <TextComponent style={styles.infoLabel}>Layout</TextComponent>
+                                    <TextComponent>{establishment.establishment.space_layout}</TextComponent>
                                 </View>
-                            </CardComponent>
-                        ))}
-                    </View>
-                </ScrollView>
-            </SafeAreaView>
-        </View>
+                            </View>
+
+                            <Link href={`/admin/establishments/${establishment.establishment.uuid}`}>View Details</Link>
+                        </View>
+                    </CardComponent>
+                ))}
+            </View>
+        </ResponsiveContainer>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        ...defaultContainerStyles,
-    },
-    body: {
-        ...defaultBodyStyles,
-    },
     header: {
-        padding: 16,
+        marginBottom: 16,
     },
     subtitle: {
         color: "#6B7280",
@@ -169,7 +153,7 @@ const styles = StyleSheet.create({
     },
     filters: {
         padding: 16,
-        flexDirection: "row",
+        flexDirection: "column",
         gap: 12,
     },
     filterContainer: {

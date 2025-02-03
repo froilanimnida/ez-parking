@@ -1,4 +1,5 @@
 import CardComponent from "@/components/CardComponent";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import TextComponent from "@/components/TextComponent";
 import TextInputComponent from "@/components/TextInputComponent";
 import PlatformType from "@/lib/platform";
@@ -48,98 +49,106 @@ export default function Settings() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView
-                style={styles.body}
-                contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignContent: "center", gap: 16 }}
+        <ResponsiveContainer>
+            <View style={styles.header}>
+                <TextComponent bold variant="h1">
+                    Account Settings
+                </TextComponent>
+                <TextComponent style={styles.subtitle}>Manage your account information and preferences</TextComponent>
+            </View>
+
+            <CardComponent
+                header="System Information"
+                subHeader="View your system information"
+                customStyles={styles.card}
             >
-                <View style={styles.header}>
-                    <TextComponent bold style={styles.title}>
-                        Account Settings
-                    </TextComponent>
-                    <TextComponent style={styles.subtitle}>
-                        Manage your account information and preferences
-                    </TextComponent>
+                <View style={styles.grid}>
+                    <View style={styles.inputGroup}>
+                        <TextComponent variant="caption">User ID</TextComponent>
+                        <TextInputComponent
+                            customStyles={[styles.input, styles.disabledInput]}
+                            value={String(userData.user_id)}
+                            editable={false}
+                        />
+                    </View>
+                    <View style={styles.inputGroup}>
+                        <TextComponent variant="caption">UUID</TextComponent>
+                        <TextInputComponent
+                            customStyles={[styles.input, styles.disabledInput]}
+                            value={userData.uuid}
+                            editable={false}
+                        />
+                    </View>
+                    {/* Add other system info fields */}
                 </View>
+            </CardComponent>
 
-                {/* System Information */}
-                <CardComponent header="System Information" subHeader="View your system information">
-                    <View style={styles.grid}>
-                        <View style={styles.inputGroup}>
-                            <TextComponent variant="caption">User ID</TextComponent>
-                            <TextInputComponent
-                                customStyles={[styles.input, styles.disabledInput]}
-                                value={String(userData.user_id)}
-                                editable={false}
-                            />
-                        </View>
-                        <View style={styles.inputGroup}>
-                            <TextComponent variant="caption">UUID</TextComponent>
-                            <TextInputComponent
-                                customStyles={[styles.input, styles.disabledInput]}
-                                value={userData.uuid}
-                                editable={false}
-                            />
-                        </View>
-                        {/* Add other system info fields */}
+            <CardComponent
+                customStyles={styles.card}
+                header="Personal Information"
+                subHeader="Update your personal information"
+            >
+                <View style={styles.grid}>
+                    <View style={styles.inputGroup}>
+                        <TextComponent variant="caption">Owner Name</TextComponent>
+                        <TextInputComponent
+                            customStyles={styles.input}
+                            value={userData.first_name}
+                            onChangeText={(text) => setUserData({ ...userData, first_name: text })}
+                        />
                     </View>
-                </CardComponent>
-
-                <CardComponent header="Personal Information" subHeader="Update your personal information">
-                    <View style={styles.grid}>
-                        <View style={styles.inputGroup}>
-                            <TextComponent variant="caption">First Name</TextComponent>
-                            <TextInputComponent
-                                customStyles={styles.input}
-                                value={userData.first_name}
-                                onChangeText={(text) => setUserData({ ...userData, first_name: text })}
-                            />
-                        </View>
+                    <View style={styles.inputGroup}>
+                        <TextComponent variant="caption">Email Address</TextComponent>
+                        <TextInputComponent
+                            customStyles={styles.input}
+                            value={userData.email}
+                            onChangeText={(text) => setUserData({ ...userData, email: text })}
+                        />
                     </View>
-                </CardComponent>
-
-                <CardComponent header="Contact Information" subHeader="Update your contact information">
-                    <View style={styles.grid}>
-                        <View style={styles.inputGroup}>
-                            <TextComponent variant="caption">Email</TextComponent>
-                            <TextInputComponent
-                                customStyles={[styles.input, styles.disabledInput]}
-                                value={userData.email}
-                                editable={false}
-                            />
-                        </View>
-                        {/* Add other contact info fields */}
+                    <View style={styles.inputGroup}>
+                        <TextComponent variant="caption">Phone Number</TextComponent>
+                        <TextInputComponent
+                            customStyles={styles.input}
+                            value={userData.phone_number}
+                            onChangeText={(text) => setUserData({ ...userData, phone_number: text })}
+                        />
                     </View>
-                </CardComponent>
+                </View>
+            </CardComponent>
 
-                {/* Save Button */}
-                <TouchableOpacity style={styles.button} onPress={handleSave} disabled={isUpdating}>
-                    <TextComponent style={styles.buttonText}>{isUpdating ? "Saving..." : "Save Changes"}</TextComponent>
-                </TouchableOpacity>
-            </ScrollView>
-        </SafeAreaView>
+            <CardComponent
+                customStyles={styles.card}
+                header="Contact Information"
+                subHeader="Update your contact information"
+            >
+                <View style={styles.grid}>
+                    <View style={styles.inputGroup}>
+                        <TextComponent variant="caption">Email</TextComponent>
+                        <TextInputComponent
+                            customStyles={[styles.input, styles.disabledInput]}
+                            value={userData.email}
+                            editable={false}
+                        />
+                    </View>
+                    {/* Add other contact info fields */}
+                </View>
+            </CardComponent>
+
+            <TouchableOpacity style={styles.button} onPress={handleSave} disabled={isUpdating}>
+                <TextComponent style={styles.buttonText}>{isUpdating ? "Saving..." : "Save Changes"}</TextComponent>
+            </TouchableOpacity>
+        </ResponsiveContainer>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingTop: PlatformType() === "android" ? StatusBarHeight() : 0,
-        backgroundColor: "#f9fafb",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    body: {
+    card: {
         width: "100%",
-        maxWidth: 1280,
-    },
-    header: {
         marginBottom: 24,
     },
-    title: {
-        fontSize: 24,
-        fontWeight: "bold",
-        color: "#111827",
+    header: {
+        width: "100%",
+        marginBottom: 24,
     },
     subtitle: {
         fontSize: 14,

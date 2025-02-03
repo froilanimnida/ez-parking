@@ -1,9 +1,9 @@
-import { StyleSheet, View, SafeAreaView, ScrollView, TouchableOpacity } from "react-native";
-import React, { useEffect } from "react";
+import { StyleSheet, View, TouchableOpacity } from "react-native";
+import React from "react";
 import TextComponent from "@/components/TextComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import LinkComponent from "@/components/LinkComponent";
-import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 
 interface AdminActionsType {
     title: string;
@@ -41,46 +41,39 @@ const AdminDashboard = () => {
     ];
 
     return (
-        <View style={styles.container}>
-            <SafeAreaView style={styles.body}>
-                <ScrollView>
-                    <View style={styles.header}>
-                        <TextComponent bold variant="h1">
-                            Admin Dashboard
-                        </TextComponent>
-                        <TextComponent variant="body" style={styles.subtitle}>
-                            Manage your platform settings and users
-                        </TextComponent>
-                    </View>
+        <ResponsiveContainer>
+            <View style={styles.header}>
+                <TextComponent bold variant="h1">
+                    Admin Dashboard
+                </TextComponent>
+                <TextComponent variant="body" style={styles.subtitle}>
+                    Manage your platform settings and users
+                </TextComponent>
+            </View>
 
-                    <View style={styles.grid}>
-                        {adminActions.map((action, index) => (
-                            <LinkComponent href={action.href} key={index} asChild>
-                                <TouchableOpacity style={styles.card}>
-                                    <View style={styles.iconContainer}>
-                                        <MaterialCommunityIcons name={action.icon} size={24} color="#4F46E5" />
-                                    </View>
-                                    <TextComponent variant="h3" style={styles.cardTitle}>
-                                        {action.title}
-                                    </TextComponent>
-                                    <TextComponent variant="caption" style={styles.cardDescription}>
-                                        {action.description}
-                                    </TextComponent>
-                                </TouchableOpacity>
-                            </LinkComponent>
-                        ))}
-                    </View>
-                </ScrollView>
-            </SafeAreaView>
-        </View>
+            <View style={styles.grid}>
+                {adminActions.map((action, index) => (
+                    <LinkComponent href={action.href} key={index} asChild>
+                        <TouchableOpacity style={styles.card}>
+                            <View style={styles.iconContainer}>
+                                <MaterialCommunityIcons name={action.icon} size={24} color="#4F46E5" />
+                            </View>
+                            <TextComponent variant="h3" style={styles.cardTitle}>
+                                {action.title}
+                            </TextComponent>
+                            <TextComponent variant="caption" style={styles.cardDescription}>
+                                {action.description}
+                            </TextComponent>
+                        </TouchableOpacity>
+                    </LinkComponent>
+                ))}
+            </View>
+        </ResponsiveContainer>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { ...defaultContainerStyles },
-    body: { ...defaultBodyStyles },
     header: {
-        padding: 16,
         marginBottom: 16,
     },
     subtitle: {
@@ -88,7 +81,6 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
     grid: {
-        padding: 16,
         flexDirection: "row",
         flexWrap: "wrap",
         gap: 16,

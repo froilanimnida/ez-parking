@@ -30,12 +30,7 @@ const LinkComponent: React.FC<LinkProps> = ({
             {icon && iconPosition === "left" && <View style={baseStyles.iconLeft}>{icon}</View>}
             {label && (
                 <TextComponent
-                    style={[
-                        baseStyles[`text${size.toUpperCase()}`],
-                        baseStyles[`${variant}Text`],
-                        disabled && baseStyles.disabledText,
-                        textStyle,
-                    ]}
+                    style={[baseStyles[`text${size.toUpperCase()}`], baseStyles[`${variant}Text`], textStyle]}
                 >
                     {label}
                 </TextComponent>

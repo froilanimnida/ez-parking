@@ -6,15 +6,17 @@ import ButtonComponent from "components/ButtonComponent";
 import CardComponent from "@/components/CardComponent";
 import axiosInstance from "@/lib/axiosInstance";
 import TextInputComponent from "@/components/TextInputComponent";
-import PlatformType from "@/lib/platform";
-import StatusBarHeight from "@/lib/statusBar";
 import type { AxiosError } from "axios";
-import { storeCredentials } from "@/lib/credentialsManager";
+import { getAuthHeaders } from "@/lib/credentialsManager";
+import { router } from "expo-router";
+import LinkComponent from "@/components/LinkComponent";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 
 const loginUser = async (email: string) => {
     const result = await axiosInstance.post(`${process.env.EXPO_PUBLIC_API_AUTH_ROOT}/login`, {
         email: email,
     });
+    if (result.status >= 400) return Promise.reject(result.data);
     return result;
 };
 
@@ -54,20 +56,10 @@ const LoginForm = () => {
             handleOTP(otp);
         }
     };
-
     const handleLogin = async () => {
         setLoggingIn(true);
         try {
-            const result = await loginUser(email);
-            // Store the credentials after successful login
-            if (PlatformType() !== "web") {
-                // TODO: Implement this function
-                // await storeCredentials({
-                //     authorization: result.data.token,
-                //     authorizationExpires: result.data.expires,
-                //     // ... other credentials from response
-                // });
-            }
+            await loginUser(email);
             alert("OTP sent successfully.");
             setTimeout(() => {
                 setShowOtpForm(true);
@@ -75,25 +67,26 @@ const LoginForm = () => {
                 startTimer();
             }, 1500);
         } catch (error) {
-            console.error(error);
-            const errorBody = error as AxiosError;
-            const errorMessage = errorBody.response?.data as { code: string; message: string };
-            if (errorMessage) {
-                alert(errorMessage.message);
-            } else {
-                alert("An error occurred");
-            }
+            const errorBody = error as { code: string; message: string };
+            alert(errorBody?.message || "An error occurred");
             setLoggingIn(false);
         }
     };
-
-    const handleOTP = (otp: string) => {
+    const handleOTP = async (otp: string) => {
         setLoggingIn(true);
         try {
-            const result = verifyOTP(email, otp, rememberMe);
+            const result = await verifyOTP(email, otp, rememberMe);
+            const headers = await getAuthHeaders();
+            if (!headers.Authorization) {
+                console.warn("No authorization token found");
+            }
+            console.log(result.data.role);
+            router.replace(result.data.role);
+
             alert("Logged in successfully.");
             setLoggingIn(false);
         } catch (error) {
+            console.error("Login error:", error);
             const errorBody = error as AxiosError;
             const errorMessage = errorBody.response?.data as { code: string; message: string };
             alert(errorMessage.message || "An error occurred");
@@ -102,38 +95,36 @@ const LoginForm = () => {
     };
 
     return (
-        <View style={styles.container}>
+        <ResponsiveContainer>
             <View style={styles.body}>
                 {!showOtpForm ? (
                     <View style={styles.loginForm}>
                         <CardComponent
                             header="Welcome back"
                             subHeader="Please enter your registered email address"
-                            children={
-                                <>
-                                    <TextInputComponent
-                                        customStyles={styles.input}
-                                        placeholder="Email address"
-                                        keyboardType="email-address"
-                                        value={email}
-                                        onChangeText={setEmail}
-                                        autoCapitalize="none"
-                                    />
-                                    <View style={styles.checkbox}>
-                                        <Checkbox onValueChange={setRememberMe} value={rememberMe} color="#4F46E5" />
-                                        <TextComponent>Remember me</TextComponent>
-                                    </View>
-
-                                    <ButtonComponent
-                                        title="Continue"
-                                        onPress={handleLogin}
-                                        variant="primary"
-                                        loading={loggingIn}
-                                        disabled={!isEmailValid(email) || loggingIn}
-                                    />
-                                </>
-                            }
-                        />
+                            customStyles={{ gap: 16 }}
+                        >
+                            <TextInputComponent
+                                customStyles={styles.input}
+                                placeholder="Email address"
+                                keyboardType="email-address"
+                                value={email}
+                                onChangeText={setEmail}
+                                autoCapitalize="none"
+                            />
+                            <View style={styles.checkbox}>
+                                <Checkbox onValueChange={setRememberMe} value={rememberMe} color="#4F46E5" />
+                                <TextComponent>Remember me</TextComponent>
+                            </View>
+                            <ButtonComponent
+                                title="Continue"
+                                onPress={handleLogin}
+                                variant="primary"
+                                loading={loggingIn}
+                                disabled={!isEmailValid(email) || loggingIn}
+                            />
+                            <LinkComponent href="./sign-up" label="Create user account" variant="text" />
+                        </CardComponent>
                     </View>
                 ) : (
                     <View>
@@ -166,25 +157,16 @@ const LoginForm = () => {
                     </View>
                 )}
             </View>
-        </View>
+        </ResponsiveContainer>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingTop: PlatformType() === "android" ? StatusBarHeight() : 0,
-        justifyContent: "center",
-        width: "100%",
-        height: "100%",
-        alignItems: "center",
-    },
     body: {
+        minHeight: "100%",
         justifyContent: "center",
-        alignItems: "center",
+        alignContent: "center",
         flex: 1,
-        width: "80%",
-        maxWidth: 768,
     },
     loginForm: {
         width: "100%",

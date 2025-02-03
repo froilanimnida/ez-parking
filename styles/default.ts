@@ -1,4 +1,4 @@
-import { type ViewStyle } from "react-native";
+import { type StyleProp, type View, type ViewStyle } from "react-native";
 import PlatformType from "@/lib/platform";
 import StatusBarHeight from "@/lib/statusBar";
 
@@ -22,9 +22,17 @@ const defaultContainerStyles: ViewStyle = {
 
 const defaultBodyStyles: ViewStyle = {
     flex: 1,
-    paddingTop: paddingTop(),
     width: "90%",
     maxWidth: 1536,
-} as const;
+};
 
-export { defaultContainerStyles, defaultBodyStyles };
+const responsiveContainer: StyleProp<ViewStyle> = {
+    width: "100%",
+    backgroundColor: "#f9fafb",
+    minHeight: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: PlatformType() === "web" ? 16 : 0,
+};
+
+export { defaultContainerStyles, defaultBodyStyles, responsiveContainer };

@@ -17,6 +17,7 @@ interface TextInputProps {
     ref?: React.LegacyRef<TextInput>;
     autoCapitalize?: "none" | "sentences" | "words" | "characters";
     autoFocus?: boolean;
+    defaultValue?: string;
 }
 
 const TextInputComponent = ({

@@ -1,16 +1,16 @@
-import { StyleSheet, Text, View, ScrollView, FlatList } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import axiosInstance from "@/lib/axiosInstance";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import ButtonComponent from "@/components/ButtonComponent";
-import { defaultBodyStyles } from "@/styles/default";
 import TextInputComponent from "@/components/TextInputComponent";
 import SelectComponent from "@/components/SelectComponent";
 import CheckboxComponent from "@/components/CheckboxComponent";
 import type { VehicleType } from "@/lib/types/models/vehicle-types";
 import { FlashList } from "@shopify/flash-list";
 import LinkComponent from "@/components/LinkComponent";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 
 const fetchVehicleTypes = async () => {
     try {
@@ -73,94 +73,73 @@ const VehicleTypes = () => {
     );
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={{ alignItems: "center" }}>
-            <View style={styles.body}>
-                <View style={styles.header}>
-                    <TextComponent bold variant="h1">
-                        Vehicle Types
-                    </TextComponent>
-                    <TextComponent style={styles.subtitle}>
-                        Manage vehicle categories and their specifications
-                    </TextComponent>
-                </View>
+        <ResponsiveContainer>
+            <TextComponent bold variant="h1" style={styles.header}>
+                Vehicle Types
+            </TextComponent>
 
-                <View style={styles.tableContainer}>
-                    <FlashList
-                        data={vehicleTypes}
-                        renderItem={renderVehicleTypeItem}
-                        keyExtractor={(item) => item.uuid}
-                        estimatedItemSize={100}
-                    />
-                </View>
-
-                <CardComponent
-                    customStyles={styles.formCard}
-                    header="Add New Vehicle Type"
-                    subHeader="Fill in the details below"
-                >
-                    <View style={styles.form}>
-                        <TextInputComponent
-                            customStyles={styles.input}
-                            placeholder="Code"
-                            value={newVehicleType.code}
-                            onChangeText={(value) => handleInputChange("code", value)}
-                        />
-                        <TextInputComponent
-                            customStyles={styles.input}
-                            placeholder="Name"
-                            value={newVehicleType.name}
-                            onChangeText={(value) => handleInputChange("name", value)}
-                        />
-                        <TextInputComponent
-                            customStyles={styles.input}
-                            placeholder="Description"
-                            value={newVehicleType.description}
-                            onChangeText={(value) => handleInputChange("description", value)}
-                        />
-                        <SelectComponent
-                            items={[
-                                { label: "Small", value: "SMALL" },
-                                { label: "Medium", value: "MEDIUM" },
-                                { label: "Large", value: "LARGE" },
-                            ]}
-                            selectedValue={newVehicleType.size_category}
-                            onValueChange={(value) => handleInputChange("size_category", value)}
-                            customStyles={styles.picker}
-                        />
-
-                        <View style={styles.checkboxContainer}>
-                            <CheckboxComponent
-                                value={newVehicleType.is_active}
-                                onValueChange={(value) => handleInputChange("is_active", value)}
-                                customStyles={styles.checkbox}
-                            />
-                            <TextComponent style={styles.checkboxLabel}>Active</TextComponent>
-                        </View>
-                        <ButtonComponent
-                            title="Add Vehicle Type"
-                            onPress={handleAddVehicleType}
-                            style={styles.addButton}
-                        />
-                    </View>
-                </CardComponent>
+            <View style={styles.tableContainer}>
+                <FlashList
+                    data={vehicleTypes}
+                    renderItem={renderVehicleTypeItem}
+                    keyExtractor={(item) => item.uuid}
+                    estimatedItemSize={100}
+                />
             </View>
-        </ScrollView>
+
+            <CardComponent
+                customStyles={styles.formCard}
+                header="Add New Vehicle Type"
+                subHeader="Fill in the details below"
+            >
+                <View style={styles.form}>
+                    <TextInputComponent
+                        customStyles={styles.input}
+                        placeholder="Code"
+                        value={newVehicleType.code}
+                        onChangeText={(value) => handleInputChange("code", value)}
+                    />
+                    <TextInputComponent
+                        customStyles={styles.input}
+                        placeholder="Name"
+                        value={newVehicleType.name}
+                        onChangeText={(value) => handleInputChange("name", value)}
+                    />
+                    <TextInputComponent
+                        customStyles={styles.input}
+                        placeholder="Description"
+                        value={newVehicleType.description}
+                        onChangeText={(value) => handleInputChange("description", value)}
+                    />
+                    <SelectComponent
+                        items={[
+                            { label: "Small", value: "SMALL" },
+                            { label: "Medium", value: "MEDIUM" },
+                            { label: "Large", value: "LARGE" },
+                        ]}
+                        selectedValue={newVehicleType.size_category}
+                        onValueChange={(value) => handleInputChange("size_category", value)}
+                        customStyles={styles.picker}
+                    />
+
+                    <View style={styles.checkboxContainer}>
+                        <CheckboxComponent
+                            value={newVehicleType.is_active}
+                            onValueChange={(value) => handleInputChange("is_active", value)}
+                            customStyles={styles.checkbox}
+                        />
+                        <TextComponent style={styles.checkboxLabel}>Active</TextComponent>
+                    </View>
+                    <ButtonComponent title="Add Vehicle Type" onPress={handleAddVehicleType} style={styles.addButton} />
+                </View>
+            </CardComponent>
+        </ResponsiveContainer>
     );
 };
 
 export default VehicleTypes;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#F9FAFB",
-        padding: 16,
-        width: "100%",
-    },
-    body: {
-        width: "95%",
-        maxWidth: defaultBodyStyles.maxWidth,
-    },
     header: {
         marginBottom: 16,
     },

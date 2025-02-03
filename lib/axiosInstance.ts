@@ -1,23 +1,18 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import PlatformType from "./platform";
+import { router } from "expo-router";
 
-const PLATFORM = PlatformType();
-
+const protectedRoutes = ["/admin", "/user", "/parking-manager"] as const;
 type UserRole = "user" | "parking_manager" | "admin";
 
-const ROLE_ROUTES: Record<string, UserRole[]> = {
-    "/parking-manager": ["parking_manager"],
-    "/admin": ["admin"],
-    "/user": ["user"],
-};
-
 async function verifyAndGetRole(
-    authToken: string | undefined | undefined,
-    xsrfToken: string | undefined | undefined,
-    csrf_refresh_token: string | undefined | undefined,
-    refresh_token_cookie: string | undefined | undefined
+    authToken: string | undefined | null,
+    xsrfToken: string | undefined | null,
+    csrf_refresh_token: string | undefined | null,
+    refresh_token_cookie: string | undefined | null
 ): Promise<UserRole | null> {
+    console.log("Verifying role with auth token:", authToken);
     if (!authToken) return null;
     try {
         const result = await axiosInstance.post(
@@ -51,13 +46,6 @@ function getRedirectPath(role: UserRole): string {
     }
 }
 
-function matchesPattern(path: string, pattern: string): boolean {
-    const normalizedPath = path.replace(/\/$/, "");
-    const regexPattern = pattern.replace(/\*/g, ".*").replace(/\//g, "\\/").replace(/\/$/, "");
-    const regex = new RegExp(`^${regexPattern}`);
-    return regex.test(normalizedPath);
-}
-
 const axiosInstance = axios.create({
     withCredentials: true,
     baseURL: process.env.EXPO_PUBLIC_API_BASE_URL,
@@ -69,22 +57,32 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
     async (value) => {
         const requestUrl = value.url;
-        // const router = useRouter();
-        console.log(value);
-        console.log("Request Origin URL: ", value.url);
         if (requestUrl?.endsWith("/login")) {
-            // const userRole = await verifyAndGetRole(authToken, xsrfToken, csrf_refresh_token, refresh_token_cookie);
-            // if (userRole) {
-            //         router.replace(getRedirectPath(userRole));
-            // }
+            if (PlatformType() !== "web") {
+                const authToken = await SecureStore.getItemAsync("Authorization");
+                const xsrfToken = await SecureStore.getItemAsync("X-CSRF-TOKEN");
+                const csrf_refresh_token = await SecureStore.getItemAsync("csrf_refresh_token");
+                const refresh_token_cookie = await SecureStore.getItemAsync("refresh_token_cookie");
+
+                const userRole = await verifyAndGetRole(authToken, xsrfToken, csrf_refresh_token, refresh_token_cookie);
+                if (userRole) {
+                    value.url = getRedirectPath(userRole);
+                }
+            }
+            return value;
+        } else if (
+            requestUrl?.endsWith("/admin") ||
+            requestUrl?.endsWith("/user") ||
+            requestUrl?.endsWith("/parking-manager")
+        ) {
             if (PlatformType() !== "web") {
                 const authToken = await SecureStore.getItemAsync("Authorization");
                 const xsrfToken = await SecureStore.getItemAsync("X-CSRF-TOKEN");
                 const csrf_refresh_token = await SecureStore.getItemAsync("csrf_refresh_token");
                 const refresh_token_cookie = await SecureStore.getItemAsync("refresh_token_cookie");
                 const userRole = await verifyAndGetRole(authToken, xsrfToken, csrf_refresh_token, refresh_token_cookie);
-                if (userRole) {
-                    value.url = getRedirectPath(userRole);
+                if (!userRole) {
+                    value.url = "/login";
                 }
             }
             return value;
@@ -92,6 +90,68 @@ axiosInstance.interceptors.request.use(
         return value;
     },
     (error) => {}
+);
+
+axiosInstance.interceptors.request.use(
+    async (config) => {
+        if (PlatformType() !== "web") {
+            const authorization = await SecureStore.getItemAsync("Authorization");
+            const xsrfToken = await SecureStore.getItemAsync("X-CSRF-TOKEN");
+            const csrfRefreshToken = await SecureStore.getItemAsync("csrf_refresh_token");
+            const refreshToken = await SecureStore.getItemAsync("refresh_token_cookie");
+
+            console.log("Request Headers:", {
+                Authorization: authorization,
+                "X-CSRF-TOKEN": xsrfToken,
+                csrf_refresh_token: csrfRefreshToken,
+                refresh_token_cookie: refreshToken,
+            });
+
+            config.headers = {
+                ...config.headers,
+                Authorization: authorization ? `Bearer ${authorization}` : "",
+                "X-CSRF-TOKEN": xsrfToken || "",
+                csrf_refresh_token: csrfRefreshToken || "",
+                refresh_token_cookie: refreshToken || "",
+            };
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
+axiosInstance.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        if (error.response?.status === 401) {
+            router.replace("./auth/login");
+        }
+        return Promise.reject(error);
+    }
+);
+
+axiosInstance.interceptors.response.use(
+    async (response) => {
+        if (PlatformType() !== "web") {
+            const setCookieHeaders = response.headers["set-cookie"];
+            if (setCookieHeaders && Array.isArray(setCookieHeaders)) {
+                for (const cookieString of setCookieHeaders[0].split(",")) {
+                    const trimmedCookie = cookieString.trim();
+                    const cookieValue = trimmedCookie.split(";")[0];
+                    const [key, value] = cookieValue.split("=");
+                    if (key && value) {
+                        try {
+                            await SecureStore.setItemAsync(key, value);
+                        } catch (err) {
+                            console.error(`Failed to store cookie ${key}:`, err);
+                        }
+                    }
+                }
+            }
+        }
+        return response;
+    },
+    (error) => Promise.reject(error)
 );
 
 if (__DEV__) {

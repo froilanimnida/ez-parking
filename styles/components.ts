@@ -5,6 +5,7 @@ const baseStyles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         height: "auto",
+        width: "auto",
         justifyContent: "center",
     },
     xs: {
@@ -45,6 +46,7 @@ const baseStyles = StyleSheet.create({
     // Variants
     primary: {
         backgroundColor: "#4F46E5",
+        color: "white",
     },
     secondary: {
         backgroundColor: "transparent",
@@ -73,14 +75,9 @@ const baseStyles = StyleSheet.create({
     destructiveText: { color: "white" },
     outlineText: { color: "#374151" },
     ghostText: { color: "#374151" },
-    // States
     disabled: {
         opacity: 0.5,
     },
-    disabledText: {
-        color: "#9CA3AF",
-    },
-    // Icon
     iconLeft: {
         marginRight: 8,
     },

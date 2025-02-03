@@ -1,4 +1,7 @@
 import * as SecureStore from "expo-secure-store";
+import PlatformType from "./platform";
+import axiosInstance from "./axiosInstance";
+import { router } from "expo-router";
 
 export async function getAuthHeaders() {
     try {
@@ -19,28 +22,23 @@ export async function getAuthHeaders() {
     }
 }
 
-export async function storeCredentials(credentials: {
-    authorization: string;
-    authorizationExpires: string;
-    csrfToken: string;
-    csrfTokenExpires: string;
-    csrfRefreshToken: string;
-    csrfRefreshTokenExpires: string;
-    refreshToken: string;
-    refreshTokenExpires: string;
-}) {
+export async function authenticateUser() {
+    const authHeaders = await getAuthHeaders();
+}
+
+export async function logoutCurrentUser() {
     try {
-        await Promise.all([
-            SecureStore.setItemAsync("Authorization", credentials.authorization),
-            SecureStore.setItemAsync("AuthorizationExpires", credentials.authorizationExpires),
-            SecureStore.setItemAsync("X-CSRF-TOKEN", credentials.csrfToken),
-            SecureStore.setItemAsync("CSRFTokenExpires", credentials.csrfTokenExpires),
-            SecureStore.setItemAsync("csrf_refresh_token", credentials.csrfRefreshToken),
-            SecureStore.setItemAsync("CSRFRefreshTokenExpires", credentials.csrfRefreshTokenExpires),
-            SecureStore.setItemAsync("refresh_token_cookie", credentials.refreshToken),
-            SecureStore.setItemAsync("RefreshTokenExpires", credentials.refreshTokenExpires),
-        ]);
+        if (PlatformType() !== "web") {
+            axiosInstance.post("/auth/logout");
+            await SecureStore.deleteItemAsync("Authorization");
+            await SecureStore.deleteItemAsync("X-CSRF-TOKEN");
+            await SecureStore.deleteItemAsync("csrf_refresh_token");
+            await SecureStore.deleteItemAsync("refresh_token_cookie");
+        } else {
+            axiosInstance.post("/auth/logout");
+        }
+        router.replace("/auth/login");
     } catch (error) {
-        console.error("Error storing credentials:", error);
+        console.error("Error logging out:", error);
     }
 }

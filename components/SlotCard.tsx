@@ -1,10 +1,7 @@
-import { StyleSheet, View, TouchableOpacity } from "react-native";
 import React from "react";
-import TextComponent from "@/components/TextComponent";
-import CardComponent from "@/components/CardComponent";
-import type { ParkingSlot } from "@/lib/models/parking-slot";
-import type { PricingPlan } from "@/lib/models/pricing-plan";
-import LinkComponent from "./LinkComponent";
+import { View, Text, StyleSheet, Pressable, Linking } from "react-native";
+import { PricingPlan } from "@/lib/models/pricing-plan";
+import { ParkingSlot } from "@/lib/models/parking-slot";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;
@@ -19,7 +16,7 @@ interface SlotCardProps {
     slotUuid: string;
 }
 
-const getRateDisplay = (baseRate: number, rates: { rate: number; rate_type: string; is_enabled: boolean }[]) => {
+function getRateDisplay(baseRate: number, rates: PricingPlan[]): { amount: string; type: string } {
     const activeRate = rates.find((r) => r.is_enabled);
     if (!activeRate) return { amount: "0.00", type: "hourly" };
 
@@ -28,152 +25,170 @@ const getRateDisplay = (baseRate: number, rates: { rate: number; rate_type: stri
         amount: calculatedRate.toFixed(2),
         type: activeRate.rate_type,
     };
-};
+}
 
-const SlotCard = ({ slotInfo, rates, establishmentUuid, slotUuid }: SlotCardProps) => {
+const SlotCard: React.FC<SlotCardProps> = ({ slotInfo, rates, establishmentUuid, slotUuid }) => {
     const { amount, type } = getRateDisplay(slotInfo.base_rate, rates);
 
+    const getBorderColor = () => {
+        switch (slotInfo.slot_status) {
+            case "open":
+                return styles.borderOpen;
+            case "reserved":
+                return styles.borderReserved;
+            default:
+                return styles.borderOccupied;
+        }
+    };
+
+    const getStatusBadgeStyle = () => {
+        switch (slotInfo.slot_status) {
+            case "open":
+                return [styles.statusBadge, styles.statusOpen];
+            case "reserved":
+                return [styles.statusBadge, styles.statusReserved];
+            default:
+                return [styles.statusBadge, styles.statusOccupied];
+        }
+    };
+
+    const handleBookSlot = () => {
+        const nextUrl = `/user/book/${establishmentUuid}?slot=${slotUuid}`;
+        const loginUrl = `/auth/login?next=${encodeURIComponent(nextUrl)}`;
+        Linking.openURL(loginUrl);
+    };
+
     return (
-        <CardComponent
-            customStyles={[
-                styles.card,
-                slotInfo.slot_status === "open" && styles.borderOpen,
-                slotInfo.slot_status === "reserved" && styles.borderReserved,
-                slotInfo.slot_status === "occupied" && styles.borderOccupied,
-            ]}
-            header={`Slot - ${slotInfo.slot_code}`}
-        >
+        <View style={[styles.container, getBorderColor()]}>
             <View style={styles.header}>
-                <TextComponent variant="h3">{slotInfo.slot_code}</TextComponent>
-                <View
-                    style={[
-                        styles.statusBadge,
-                        slotInfo.slot_status === "open" && styles.statusOpen,
-                        slotInfo.slot_status === "reserved" && styles.statusReserved,
-                        slotInfo.slot_status === "occupied" && styles.statusOccupied,
-                    ]}
-                >
-                    <TextComponent style={styles.statusText}>{slotInfo.slot_status}</TextComponent>
-                </View>
+                <Text style={styles.slotCode}>{slotInfo.slot_code}</Text>
+                <Text style={getStatusBadgeStyle()}>{slotInfo.slot_status}</Text>
             </View>
 
-            <View style={styles.details}>
-                <TextComponent style={styles.detailText}>Floor: {slotInfo.floor_level}</TextComponent>
-                <TextComponent style={styles.detailText}>Accommodates: {slotInfo.vehicle_type_name}</TextComponent>
-                <TextComponent style={styles.detailText}>Size: {slotInfo.vehicle_type_size}</TextComponent>
+            <View style={styles.infoContainer}>
+                <Text style={styles.infoText}>Floor: {slotInfo.floor_level}</Text>
+                <Text style={styles.infoText}>Accommodates: {slotInfo.vehicle_type_name}</Text>
+                <Text style={styles.infoText}>Size: {slotInfo.vehicle_type_size}</Text>
 
                 {slotInfo.slot_status === "open" && (
-                    <View style={styles.rateContainer}>
-                        <TextComponent style={styles.rateText}>
-                            ₱{amount}/{type === "hourly" ? "hr" : type === "daily" ? "day" : "mo"}
-                        </TextComponent>
-                        <TextComponent style={styles.rateType}>{type} rate</TextComponent>
-                    </View>
+                    <>
+                        <View style={styles.rateRow}>
+                            <Text style={styles.rateText}>
+                                ₱{amount}/{type === "hourly" ? "hr" : type === "daily" ? "day" : "mo"}
+                            </Text>
+                            <Text style={styles.rateTypeText}>{type} rate</Text>
+                        </View>
+
+                        <Pressable style={styles.bookButton} onPress={handleBookSlot}>
+                            <Text style={styles.bookButtonText}>Book this slot</Text>
+                        </Pressable>
+                    </>
                 )}
 
-                {slotInfo.slot_status === "open" && (
-                    <LinkComponent
-                        href={`./../auth/login?next=${encodeURIComponent(
-                            `/user/book/${establishmentUuid}/${slotUuid}`
-                        )}`}
-                        asChild
-                    >
-                        <TouchableOpacity style={styles.bookButton}>
-                            <TextComponent style={styles.bookButtonText}>Book this slot</TextComponent>
-                        </TouchableOpacity>
-                    </LinkComponent>
-                )}
-
-                {slotInfo.is_premium && (
-                    <View style={styles.premiumBadge}>
-                        <TextComponent style={styles.premiumText}>Premium</TextComponent>
-                    </View>
-                )}
+                {slotInfo.is_premium && <Text style={styles.premiumBadge}>Premium</Text>}
             </View>
-        </CardComponent>
+        </View>
     );
 };
 
-export default SlotCard;
-
 const styles = StyleSheet.create({
-    card: {
-        padding: 16,
-        marginBottom: 16,
+    container: {
         borderLeftWidth: 4,
+        backgroundColor: "#ffffff",
+        padding: 16,
+        borderRadius: 4,
+        marginVertical: 8,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
     },
     borderOpen: {
-        borderLeftColor: "#10B981",
+        borderLeftColor: "green",
     },
     borderReserved: {
-        borderLeftColor: "#F59E0B",
+        borderLeftColor: "orange",
     },
     borderOccupied: {
-        borderLeftColor: "#EF4444",
+        borderLeftColor: "red",
     },
     header: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginBottom: 16,
+        alignItems: "center",
+        marginBottom: 8,
+    },
+    slotCode: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: "#111827",
     },
     statusBadge: {
+        borderRadius: 16,
         paddingHorizontal: 8,
         paddingVertical: 4,
-        borderRadius: 12,
+        fontSize: 12,
+        fontWeight: "600",
     },
     statusOpen: {
-        backgroundColor: "#D1FAE5",
+        backgroundColor: "#dcfce7",
+        color: "#166534",
     },
     statusReserved: {
-        backgroundColor: "#FEF3C7",
+        backgroundColor: "#fef9c3",
+        color: "#713f12",
     },
     statusOccupied: {
-        backgroundColor: "#FEE2E2",
+        backgroundColor: "#fee2e2",
+        color: "#991b1b",
     },
-    statusText: {
-        color: "#065F46",
-        fontSize: 12,
+    infoContainer: {
+        marginTop: 8,
     },
-    details: {
-        gap: 8,
+    infoText: {
+        fontSize: 14,
+        color: "#374151",
+        marginBottom: 4,
     },
-    detailText: {
-        color: "#6B7280",
-    },
-    rateContainer: {
+    rateRow: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
         marginTop: 8,
     },
     rateText: {
-        color: "#10B981",
-        fontWeight: "bold",
+        fontSize: 16,
+        fontWeight: "600",
+        color: "#16a34a",
     },
-    rateType: {
-        color: "#6B7280",
+    rateTypeText: {
         fontSize: 12,
+        color: "#6b7280",
+        textTransform: "capitalize",
     },
     bookButton: {
-        backgroundColor: "#10B981",
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 8,
-        marginTop: 16,
+        marginTop: 8,
+        backgroundColor: "#16a34a",
+        borderRadius: 4,
+        paddingVertical: 10,
+        alignItems: "center",
     },
     bookButtonText: {
-        color: "white",
-        textAlign: "center",
+        color: "#ffffff",
+        fontSize: 14,
+        fontWeight: "600",
     },
     premiumBadge: {
-        backgroundColor: "#E9D5FF",
+        marginTop: 8,
+        backgroundColor: "#f3e8ff",
+        color: "#6b21a8",
+        fontSize: 12,
         paddingHorizontal: 8,
         paddingVertical: 4,
-        borderRadius: 12,
-        marginTop: 8,
-    },
-    premiumText: {
-        color: "#7C3AED",
-        fontSize: 12,
+        borderRadius: 16,
+        alignSelf: "flex-start",
     },
 });
+
+export default SlotCard;

@@ -1,19 +1,16 @@
-import { SafeAreaView, ScrollView, StyleSheet,  View } from "react-native";
+import { StyleSheet } from "react-native";
 import React from "react";
 import { defaultContainerStyles, defaultBodyStyles } from "@/styles/default";
 import TextComponent from "@/components/TextComponent";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 
 const Reports = () => {
     return (
-        <View style={styles.container}>
-            <SafeAreaView style={styles.body}>
-                <ScrollView>
-                    <TextComponent bold variant="h1">
-                        Reports
-                    </TextComponent>
-                </ScrollView>
-            </SafeAreaView>
-        </View>
+        <ResponsiveContainer>
+            <TextComponent bold variant="h1">
+                Reports
+            </TextComponent>
+        </ResponsiveContainer>
     );
 };
 
