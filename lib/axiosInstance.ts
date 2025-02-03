@@ -1,6 +1,7 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import PlatformType from "./platform";
+import Constants from "expo-constants";
 import { router } from "expo-router";
 
 const protectedRoutes = ["/admin", "/user", "/parking-manager"] as const;
@@ -46,9 +47,14 @@ function getRedirectPath(role: UserRole): string {
     }
 }
 
+const API_BASE_URL = __DEV__
+    ? process.env.EXPO_PUBLIC_API_BASE_URL
+    : Constants.expoConfig?.extra?.apiBaseUrl || "https://ez-parking-system.onrender.com/api/v1";
+
 const axiosInstance = axios.create({
     withCredentials: true,
-    baseURL: process.env.EXPO_PUBLIC_API_BASE_URL,
+    // baseURL: API_BASE_URL,
+    baseURL: "https://ez-parking-system.onrender.com/api/v1",
     headers: {
         Accept: "application/json",
     },
