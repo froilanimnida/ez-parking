@@ -1,6 +1,7 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import PlatformType from "./platform";
+import Constants from "expo-constants";
 import { router } from "expo-router";
 
 const protectedRoutes = ["/admin", "/user", "/parking-manager"] as const;
@@ -46,9 +47,14 @@ function getRedirectPath(role: UserRole): string {
     }
 }
 
+const API_BASE_URL = __DEV__
+    ? process.env.EXPO_PUBLIC_API_BASE_URL
+    : Constants.expoConfig?.extra?.apiBaseUrl || "https://ez-parking-system.onrender.com/api/v1";
+
 const axiosInstance = axios.create({
     withCredentials: true,
-    baseURL: process.env.EXPO_PUBLIC_API_BASE_URL,
+    // baseURL: API_BASE_URL,
+    baseURL: "https://ez-parking-system.onrender.com/api/v1",
     headers: {
         Accept: "application/json",
     },
@@ -100,13 +106,6 @@ axiosInstance.interceptors.request.use(
             const csrfRefreshToken = await SecureStore.getItemAsync("csrf_refresh_token");
             const refreshToken = await SecureStore.getItemAsync("refresh_token_cookie");
 
-            console.log("Request Headers:", {
-                Authorization: authorization,
-                "X-CSRF-TOKEN": xsrfToken,
-                csrf_refresh_token: csrfRefreshToken,
-                refresh_token_cookie: refreshToken,
-            });
-
             config.headers = {
                 ...config.headers,
                 Authorization: authorization ? `Bearer ${authorization}` : "",
@@ -153,11 +152,6 @@ axiosInstance.interceptors.response.use(
     },
     (error) => Promise.reject(error)
 );
-
-if (__DEV__) {
-    axios.defaults.validateStatus = (status) => true;
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-}
 
 axiosInstance.interceptors.request.use((config) => {
     if (config.data instanceof FormData) {

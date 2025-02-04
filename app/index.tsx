@@ -1,5 +1,6 @@
 import LandingPage from "@/components/mobile/LandingPage";
-import { StyleSheet, Text, View } from "react-native";
+import { useEffect } from "react";
+import { StyleSheet, View } from "react-native";
 
 export default function Index() {
     return (

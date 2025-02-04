@@ -16,6 +16,7 @@ const LandingPage = () => {
                         Parking.
                     </TextComponent>
                     <LinkComponent href="./user" variant="primary" label="Get Started" />
+                    <LinkComponent href="./establishment" variant="outline" label="Search for Establishment" />
                 </View>
             </View>
         </SafeAreaView>
