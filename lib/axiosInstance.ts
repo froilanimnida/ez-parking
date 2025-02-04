@@ -106,13 +106,6 @@ axiosInstance.interceptors.request.use(
             const csrfRefreshToken = await SecureStore.getItemAsync("csrf_refresh_token");
             const refreshToken = await SecureStore.getItemAsync("refresh_token_cookie");
 
-            console.log("Request Headers:", {
-                Authorization: authorization,
-                "X-CSRF-TOKEN": xsrfToken,
-                csrf_refresh_token: csrfRefreshToken,
-                refresh_token_cookie: refreshToken,
-            });
-
             config.headers = {
                 ...config.headers,
                 Authorization: authorization ? `Bearer ${authorization}` : "",
@@ -159,11 +152,6 @@ axiosInstance.interceptors.response.use(
     },
     (error) => Promise.reject(error)
 );
-
-if (__DEV__) {
-    axios.defaults.validateStatus = (status) => true;
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-}
 
 axiosInstance.interceptors.request.use((config) => {
     if (config.data instanceof FormData) {

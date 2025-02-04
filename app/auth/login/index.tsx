@@ -13,10 +13,11 @@ import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 
 const loginUser = async (email: string) => {
-    const result = await axiosInstance.post(`${process.env.EXPO_PUBLIC_API_AUTH_ROOT}/login`, {
+    const result = await axiosInstance.post("auth/login", {
         email: email,
     });
     if (result.status >= 400) return Promise.reject(result.data);
+    console.log(result);
     return result;
 };
 

@@ -1,5 +1,5 @@
 import { StyleSheet, View, TouchableOpacity, Linking } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import SlotCard from "@/components/SlotCard";
@@ -13,6 +13,7 @@ import type { ParkingSlot } from "@/lib/models/parking-slot";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import WebView from "react-native-webview";
 import PlatformType from "@/lib/platform";
+import { useGlobalSearchParams, useLocalSearchParams } from "expo-router";
 
 interface SlotWithInfo extends ParkingSlot {
     vehicle_type_code: string;
@@ -34,6 +35,11 @@ const EstablishmentOverview: React.FC<EstablishmentOverviewProps> = ({
     pricing_plans,
     slots,
 }) => {
+    const { uuid } = useLocalSearchParams<{ uuid: string }>();
+    useEffect(() => {
+        console.log(uuid);
+    });
+
     const mockEstablishmentData = {
         establishment: {
             uuid: "123e4567-e89b-12d3-a456-426614174000",
