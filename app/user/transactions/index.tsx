@@ -10,6 +10,7 @@ import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { fetchUserTransactions } from "@/lib/api/transaction";
 import { isAuthenticated } from "@/lib/credentialsManager";
+import { Link } from "expo-router";
 
 const getPaymentStatusStyle = (status: string) => {
     switch (status) {

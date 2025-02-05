@@ -16,7 +16,7 @@ async function verifyAndGetRole(
     if (!authToken) return null;
     try {
         const result = await axiosInstance.post(
-            `${process.env.EXPO_PUBLIC_API_AUTH_ROOT}/verify-token`,
+            `/auth/verify-token`,
             {},
             {
                 headers: {
