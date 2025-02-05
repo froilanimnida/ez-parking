@@ -1,4 +1,5 @@
 import axiosInstance from "../axiosInstance";
+import type { User } from "../models/user";
 
 export const banUser = async (userId: number) => {
     const result = await axiosInstance.post(`/admin/ban-user`, {
@@ -32,4 +33,9 @@ export const getEstablishments = async () => {
 export const getEstablishment = async (establishmentUuid: string) => {
     const result = await axiosInstance.get(`/admin/establishment/${establishmentUuid}`);
     return result;
+};
+
+export const getAllUsers = async () => {
+    const result = await axiosInstance.get(`/admin/users`);
+    return result.data as User[];
 };

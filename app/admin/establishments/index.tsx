@@ -35,10 +35,7 @@ const fetchEstablishments = async () => {
 
     const res = await axiosInstance.get(`${process.env.EXPO_PUBLIC_API_ADMIN_ROOT}/establishments`, {
         headers: {
-            Authorization: cookiesObject.Authorization,
-            "X-CSRF-TOKEN": cookiesObject["X-CSRF-TOKEN"],
-            csrf_refresh_token: cookiesObject.csrf_refresh_token,
-            refresh_token_cookie: cookiesObject.refresh_token_cookie,
+            ...cookiesObject,
         },
     });
     return res;

@@ -2,10 +2,8 @@ import CardComponent from "@/components/CardComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import TextComponent from "@/components/TextComponent";
 import TextInputComponent from "@/components/TextInputComponent";
-import PlatformType from "@/lib/platform";
-import StatusBarHeight from "@/lib/statusBar";
 import React, { useState } from "react";
-import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from "react-native";
+import { View, TouchableOpacity, StyleSheet,  } from "react-native";
 
 type UserData = {
     user_id: number;
@@ -154,23 +152,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#6b7280",
         marginTop: 4,
-    },
-    section: {
-        backgroundColor: "white",
-        borderRadius: 8,
-        padding: 16,
-        marginBottom: 24,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: "500",
-        color: "#111827",
-        marginBottom: 16,
     },
     grid: {
         gap: 16,

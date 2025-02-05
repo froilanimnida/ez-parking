@@ -392,7 +392,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         padding: 16,
         borderRadius: 8,
-        shadowColor: "#000",
+        boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
         elevation: 2,
         marginHorizontal: 16,
     },
