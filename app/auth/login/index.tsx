@@ -22,7 +22,7 @@ const loginUser = async (email: string) => {
 };
 
 const verifyOTP = async (email: string, otp: string, rememberMe: boolean) => {
-    const result = await axiosInstance.patch(`${process.env.EXPO_PUBLIC_API_AUTH_ROOT}/verify-otp`, {
+    const result = await axiosInstance.patch(`/auth/verify-otp`, {
         email: email,
         otp: otp,
         remember_me: rememberMe,

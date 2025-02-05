@@ -1,14 +1,14 @@
-import { ScrollView, StyleSheet, View } from "react-native";
-import React, { useState } from "react";
-import { responsiveContainer } from "@/styles/default";
+import { StyleSheet, View } from "react-native";
+import React, { useEffect, useState } from "react";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import { ParkingSlot } from "@/lib/models/parking-slot";
 import { Transaction } from "@/lib/models/transaction";
+import { ActivityIndicator } from "react-native";
 import TextInputComponent from "@/components/TextInputComponent";
 import LinkComponent from "@/components/LinkComponent";
-import { SafeAreaView } from "react-native-safe-area-context";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
+import { fetchUserTransactions } from "@/lib/api/transaction";
 
 const getPaymentStatusStyle = (status: string) => {
     switch (status) {
@@ -36,62 +36,43 @@ const getTransactionStatusStyle = (status: string) => {
     }
 };
 
-interface APIResponse extends Transaction, ParkingSlot {}
+interface UserTransaction {
+    amount_due: string;
+    base_rate: string;
+    created_at: string;
+    duration_type: string;
+    entry_time: any;
+    establishment_id: number;
+    exit_time: any;
+    floor_level: number;
+    is_active: boolean;
+    is_premium: boolean;
+    payment_status: string;
+    slot_code: string;
+    slot_features: string;
+    slot_id: number;
+    slot_multiplier: string;
+    slot_status: string;
+    status: string;
+    transaction_id: number;
+    updated_at: string;
+    user_id: number;
+    uuid: string;
+    vehicle_type_id: number;
+}
 
 const Transactions = () => {
     const [searchTerm, setSearchTerm] = useState("");
-    const [transactions, setTransactions] = useState<APIResponse[]>([]);
-
-    const mockTransactions: APIResponse[] = [
-        {
-            amount_due: "100.00",
-            base_rate: 50,
-            created_at: "2021-10-01T00:00:00Z",
-            duration_type: "hourly",
-            entry_time: "2021-10-01T00:00:00Z",
-            establishment_id: 1,
-            exit_time: "2021-10-01T01:00:00Z",
-            floor_level: 1,
-            is_active: true,
-            is_premium: false,
-            payment_status: "PAID",
-            slot_code: "A1",
-            slot_features: "standard",
-            slot_id: 1,
-            slot_status: "open",
-            slot_multiplier: 1,
-            status: "completed",
-            transaction_id: 1,
-            updated_at: "2021-10-01T01:00:00Z",
-            user_id: 1,
-            uuid: "12345678-1234-1234-1234-1234567890AB",
-            vehicle_type_id: 1,
-        },
-        {
-            amount_due: "200.00",
-            base_rate: 100,
-            created_at: "2021-10-01T00:00:00Z",
-            duration_type: "hourly",
-            entry_time: "2021-10-01T00:00:00Z",
-            establishment_id: 1,
-            exit_time: "2021-10-01T02:00:00Z",
-            floor_level: 1,
-            is_active: true,
-            is_premium: true,
-            payment_status: "PAID",
-            slot_code: "B1",
-            slot_features: "premium",
-            slot_id: 2,
-            status: "completed",
-            transaction_id: 2,
-            updated_at: "2021-10-01T02:00:00Z",
-            user_id: 1,
-            uuid: "12345678-1234-1234-1234-1234567890AC",
-            vehicle_type_id: 1,
-            slot_status: "open",
-            slot_multiplier: 0,
-        },
-    ];
+    const [transactions, setTransactions] = useState<UserTransaction[]>([]);
+    useEffect(() => {
+        const fetchTransactions = async () => {
+            fetchUserTransactions().then((response) => {
+                console.log(response);
+                setTransactions(response.transactions);
+            });
+        };
+        fetchTransactions();
+    }, []);
 
     return (
         <ResponsiveContainer>
@@ -109,17 +90,13 @@ const Transactions = () => {
             />
 
             <View style={styles.transactionList}>
-                {mockTransactions.map((transaction) => (
-                    <CardComponent
-                        key={transaction.uuid}
-                        customStyles={styles.card}
-                        header="Transaction Details"
-                        subHeader={transaction.uuid}
-                    >
+                {transactions.map((transaction) => (
+                    <CardComponent key={transaction.uuid} customStyles={styles.card} header="Transaction Details">
                         <View style={styles.cardHeader}>
                             <LinkComponent
+                                label={`${transaction.uuid}`}
                                 href={`./transactions/${transaction.uuid}`}
-                                style={{ backgroundColor: "transparent" }}
+                                variant="text"
                             ></LinkComponent>
 
                             <View style={styles.statusContainer}>
