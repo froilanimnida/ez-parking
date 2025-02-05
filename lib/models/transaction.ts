@@ -15,8 +15,7 @@ export interface Transaction {
     is_premium: boolean;
     payment_status: string;
     slot_code: string;
-    slot_features: "standard" | "premium";
-    status: "paid" | "pending" | "completed" | "failed";
+    status: "reserved" | "active" | "cancelled" | "completed";
     updated_at: string;
     user_id: number;
     vehicle_type_id: number;

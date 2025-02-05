@@ -5,9 +5,10 @@ import CardComponent from "@/components/CardComponent";
 import PlatformType from "@/lib/platform";
 import TextComponent from "@/components/TextComponent";
 import LinkComponent from "@/components/LinkComponent";
-import { responsiveContainer } from "@/styles/default";
-import { SafeAreaView } from "react-native-safe-area-context";
 import ButtonComponent from "@/components/ButtonComponent";
+import { viewTransaction } from "@/lib/api/transaction";
+import { useLocalSearchParams } from "expo-router";
+import type { TransactionDetailsType } from "@/lib/models/userRoleTypes";
 
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
     // Haversine formula or other. Here’s a simple placeholder:
@@ -15,58 +16,14 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 }
 
 const TransactionDetails = () => {
-    const transactionDetails = {
-        establishment_info: {
-            name: "Sample Parking Establishment",
-            latitude: 14.5547,
-            longitude: 121.0244,
-        },
-        slot_info: {
-            slot_code: "SLOT-012",
-            floor_level: 3,
-            vehicle_type_code: "SUV",
-            vehicle_type_name: "Sport Utility Vehicle",
-            vehicle_type_size: "Large",
-            slot_features: "Covered Parking",
-            is_premium: true,
-        },
-        qr_code:
-            "HcPIuQbfB3enQe2soIVzGx7AnLBADnnaBk1CgCSMsGp3qyW5Fz1tyz+0n6HGrMYvqTVdllhBedWi8RfWoZzsJnfers/0eSkqqNFkac5/DG4UeDVF27Sqe1vjFtTdmcFFab95LAR2+KLVQhp1q3olB2F4IPkgOImQI9EJzN8Hba0sTUyDM4IzIw496Yl9NDeO0cUsLc/okGLSQmJFS/pLCygAjPbu/MGnyUtKkXNN0YIRt1uvCcw0BDqaeT+ybTkIRmcCNTQdxmlfSVbl6Ow0V3AODCktSiQW7l/Ll8Kk0enaU0uqw4ZRVWHiUiZGq8FVd2B3BibVa5AWsSHudfq9iByCq+zHDjRIkw3jjoTJFy6J0BNxfTDhW2JLorK47XlWJ8nDvN0qvIauyo96+6vRb8/vd7auyFezWFle742LbTkVQW8U6fpnfzqnx+42YFHmO3qfo+kcB9s5GFxHtogvDjEFKUFciHUpr1mOCQZNA56cYwAfuFF1gGLV1tm5rnPG", // Base64 mock
-        transaction_data: {
-            transaction_id: "TXN-ABC123",
-            status: "reserved", // 'active', 'completed', 'cancelled'
-            payment_status: "PAID", // 'PAID', 'PARTIALLY_PAID', 'OVERDUE'
-            entry_time: new Date().toISOString(),
-            exit_time: "Not Available",
-            amount_due: "120.00",
-        },
-        address_info: {
-            street: "123 Main Street, ",
-            city: "Makati, ",
-            province: "Metro Manila, ",
-            postal_code: "1200",
-        },
-        user_plate_number: "ABC-1234",
-        contact_number: "0917-123-4567",
-    };
-    // ---------------------------------------------------------------------------
-
-    // Local states
+    const [transactionDetails, setTransactionDetails] = useState<TransactionDetailsType>({});
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
     const [userLatitude, setUserLatitude] = useState(0);
     const [userLongitude, setUserLongitude] = useState(0);
     const [loadingLocation, setLoadingLocation] = useState(true);
+    const { uuid } = useLocalSearchParams<{ uuid: string }>();
 
-    const establishmentLatitude = transactionDetails.establishment_info.latitude;
-    const establishmentLongitude = transactionDetails.establishment_info.longitude;
-
-    // Mock "mapUrl" for WebView
-    const mapUrl = `https://maps.google.com/maps?width=100%25&height=600&hl=en&q=${establishmentLatitude},${establishmentLongitude}+(${encodeURIComponent(
-        transactionDetails.establishment_info.name
-    )})&t=&z=14&ie=UTF8&iwloc=B&output=embed`;
-
-    // Fetch user location when mounted
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -80,9 +37,14 @@ const TransactionDetails = () => {
             },
             { enableHighAccuracy: true }
         );
-        return () => {
-            // cleanup or reset if needed
+        const getTransactionDetails = async () => {
+            viewTransaction(uuid).then(response => {
+                console.log(response)
+                setTransactionDetails(response.data.transaction)
+            });
+
         };
+        getTransactionDetails();
     }, []);
 
     const handleCancelTransaction = () => {
@@ -90,8 +52,13 @@ const TransactionDetails = () => {
         Alert.alert("Transaction cancelled.");
     };
 
+    // const establishmentLatitude = transactionDetails.establishment_info.latitude;
+    // const establishmentLongitude = transactionDetails.establishment_info.longitude;
+    // const mapUrl = `https://maps.google.com/maps?width=100%25&height=600&hl=en&q=${establishmentLatitude},${establishmentLongitude}+(${encodeURIComponent(
+    //     transactionDetails.establishment_info.name
+    // )})&t=&z=14&ie=UTF8&iwloc=B&output=embed`;
     const distanceKm =
-        transactionDetails.transaction_data.status === "reserved"
+        transactionDetails.slot_info.slot_status === "reserved"
             ? calculateDistance(establishmentLatitude, establishmentLongitude, userLatitude, userLongitude).toFixed(1)
             : null;
     return (
@@ -218,14 +185,12 @@ const TransactionDetails = () => {
                             Google Maps
                         </LinkComponent>
                         <LinkComponent
-                            style={[styles.directionLink, { marginRight: 16 }]}
+                            style={[{ marginRight: 16 }]}
                             href={`https://www.waze.com/ul?ll=${transactionDetails.establishment_info.latitude},${transactionDetails.establishment_info.longitude}&navigate=yes`}
                         >
                             Waze
                         </LinkComponent>
-                        <LinkComponent style={styles.directionLink} href="./">
-                            Our Map
-                        </LinkComponent>
+                        <LinkComponent href="./">Our Map</LinkComponent>
                     </View>
                 </View>
             </CardComponent>
@@ -310,13 +275,13 @@ const TransactionDetails = () => {
 
             {/* Map Location */}
             <CardComponent header="Location Details">
-                <View style={styles.mapContainer}>
+                {/* <View style={styles.mapContainer}>
                     {PlatformType() === "web" ? (
                         <iframe src={mapUrl} style={{ width: "100%", height: "100%" }}></iframe>
                     ) : (
                         <WebView source={{ uri: mapUrl }} style={{ flex: 1 }} />
                     )}
-                </View>
+                </View> */}
             </CardComponent>
 
             {/* Cancel Transaction Button */}
@@ -483,10 +448,6 @@ const styles = StyleSheet.create({
         fontSize: 10,
         color: "#6b21a8",
         fontWeight: "600",
-    },
-    directionLink: {
-        color: "#fff",
-        fontSize: 14,
     },
     mapContainer: {
         marginTop: 16,
