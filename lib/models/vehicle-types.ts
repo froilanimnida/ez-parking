@@ -4,7 +4,7 @@ export interface VehicleType {
     description: string;
     is_active: boolean;
     name: string;
-    size_category: string;
+    size_category: "SMALL" | "MEDIUM" | "LARGE";
     updated_at: string;
     uuid: string;
     vehicle_type_id: number;

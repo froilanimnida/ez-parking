@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import axiosInstance from "@/lib/axiosInstance";
 import TextComponent from "@/components/TextComponent";
@@ -7,7 +7,7 @@ import ButtonComponent from "@/components/ButtonComponent";
 import TextInputComponent from "@/components/TextInputComponent";
 import SelectComponent from "@/components/SelectComponent";
 import CheckboxComponent from "@/components/CheckboxComponent";
-import type { VehicleType } from "@/lib/types/models/vehicle-types";
+import type { VehicleType } from "@/lib/models/vehicle-types";
 import { FlashList } from "@shopify/flash-list";
 import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
@@ -48,11 +48,11 @@ const VehicleTypes = () => {
 
     const renderVehicleTypeItem = ({ item }: { item: VehicleType }) => (
         <View style={styles.tableRow}>
-            <Text style={styles.tableCell}>{item.code}</Text>
-            <Text style={styles.tableCell}>{item.name}</Text>
-            <Text style={styles.tableCell}>{item.description}</Text>
-            <Text style={styles.tableCell}>
-                <Text
+            <TextComponent style={styles.tableCell}>{item.code}</TextComponent>
+            <TextComponent style={styles.tableCell}>{item.name}</TextComponent>
+            <TextComponent style={styles.tableCell}>{item.description}</TextComponent>
+            <TextComponent style={styles.tableCell}>
+                <TextComponent
                     style={[
                         styles.sizeBadge,
                         item.size_category === "SMALL" && styles.sizeSmall,
@@ -61,13 +61,15 @@ const VehicleTypes = () => {
                     ]}
                 >
                     {item.size_category}
-                </Text>
-            </Text>
-            <Text style={styles.tableCell}>
-                <Text style={[styles.statusBadge, item.is_active ? styles.statusActive : styles.statusInactive]}>
+                </TextComponent>
+            </TextComponent>
+            <TextComponent style={styles.tableCell}>
+                <TextComponent
+                    style={[styles.statusBadge, item.is_active ? styles.statusActive : styles.statusInactive]}
+                >
                     {item.is_active ? "Active" : "Inactive"}
-                </Text>
-            </Text>
+                </TextComponent>
+            </TextComponent>
             <LinkComponent style={styles.editButton} href={`../vehicle-types/${item.uuid}`} label="Edit" />
         </View>
     );

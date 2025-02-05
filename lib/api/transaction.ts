@@ -6,6 +6,12 @@ export const fetchTransactions = async (establishmentUuid: string) => {
 };
 
 export const fetchUserTransactions = async () => {
-    const result = await axiosInstance.get(`/transactions`);
+    const result = await axiosInstance.get(`/transactions/all`);
     return result;
-};
+}
+
+
+export const viewTransaction = async (transactionUuid: string) => {
+    const result = await axiosInstance.get(`/transaction/view?transaction_uuid=${transactionUuid}`);
+    return result;
+}
