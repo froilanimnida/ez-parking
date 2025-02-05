@@ -3,8 +3,7 @@ import * as SecureStore from "expo-secure-store";
 import PlatformType from "./platform";
 import Constants from "expo-constants";
 import { router } from "expo-router";
-
-const protectedRoutes = ["/admin", "/user", "/parking-manager"] as const;
+import { getAuthHeaders } from "./credentialsManager";
 type UserRole = "user" | "parking_manager" | "admin";
 
 async function verifyAndGetRole(
@@ -100,19 +99,10 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.request.use(
     async (config) => {
-        if (PlatformType() !== "web") {
-            const authorization = await SecureStore.getItemAsync("Authorization");
-            const xsrfToken = await SecureStore.getItemAsync("X-CSRF-TOKEN");
-            const csrfRefreshToken = await SecureStore.getItemAsync("csrf_refresh_token");
-            const refreshToken = await SecureStore.getItemAsync("refresh_token_cookie");
-
-            config.headers = {
-                ...config.headers,
-                Authorization: authorization ? `Bearer ${authorization}` : "",
-                "X-CSRF-TOKEN": xsrfToken || "",
-                csrf_refresh_token: csrfRefreshToken || "",
-                refresh_token_cookie: refreshToken || "",
-            };
+        const authHeaders = await getAuthHeaders();
+        config.headers = { ...config.headers, ...authHeaders };
+        if (config.data instanceof FormData) {
+            config.headers["Content-Type"] = "multipart/form-data";
         }
         return config;
     },
@@ -131,6 +121,7 @@ axiosInstance.interceptors.response.use(
 
 axiosInstance.interceptors.response.use(
     async (response) => {
+        if (PlatformType() === "web") return response;
         if (PlatformType() !== "web") {
             const setCookieHeaders = response.headers["set-cookie"];
             if (setCookieHeaders && Array.isArray(setCookieHeaders)) {
@@ -152,12 +143,5 @@ axiosInstance.interceptors.response.use(
     },
     (error) => Promise.reject(error)
 );
-
-axiosInstance.interceptors.request.use((config) => {
-    if (config.data instanceof FormData) {
-        config.headers["Content-Type"] = "multipart/form-data";
-    }
-    return config;
-});
 
 export default axiosInstance;

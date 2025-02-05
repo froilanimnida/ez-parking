@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#ffffff",
         padding: 16,
         borderRadius: 8,
-        shadowColor: "#000",
+        boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.1)",
         marginBottom: 16,
         elevation: 2,
     },

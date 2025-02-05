@@ -9,6 +9,7 @@ import TextInputComponent from "@/components/TextInputComponent";
 import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { fetchUserTransactions } from "@/lib/api/transaction";
+import { isAuthenticated } from "@/lib/credentialsManager";
 
 const getPaymentStatusStyle = (status: string) => {
     switch (status) {
@@ -64,10 +65,11 @@ interface UserTransaction {
 const Transactions = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [transactions, setTransactions] = useState<UserTransaction[]>([]);
+    const [fetching, setFetching] = useState(true);
     useEffect(() => {
         const fetchTransactions = async () => {
             fetchUserTransactions().then((response) => {
-                console.log(response);
+                setFetching(false);
                 setTransactions(response.transactions);
             });
         };
@@ -90,6 +92,13 @@ const Transactions = () => {
             />
 
             <View style={styles.transactionList}>
+                {fetching && (
+                    <View style={{ alignItems: "center", justifyContent: "center", padding: 16 }}>
+                        {" "}
+                        <ActivityIndicator size="large" color="#0000ff" />{" "}
+                        <TextComponent>Crunching your latest transaction...</TextComponent>
+                    </View>
+                )}
                 {transactions.map((transaction) => (
                     <CardComponent key={transaction.uuid} customStyles={styles.card} header="Transaction Details">
                         <View style={styles.cardHeader}>
