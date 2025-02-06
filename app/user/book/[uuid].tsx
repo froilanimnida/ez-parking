@@ -140,7 +140,7 @@ const EstablishmentView = () => {
 
     return (
         <ResponsiveContainer>
-            <LinkComponent style={{ width: "auto", marginBottom: 16 }} href="../user">
+            <LinkComponent style={{ width: "auto", marginBottom: 16 }} href="../../user">
                 ← Back to Dashboard
             </LinkComponent>
 
