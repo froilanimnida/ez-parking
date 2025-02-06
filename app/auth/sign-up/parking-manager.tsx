@@ -490,7 +490,6 @@ export default ParkingManagerSignUp;
 const styles = StyleSheet.create({
     header: {
         width: "100%",
-        flex: 1,
         paddingBottom: 16,
         alignItems: "center",
     },

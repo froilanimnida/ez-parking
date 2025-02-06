@@ -1,19 +1,10 @@
 import LandingPage from "@/components/mobile/LandingPage";
-import { useEffect } from "react";
-import { StyleSheet, View } from "react-native";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 
 export default function Index() {
     return (
-        <View style={styles.container}>
+        <ResponsiveContainer>
             <LandingPage />
-        </View>
+        </ResponsiveContainer>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-});
