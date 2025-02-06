@@ -4,6 +4,7 @@ import { Link, type ExternalPathString, type RelativePathString } from "expo-rou
 import { BaseComponentProps } from "@/lib/types/ui";
 import { baseStyles } from "@/styles/components";
 import TextComponent from "./TextComponent";
+import { useFonts } from "expo-font";
 
 interface LinkProps extends BaseComponentProps {
     href: RelativePathString | ExternalPathString;
@@ -25,16 +26,13 @@ const LinkComponent: React.FC<LinkProps> = ({
     fullWidth = false,
     children,
 }) => {
+    useFonts({
+        Inter: require("./../assets/fonts/InterVariable.ttf"),
+    });
     const content = children || (
         <>
             {icon && iconPosition === "left" && <View style={baseStyles.iconLeft}>{icon}</View>}
-            {label && (
-                <TextComponent
-                    style={[baseStyles[`text${size.toUpperCase()}`], baseStyles[`${variant}Text`], textStyle]}
-                >
-                    {label}
-                </TextComponent>
-            )}
+            {label && <TextComponent style={[baseStyles[`${variant}Text`], textStyle]}>{label}</TextComponent>}
             {icon && iconPosition === "right" && <View style={baseStyles.iconRight}>{icon}</View>}
         </>
     );
