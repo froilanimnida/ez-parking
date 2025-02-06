@@ -53,9 +53,12 @@ const LoginForm = () => {
 
     useEffect(() => {
         const nextParams = local.next as RelativePathString | ExternalPathString;
-        setTimeout(() => {
-            router.replace(nextParams);
-        }, 1500);
+        if (nextParams) {
+            setTimeout(() => {
+                router.replace(nextParams);
+            }, 1500);
+        }
+
         let interval: NodeJS.Timeout;
         if (timer > 0) {
             interval = setInterval(() => setTimer((t) => t - 1), 1000);

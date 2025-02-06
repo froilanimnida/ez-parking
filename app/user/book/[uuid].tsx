@@ -1,11 +1,15 @@
 import React, { useMemo } from "react";
-import { View, Text, StyleSheet, ScrollView, Linking } from "react-native";
+import { View, Text, StyleSheet, Linking } from "react-native";
 import WebView from "react-native-webview";
-import SlotCard from "@/components/SlotCard"; // Adjust import according to your project
+import SlotCard from "@/components/SlotCard";
 import { OperatingHour } from "@/lib/models/operating-hour";
 import { PaymentMethod } from "@/lib/models/payment-method";
 import { PricingPlan } from "@/lib/models/pricing-plan";
 import type { ParkingSlot } from "@/lib/models/parking-slot";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
+import LinkComponent from "@/components/LinkComponent";
+import CardComponent from "@/components/CardComponent";
+import TextComponent from "@/components/TextComponent";
 
 interface ParkingEstablishment {
     uuid: string;
@@ -35,12 +39,7 @@ interface EstablishmentData {
     slots: Slot[];
 }
 
-interface EstablishmentViewProps {
-    data: EstablishmentData;
-}
-
-const EstablishmentView: React.FC<EstablishmentViewProps> = ({ data }) => {
-    // const establishmentData = data.establishment;
+const EstablishmentView = () => {
     const mockEstablishmentData = {
         establishment: {
             uuid: "e123-456",
@@ -120,7 +119,6 @@ const EstablishmentView: React.FC<EstablishmentViewProps> = ({ data }) => {
         ],
     };
 
-    // Build Google Maps embed URL
     const mapUrl = useMemo(() => {
         return `https://maps.google.com/maps?width=100%25&height=600&hl=en&q=${
             mockEstablishmentData.establishment.latitude
@@ -140,80 +138,69 @@ const EstablishmentView: React.FC<EstablishmentViewProps> = ({ data }) => {
     };
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-            {/* Back Link */}
-            <Text
-                style={styles.backLink}
-                onPress={() => {
-                    /* Implement navigation back */
-                }}
-            >
-                ← Back to Search
-            </Text>
+        <ResponsiveContainer>
+            <LinkComponent style={{ width: "auto", marginBottom: 16 }} href="../user">
+                ← Back to Dashboard
+            </LinkComponent>
 
-            {/* Main Details */}
-            <View style={styles.doubleColumn}>
-                <View style={[styles.card, styles.flex1]}>
-                    <View style={styles.headerRow}>
-                        <View style={{ flex: 1 }}>
-                            <Text style={styles.establishmentName}>{mockEstablishmentData.establishment.name}</Text>
-                            <Text style={styles.landmarksText}>
-                                {mockEstablishmentData.establishment.nearby_landmarks}
-                            </Text>
-
-                            {/* Space Type / Layout / Lighting */}
-                            <View style={styles.infoRow}>
-                                <Text style={styles.infoText}>
-                                    {mockEstablishmentData.establishment.space_type} Layout -{" "}
-                                    {mockEstablishmentData.establishment.space_layout} Parking
-                                </Text>
-                            </View>
-                            <View style={styles.infoRow}>
-                                <Text style={styles.infoText}>{mockEstablishmentData.establishment.lighting}</Text>
-                            </View>
+            <CardComponent header="Establishment Information" subHeader="Details about the parking establishment">
+                <View style={styles.headerRow}>
+                    <View style={{ flex: 1 }}>
+                        <TextComponent style={styles.establishmentName}>
+                            {mockEstablishmentData.establishment.name}
+                        </TextComponent>
+                        <TextComponent style={styles.landmarksText}>
+                            {mockEstablishmentData.establishment.nearby_landmarks}
+                        </TextComponent>
+                        <View style={styles.infoRow}>
+                            <TextComponent style={styles.infoText}>
+                                {mockEstablishmentData.establishment.space_type} Layout -{" "}
+                                {mockEstablishmentData.establishment.space_layout} Parking
+                            </TextComponent>
                         </View>
-
-                        {mockEstablishmentData.establishment.verified && (
-                            <Text style={styles.verifiedBadge}>Verified</Text>
-                        )}
+                        <View style={styles.infoRow}>
+                            <TextComponent style={styles.infoText}>
+                                {mockEstablishmentData.establishment.lighting}
+                            </TextComponent>
+                        </View>
                     </View>
-                </View>
 
-                {/* Payment Methods / Facilities */}
-                <View style={[styles.card, styles.flex1]}>
-                    <Text style={styles.sectionTitle}>Payment Methods and Facilities</Text>
-                    <View style={styles.chipContainer}>
-                        {mockEstablishmentData.payment_methods[0]?.accepts_cash && (
-                            <Text style={styles.paymentChip}>Cash</Text>
-                        )}
-                        {mockEstablishmentData.payment_methods[0]?.accepts_mobile && (
-                            <Text style={styles.paymentChip}>Mobile Payment</Text>
-                        )}
-                        {mockEstablishmentData.payment_methods[0]?.accepts_other && (
-                            <Text style={styles.paymentChip}>
-                                {mockEstablishmentData.payment_methods[0]?.other_methods}
-                            </Text>
-                        )}
-                        {mockEstablishmentData.establishment.facilities?.split(",").map((facility, idx) => (
-                            <Text style={styles.facilityChip} key={idx}>
-                                {facility.trim()}
-                            </Text>
-                        ))}
-                    </View>
+                    {mockEstablishmentData.establishment.verified && <Text style={styles.verifiedBadge}>Verified</Text>}
                 </View>
-            </View>
+            </CardComponent>
+
+            <CardComponent header="Payment Methods and Facilities" subHeader="Accepted payment methods and facilities">
+                <View style={styles.chipContainer}>
+                    {mockEstablishmentData.payment_methods[0]?.accepts_cash && (
+                        <TextComponent style={styles.paymentChip}>Cash</TextComponent>
+                    )}
+                    {mockEstablishmentData.payment_methods[0]?.accepts_mobile && (
+                        <TextComponent style={styles.paymentChip}>Mobile Payment</TextComponent>
+                    )}
+                    {mockEstablishmentData.payment_methods[0]?.accepts_other && (
+                        <TextComponent style={styles.paymentChip}>
+                            {mockEstablishmentData.payment_methods[0]?.other_methods}
+                        </TextComponent>
+                    )}
+                    {mockEstablishmentData.establishment.facilities?.split(",").map((facility, idx) => (
+                        <TextComponent style={styles.facilityChip} key={idx}>
+                            {facility.trim()}
+                        </TextComponent>
+                    ))}
+                </View>
+            </CardComponent>
 
             {/* Map with Navigation Links */}
             <View style={[styles.card, { height: 400 }]}>
                 <View style={styles.mapHeader}>
-                    <Text style={styles.sectionTitle}>Location</Text>
+                    <TextComponent style={styles.sectionTitle}>Location</TextComponent>
                     <View style={styles.mapLinks}>
-                        <Text style={styles.mapLink} onPress={() => openNavigation("google")}>
+                        <TextComponent style={styles.mapLink} onPress={() => openNavigation("google")}>
                             Google Maps
-                        </Text>
-                        <Text style={styles.mapLink} onPress={() => openNavigation("waze")}>
+                        </TextComponent>
+                        <TextComponent style={styles.mapLink} onPress={() => openNavigation("waze")}>
                             Waze
-                        </Text>
+                        </TextComponent>
                     </View>
                 </View>
                 <View style={styles.mapContainer}>
@@ -223,26 +210,24 @@ const EstablishmentView: React.FC<EstablishmentViewProps> = ({ data }) => {
 
             {/* Operating Hours */}
             <View style={styles.card}>
-                <Text style={styles.sectionTitle}>Operating Hours</Text>
+                <TextComponent style={styles.sectionTitle}>Operating Hours</TextComponent>
                 {mockEstablishmentData.establishment.is24_7 ? (
-                    <Text style={styles.operatingHourText}>Open 24/7</Text>
+                    <TextComponent style={styles.operatingHourText}>Open 24/7</TextComponent>
                 ) : (
                     <View style={styles.hoursGrid}>
                         {mockEstablishmentData.operating_hours.map((hour, idx) => (
                             <View style={styles.hourItem} key={idx}>
-                                <Text style={styles.hourItemDay}>{hour.day_of_week}</Text>
-                                <Text style={styles.hourItemTime}>
+                                <TextComponent style={styles.hourItemDay}>{hour.day_of_week}</TextComponent>
+                                <TextComponent style={styles.hourItemTime}>
                                     {hour.is_enabled ? `${hour.opening_time} - ${hour.closing_time}` : "Closed"}
-                                </Text>
+                                </TextComponent>
                             </View>
                         ))}
                     </View>
                 )}
             </View>
-
-            {/* Slots */}
             <View style={{ marginVertical: 16 }}>
-                <Text style={styles.sectionMainTitle}>Available Parking Slots</Text>
+                <TextComponent style={styles.sectionMainTitle}>Available Parking Slots</TextComponent>
                 <View style={styles.slotGrid}>
                     {mockEstablishmentData.slots.map((slot) => (
                         <SlotCard
@@ -255,27 +240,13 @@ const EstablishmentView: React.FC<EstablishmentViewProps> = ({ data }) => {
                     ))}
                 </View>
             </View>
-        </ScrollView>
+        </ResponsiveContainer>
     );
 };
 
 export default EstablishmentView;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#f9fafb",
-    },
-    contentContainer: {
-        alignItems: "center",
-        padding: 16,
-    },
-    backLink: {
-        alignSelf: "flex-start",
-        color: "#3b82f6",
-        marginBottom: 12,
-        fontSize: 16,
-    },
     doubleColumn: {
         width: "100%",
         flexDirection: "row",
