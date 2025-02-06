@@ -10,6 +10,7 @@ import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import LinkComponent from "@/components/LinkComponent";
 import CardComponent from "@/components/CardComponent";
 import TextComponent from "@/components/TextComponent";
+import ButtonComponent from "@/components/ButtonComponent";
 
 interface ParkingEstablishment {
     uuid: string;
@@ -143,7 +144,11 @@ const EstablishmentView = () => {
                 ← Back to Dashboard
             </LinkComponent>
 
-            <CardComponent header="Establishment Information" subHeader="Details about the parking establishment">
+            <CardComponent
+                customStyles={styles.card}
+                header="Establishment Information"
+                subHeader="Details about the parking establishment"
+            >
                 <View style={styles.headerRow}>
                     <View style={{ flex: 1 }}>
                         <TextComponent style={styles.establishmentName}>
@@ -169,7 +174,11 @@ const EstablishmentView = () => {
                 </View>
             </CardComponent>
 
-            <CardComponent header="Payment Methods and Facilities" subHeader="Accepted payment methods and facilities">
+            <CardComponent
+                customStyles={styles.card}
+                header="Payment Methods and Facilities"
+                subHeader="Accepted payment methods and facilities"
+            >
                 <View style={styles.chipContainer}>
                     {mockEstablishmentData.payment_methods[0]?.accepts_cash && (
                         <TextComponent style={styles.paymentChip}>Cash</TextComponent>
@@ -195,12 +204,8 @@ const EstablishmentView = () => {
                 <View style={styles.mapHeader}>
                     <TextComponent style={styles.sectionTitle}>Location</TextComponent>
                     <View style={styles.mapLinks}>
-                        <TextComponent style={styles.mapLink} onPress={() => openNavigation("google")}>
-                            Google Maps
-                        </TextComponent>
-                        <TextComponent style={styles.mapLink} onPress={() => openNavigation("waze")}>
-                            Waze
-                        </TextComponent>
+                        <ButtonComponent onPress={() => openNavigation("google")}>Google Maps</ButtonComponent>
+                        <ButtonComponent onPress={() => openNavigation("waze")}>Waze</ButtonComponent>
                     </View>
                 </View>
                 <View style={styles.mapContainer}>
@@ -258,12 +263,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     card: {
-        backgroundColor: "#ffffff",
-        padding: 16,
-        borderRadius: 8,
-        boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.1)",
         marginBottom: 16,
-        elevation: 2,
     },
     headerRow: {
         flexDirection: "row",

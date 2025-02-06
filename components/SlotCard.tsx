@@ -4,6 +4,7 @@ import { PricingPlan } from "@/lib/models/pricing-plan";
 import { ParkingSlot } from "@/lib/models/parking-slot";
 import CardComponent from "./CardComponent";
 import TextComponent from "./TextComponent";
+import { router } from "expo-router";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;
@@ -57,7 +58,7 @@ const SlotCard: React.FC<SlotCardProps> = ({ slotInfo, rates, establishmentUuid,
     const handleBookSlot = () => {
         const nextUrl = `/user/book/${establishmentUuid}?slot=${slotUuid}`;
         const loginUrl = `/auth/login?next=${encodeURIComponent(nextUrl)}`;
-        Linking.openURL(loginUrl);
+        router.push(loginUrl);
     };
 
     return (

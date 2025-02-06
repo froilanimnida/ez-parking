@@ -8,13 +8,7 @@ import axiosInstance from "@/lib/axiosInstance";
 import TextInputComponent from "@/components/TextInputComponent";
 import type { AxiosError } from "axios";
 import { getAuthHeaders } from "@/lib/credentialsManager";
-import {
-    router,
-    useGlobalSearchParams,
-    useLocalSearchParams,
-    type ExternalPathString,
-    type RelativePathString,
-} from "expo-router";
+import { router, useLocalSearchParams, type ExternalPathString, type RelativePathString } from "expo-router";
 import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 
@@ -91,13 +85,15 @@ const LoginForm = () => {
         setLoggingIn(true);
         try {
             const result = await verifyOTP(email, otp, rememberMe);
+            const nextParams = local.next as RelativePathString | ExternalPathString;
             const headers = await getAuthHeaders();
             if (!headers.Authorization) {
                 console.warn("No authorization token found");
             }
-            console.log(result.data.role);
+            if (nextParams) {
+                router.replace(nextParams);
+            }
             router.replace(result.data.role);
-
             alert("Logged in successfully.");
             setLoggingIn(false);
         } catch (error) {
