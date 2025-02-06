@@ -11,6 +11,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import PlatformType from "@/lib/platform";
 import { getNearbyEstablishments } from "@/lib/api/establishment";
 import { askLocationPermission, getIPBasedLocation } from "@/lib/location";
+import LoadingComponent from "./reusable/LoadingComponent";
 export interface EstablishmentQuery extends ParkingEstablishment {
     open_slots: number;
     total_slots: number;
@@ -19,17 +20,15 @@ export interface EstablishmentQuery extends ParkingEstablishment {
     pricing_plans: PricingPlan[];
 }
 
-const getNearestEstablishments = async (latitude: number, longitude: number) => {
-    const result = await getNearbyEstablishments(latitude, longitude);
-    return result;
-};
+const getNearestEstablishments = async (latitude: number, longitude: number) =>
+    await getNearbyEstablishments(latitude, longitude);
 
 export default function EstablishmentSearch() {
-    const [mockParkingEstablishments, setEstablishments] = useState<EstablishmentQuery[]>([]);
+    const [establishments, setEstablishments] = useState<EstablishmentQuery[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [recentSearches, setRecentSearches] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const animation = new Animated.Value(0);
 
@@ -73,8 +72,8 @@ export default function EstablishmentSearch() {
                 setLocation({ latitude: data.latitude, longitude: data.longitude });
             }
             const data = await getNearestEstablishments(location.latitude, location.longitude);
-            console.log(data);
             setEstablishments(data.data.establishments);
+            setLoading(false);
         })();
     }, []);
 
@@ -128,12 +127,12 @@ export default function EstablishmentSearch() {
             {/* Main Content */}
             <ScrollView style={styles.content}>
                 {loading ? (
-                    <View style={styles.loadingContainer}>{/* Loading indicator */}</View>
-                ) : mockParkingEstablishments.length === 0 ? (
+                    <LoadingComponent text="Searching for nearby parking establishments..." />
+                ) : establishments.length === 0 ? (
                     <View style={styles.noResults}>{/* No results UI */}</View>
                 ) : (
                     <View style={styles.results}>
-                        {mockParkingEstablishments.map((establishment) => (
+                        {establishments.map((establishment) => (
                             <EstablishmentItem
                                 key={establishment.establishment_id}
                                 establishment={establishment}
