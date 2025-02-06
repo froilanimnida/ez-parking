@@ -2,6 +2,8 @@ import React from "react";
 import { View, Text, StyleSheet, Pressable, Linking } from "react-native";
 import { PricingPlan } from "@/lib/models/pricing-plan";
 import { ParkingSlot } from "@/lib/models/parking-slot";
+import CardComponent from "./CardComponent";
+import TextComponent from "./TextComponent";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;
@@ -59,23 +61,18 @@ const SlotCard: React.FC<SlotCardProps> = ({ slotInfo, rates, establishmentUuid,
     };
 
     return (
-        <View style={[styles.container, getBorderColor()]}>
-            <View style={styles.header}>
-                <Text style={styles.slotCode}>{slotInfo.slot_code}</Text>
-                <Text style={getStatusBadgeStyle()}>{slotInfo.slot_status}</Text>
-            </View>
-
+        <CardComponent customStyles={[getBorderColor()]} header={slotInfo.slot_code} subHeader={slotInfo.slot_status}>
             <View style={styles.infoContainer}>
-                <Text style={styles.infoText}>Floor: {slotInfo.floor_level}</Text>
-                <Text style={styles.infoText}>Accommodates: {slotInfo.vehicle_type_name}</Text>
-                <Text style={styles.infoText}>Size: {slotInfo.vehicle_type_size}</Text>
+                <TextComponent style={styles.infoText}>Floor: {slotInfo.floor_level}</TextComponent>
+                <TextComponent style={styles.infoText}>Accommodates: {slotInfo.vehicle_type_name}</TextComponent>
+                <TextComponent style={styles.infoText}>Size: {slotInfo.vehicle_type_size}</TextComponent>
 
                 {slotInfo.slot_status === "open" && (
                     <>
                         <View style={styles.rateRow}>
-                            <Text style={styles.rateText}>
+                            <TextComponent style={styles.rateText}>
                                 ₱{amount}/{type === "hourly" ? "hr" : type === "daily" ? "day" : "mo"}
-                            </Text>
+                            </TextComponent>
                             <Text style={styles.rateTypeText}>{type} rate</Text>
                         </View>
 
@@ -87,20 +84,11 @@ const SlotCard: React.FC<SlotCardProps> = ({ slotInfo, rates, establishmentUuid,
 
                 {slotInfo.is_premium && <Text style={styles.premiumBadge}>Premium</Text>}
             </View>
-        </View>
+        </CardComponent>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        borderLeftWidth: 4,
-        backgroundColor: "#ffffff",
-        padding: 16,
-        borderRadius: 4,
-        marginVertical: 8,
-        boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-        elevation: 2,
-    },
     borderOpen: {
         borderLeftColor: "green",
     },

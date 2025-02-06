@@ -8,7 +8,13 @@ import axiosInstance from "@/lib/axiosInstance";
 import TextInputComponent from "@/components/TextInputComponent";
 import type { AxiosError } from "axios";
 import { getAuthHeaders } from "@/lib/credentialsManager";
-import { router } from "expo-router";
+import {
+    router,
+    useGlobalSearchParams,
+    useLocalSearchParams,
+    type ExternalPathString,
+    type RelativePathString,
+} from "expo-router";
 import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 
@@ -36,6 +42,7 @@ const LoginForm = () => {
     const [rememberMe, setRememberMe] = useState(false);
     const [loggingIn, setLoggingIn] = useState(false);
     const [timer, setTimer] = useState(0);
+    const local = useLocalSearchParams();
     const isEmailValid = (email: string) => {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     };
@@ -45,6 +52,10 @@ const LoginForm = () => {
     };
 
     useEffect(() => {
+        const nextParams = local.next as RelativePathString | ExternalPathString;
+        setTimeout(() => {
+            router.replace(nextParams);
+        }, 1500);
         let interval: NodeJS.Timeout;
         if (timer > 0) {
             interval = setInterval(() => setTimer((t) => t - 1), 1000);
