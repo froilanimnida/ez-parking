@@ -85,6 +85,8 @@ const LoginForm = () => {
         setLoggingIn(true);
         try {
             const result = await verifyOTP(email, otp, rememberMe);
+            const role = result.data.role as string;
+
             const nextParams = local.next as RelativePathString | ExternalPathString;
             const headers = await getAuthHeaders();
             if (!headers.Authorization) {
@@ -93,7 +95,7 @@ const LoginForm = () => {
             if (nextParams) {
                 router.replace(nextParams);
             }
-            router.replace(result.data.role);
+            router.replace(role.replace("_", "-") as ExternalPathString);
             alert("Logged in successfully.");
             setLoggingIn(false);
         } catch (error) {
