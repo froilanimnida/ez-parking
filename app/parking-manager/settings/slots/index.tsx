@@ -1,12 +1,15 @@
 import { StyleSheet, View, TextInput, Switch } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import TextComponent from "@/components/TextComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import CardComponent from "@/components/CardComponent";
 import SelectComponent from "@/components/SelectComponent";
 import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
+import LoadingComponent from "@/components/reusable/LoadingComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import TextInputComponent from "@/components/TextInputComponent";
+import { createParkingSlot, getParkingSlotsParkingManager } from "@/lib/api/parkingSlot";
+import { ParkingSlot } from "@/lib/models/parking-slot";
 
 const slotFeatures = [
     {
@@ -51,8 +54,16 @@ const Slots = () => {
         base_price_per_month: "",
         price_multiplier: "",
     });
+    const [isFetching, setIsFetching] = useState(true);
+    const [slots, setSlots] = useState([] as ParkingSlot[]);
 
-    let slots;
+    useEffect(() => {
+        const fetchSlots = async () => {
+            let slots = await getParkingSlotsParkingManager();
+            setIsFetching(false);
+            setSlots(slots);
+        };
+    });
 
     return (
         <ResponsiveContainer>
@@ -154,7 +165,40 @@ const Slots = () => {
                 <TextComponent variant="h1" style={styles.sectionTitle}>
                     Existing Parking Slots
                 </TextComponent>
-
+                ( isFetching ? (
+                <LoadingComponent text="Getting all the slot..." />
+                ): (
+                <View style={styles.slotsGrid}>
+                    {slots.map((slot, index) => (
+                        <CardComponent
+                            header="Slot Code"
+                            key={index}
+                            customStyles={[
+                                styles.slotCard,
+                                slot.slot_status === "open" && styles.slotOpen,
+                                slot.slot_status === "reserved" && styles.slotReserved,
+                                slot.slot_status === "occupied" && styles.slotOccupied,
+                            ]}
+                        >
+                            <View style={styles.slotHeader}>
+                                <TextComponent style={styles.slotCode}>{slot.slot_code}</TextComponent>
+                                <View
+                                    style={[
+                                        styles.statusBadge,
+                                        slot.slot_status === "open" && styles.statusOpen,
+                                        slot.slot_status === "reserved" && styles.statusReserved,
+                                        slot.slot_status === "occupied" && styles.statusOccupied,
+                                    ]}
+                                >
+                                    <TextComponent style={styles.statusText}>
+                                        {slot.slot_status.toUpperCase()}
+                                    </TextComponent>
+                                </View>
+                            </View>
+                        </CardComponent>
+                    ))}
+                </View>
+                ) )
                 <View style={styles.slotsGrid}>
                     {/* {slots.map((slot, index) => (
                             <CardComponent
