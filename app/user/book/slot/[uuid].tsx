@@ -14,6 +14,7 @@ import TextComponent from "@/components/TextComponent";
 import TextInputComponent from "@/components/TextInputComponent";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import SelectComponent from "@/components/SelectComponent";
+import CheckboxComponent from "@/components/CheckboxComponent";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;
@@ -320,26 +321,18 @@ const SlotInfo = () => {
                     </View>
                 </View>
 
-                {/* Confirmation Checkboxes */}
-                <View style={styles.checkboxRow}>
-                    <Pressable onPress={() => setAgreed(!agreed)} style={styles.checkbox}>
-                        <View style={[styles.checkboxSquare, agreed && styles.checkboxSelected]} />
-                    </Pressable>
-                    <TextComponent style={styles.checkboxLabel}>
-                        I agree to the parking terms and conditions, including the cancellation policy.
-                    </TextComponent>
-                </View>
+                <CheckboxComponent
+                    onValueChange={setAgreed}
+                    value={agreed}
+                    placeholder="I agree to the parking terms and conditions, including the cancellation policy."
+                />
 
-                <View style={styles.checkboxRow}>
-                    <Pressable onPress={() => setTerms(!terms)} style={styles.checkbox}>
-                        <View style={[styles.checkboxSquare, terms && styles.checkboxSelected]} />
-                    </Pressable>
-                    <TextComponent style={styles.checkboxLabel}>
-                        I agree that the price indicated here is final regardless if I used the parking slot for a
-                        shorter duration. I also agree that the establishment has the right to charge me for any damages
-                        incurred during my stay if the establishment can prove that I am responsible.
-                    </TextComponent>
-                </View>
+                <CheckboxComponent
+                    value={terms}
+                    onValueChange={setTerms}
+                    placeholder="I also agree that the establishment has the right to charge me for any damages
+                        incurred during my stay if the establishment can prove that I am responsible."
+                />
 
                 {/* Confirm Booking Button */}
                 <Pressable
