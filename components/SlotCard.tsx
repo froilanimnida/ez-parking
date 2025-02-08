@@ -31,7 +31,7 @@ function getRateDisplay(baseRate: number, rates: PricingPlan[]): { amount: strin
 }
 
 const SlotCard: React.FC<SlotCardProps> = ({ slotInfo, rates, establishmentUuid, slotUuid }) => {
-    const { amount, type } = getRateDisplay(slotInfo.base_rate, rates);
+    const { amount, type } = getRateDisplay(Number(slotInfo.base_price_per_hour), rates);
 
     const getBorderColor = () => {
         switch (slotInfo.slot_status) {

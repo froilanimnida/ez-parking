@@ -123,11 +123,9 @@ const SlotInfo = () => {
             slot_code: "SLOT-001",
             floor_level: 3,
             is_premium: true,
-            slot_multiplier: 1.5,
             vehicle_type_code: "SUV",
             vehicle_type_name: "Sport Utility Vehicle",
             vehicle_type_size: "Large",
-            base_rate: 50,
             created_at: "2021-10-01T00:00:00Z",
             establishment_id: 1,
             is_active: true,
@@ -162,7 +160,7 @@ const SlotInfo = () => {
         }
 
         let rate = parseFloat(plan.rate);
-        rate *= transactionCheckoutData.slot_info.slot_multiplier;
+        rate *= parseFloat(transactionCheckoutData.slot_info.base_price_per_day);
         if (transactionCheckoutData.slot_info.is_premium) {
             // Add 20% for premium
             rate *= 1.2;
@@ -295,7 +293,7 @@ const SlotInfo = () => {
                         Base Rate: ₱
                         {(
                             parseFloat(validPricingPlans.find((plan) => plan.rate_type === "hourly")?.rate ?? "0") *
-                            transactionCheckoutData.slot_info.slot_multiplier *
+                            parseFloat(transactionCheckoutData.slot_info.price_multiplier) *
                             (transactionCheckoutData.slot_info.is_premium ? 1.2 : 1)
                         ).toFixed(2)}
                         /hour{" "}

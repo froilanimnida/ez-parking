@@ -8,8 +8,6 @@ export interface ParkingSlot {
     is_active: boolean;
     slot_features: "standard" | "covered" | "vip" | "disabled" | "ev_charging";
     is_premium: boolean;
-    base_rate: number;
-    slot_multiplier: number;
     floor_level: number;
     created_at: string;
     updated_at: string;
