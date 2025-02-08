@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, TextInput, StyleSheet, Pressable, ActivityIndicator } from "react-native";
+import { View, StyleSheet, Pressable } from "react-native";
 import { Address } from "@/lib/models/address";
 import { ParkingEstablishment } from "@/lib/models/parking-establishment";
 import { OperatingHour } from "@/lib/models/operating-hour";
 import { PaymentMethod } from "@/lib/models/payment-method";
 import { PricingPlan } from "@/lib/models/pricing-plan";
 import { ParkingSlot } from "@/lib/models/parking-slot";
+import { useLocalSearchParams } from "expo-router";
+import LinkComponent from "@/components/LinkComponent";
+import CardComponent from "@/components/CardComponent";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
+import TextComponent from "@/components/TextComponent";
+import TextInputComponent from "@/components/TextInputComponent";
+import LoadingComponent from "@/components/reusable/LoadingComponent";
+import SelectComponent from "@/components/SelectComponent";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;
@@ -22,11 +30,10 @@ interface TransactionCheckoutData {
     has_ongoing_transaction: boolean;
 }
 
-// Define component
 const SlotInfo = () => {
-    // ----------------------------------------------------------------------------
-    // Mock data for demonstration. Replace this with real data fetched via props
-    // or any other data source.
+    const { slot_uuid } = useLocalSearchParams();
+    console.log(slot_uuid);
+    const [establishmentUuid, setEstablishmentUuid] = useState("");
     const transactionCheckoutData: TransactionCheckoutData = {
         address: {
             street: "123 Main Street",
@@ -129,12 +136,13 @@ const SlotInfo = () => {
             updated_at: "2021-10-01T00:00:00Z",
             uuid: "slot-uuid",
             vehicle_type_id: 1,
+            base_price_per_day: "1000",
+            base_price_per_hour: "50",
+            base_price_per_month: "5000",
+            price_multiplier: "1.5",
         },
         has_ongoing_transaction: false,
     };
-    // ----------------------------------------------------------------------------
-
-    // Local State
     const [agreed, setAgreed] = useState(false);
     const [terms, setTerms] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -143,10 +151,8 @@ const SlotInfo = () => {
     const [pricingType, setPricingType] = useState<"hourly" | "daily" | "monthly">("hourly");
     const [totalPrice, setTotalPrice] = useState(0);
 
-    // Extract valid pricing plans (is_enabled)
     const validPricingPlans = transactionCheckoutData.pricing_plans.filter((plan) => plan.is_enabled);
 
-    // Helper function to compute total price
     const updateTotalPrice = (newDuration: number, newPricingType: typeof pricingType) => {
         const plan = validPricingPlans.find((p) => p.rate_type === newPricingType);
         if (!plan) {
@@ -172,7 +178,6 @@ const SlotInfo = () => {
         setTotalPrice(total);
     };
 
-    // Whenever duration or pricingType changes, recalc total
     useEffect(() => {
         updateTotalPrice(duration, pricingType);
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -193,72 +198,68 @@ const SlotInfo = () => {
         }, 1500);
     };
 
-    // ----------------------------------------------------------------------------
-    // Rendering
-    // ----------------------------------------------------------------------------
     return (
-        <ScrollView style={styles.container}>
-            {/* Back to Dashboard link */}
-            <Pressable
-                onPress={() => {
-                    /* Navigate back */
-                }}
-                style={styles.backLink}
+        <ResponsiveContainer>
+            <LinkComponent href={`./user/book/${establishmentUuid}`} style={styles.backLink}>
+                ← Back to Dashboard
+            </LinkComponent>
+
+            <CardComponent
+                customStyles={styles.card}
+                header="Confirm Your Booking"
+                subHeader="Please review your booking details below"
+            ></CardComponent>
+
+            <CardComponent
+                customStyles={styles.card}
+                header="Slot Information"
+                subHeader={transactionCheckoutData.slot_info.slot_code}
             >
-                <Text style={styles.backLinkText}>← Back to Dashboard</Text>
-            </Pressable>
-
-            {/* Heading */}
-            <View style={styles.card}>
-                <Text style={styles.title}>Confirm Your Booking</Text>
-                <Text style={styles.paragraph}>Please review your booking details below</Text>
-            </View>
-
-            {/* Establishment & Slot Info */}
-            <View style={styles.card}>
                 <View style={styles.infoGrid}>
-                    {/* Establishment Details */}
                     <View style={styles.infoBlock}>
-                        <Text style={styles.subheading}>Establishment Details</Text>
-                        <Text style={styles.paragraph}>{transactionCheckoutData.establishment_info.name}</Text>
-                        <Text style={styles.paragraph}>
+                        <TextComponent style={styles.subheading}>Establishment Details</TextComponent>
+                        <TextComponent style={styles.paragraph}>
+                            {transactionCheckoutData.establishment_info.name}
+                        </TextComponent>
+                        <TextComponent style={styles.paragraph}>
                             {transactionCheckoutData.address.street} {transactionCheckoutData.address.city},{" "}
                             {transactionCheckoutData.address.province} {transactionCheckoutData.address.postal_code}
-                        </Text>
-                        <Text style={[styles.paragraph, styles.smallText]}>
+                        </TextComponent>
+                        <TextComponent style={[styles.paragraph, styles.smallText]}>
                             Base Rate: ₱{validPricingPlans.find((plan) => plan.rate_type === "hourly")?.rate}
                             /hour
-                        </Text>
+                        </TextComponent>
                     </View>
 
-                    {/* Slot Information */}
                     <View style={styles.infoBlock}>
-                        <Text style={styles.subheading}>Slot Information</Text>
-                        <Text style={styles.paragraph}>Slot Code: {transactionCheckoutData.slot_info.slot_code}</Text>
-                        <Text style={styles.paragraph}>
+                        <TextComponent style={styles.subheading}>Slot Information</TextComponent>
+                        <TextComponent style={styles.paragraph}>
+                            Slot Code: {transactionCheckoutData.slot_info.slot_code}
+                        </TextComponent>
+                        <TextComponent style={styles.paragraph}>
                             Floor Level: {transactionCheckoutData.slot_info.floor_level}
-                        </Text>
-                        <Text style={styles.paragraph}>
+                        </TextComponent>
+                        <TextComponent style={styles.paragraph}>
                             Vehicle Type: {transactionCheckoutData.slot_info.vehicle_type_name}
-                        </Text>
+                        </TextComponent>
                     </View>
                 </View>
-            </View>
+            </CardComponent>
 
             {/* Booking Form */}
             <View style={styles.card}>
                 {/* Duration */}
                 <View style={styles.formRow}>
-                    <Text style={styles.formLabel}>
+                    <TextComponent style={styles.formLabel}>
                         Parking Duration{" "}
                         {pricingType === "hourly"
                             ? "(in hours)"
                             : pricingType === "daily"
                             ? "(in days)"
                             : "(in months)"}
-                    </Text>
-                    <TextInput
-                        style={styles.input}
+                    </TextComponent>
+                    <TextInputComponent
+                        customStyles={styles.input}
                         keyboardType="number-pad"
                         value={String(duration)}
                         onChangeText={(val) => setDuration(Number(val))}
@@ -268,40 +269,28 @@ const SlotInfo = () => {
 
                 {/* Pricing Type */}
                 <View style={styles.formRow}>
-                    <Text style={styles.formLabel}>Pricing Type</Text>
+                    <TextComponent style={styles.formLabel}>Pricing Type</TextComponent>
                     <View style={styles.selectBox}>
-                        {/* We replicate a simple select approach by listing valid plans in separate Pressables.
-                For a real app, you might use a Picker or custom dropdown. */}
-                        <Text style={styles.formLabel}>
+                        <TextComponent style={styles.formLabel}>
                             Current: {pricingType.charAt(0).toUpperCase() + pricingType.slice(1)}
-                        </Text>
+                        </TextComponent>
                         <View style={{ marginTop: 8 }}>
-                            {validPricingPlans.map((plan) => (
-                                <Pressable
-                                    key={plan.rate_type}
-                                    onPress={() => setPricingType(plan.rate_type as typeof pricingType)}
-                                    style={[
-                                        styles.planOption,
-                                        plan.rate_type === pricingType && styles.planOptionSelected,
-                                    ]}
-                                >
-                                    <Text
-                                        style={[
-                                            styles.formLabelSmall,
-                                            { color: plan.rate_type === pricingType ? "#ffffff" : "#374151" },
-                                        ]}
-                                    >
-                                        {plan.rate_type.charAt(0).toUpperCase() + plan.rate_type.slice(1)}
-                                    </Text>
-                                </Pressable>
-                            ))}
+                            <SelectComponent
+                                items={[
+                                    { label: "Hourly", value: "hourly" },
+                                    { label: "Daily", value: "daily" },
+                                    { label: "Monthly", value: "monthly" },
+                                ]}
+                                onValueChange={(val) => setPricingType(val as typeof pricingType)}
+                                selectedValue={pricingType}
+                            />
                         </View>
                     </View>
                 </View>
 
                 {/* Pricing Summary */}
                 <View style={styles.summaryContainer}>
-                    <Text style={styles.summaryText}>
+                    <TextComponent style={styles.summaryText}>
                         Base Rate: ₱
                         {(
                             parseFloat(validPricingPlans.find((plan) => plan.rate_type === "hourly")?.rate ?? "0") *
@@ -310,20 +299,24 @@ const SlotInfo = () => {
                         ).toFixed(2)}
                         /hour{" "}
                         {transactionCheckoutData.slot_info.is_premium && (
-                            <Text style={styles.premiumText}>(Premium Slot)</Text>
+                            <TextComponent style={styles.premiumText}>(Premium Slot)</TextComponent>
                         )}
-                    </Text>
+                    </TextComponent>
                     <View style={styles.summaryRow}>
-                        <Text style={styles.summaryLabel}>Duration:</Text>
-                        <Text style={styles.summaryValue}>
+                        <TextComponent style={styles.summaryLabel}>Duration:</TextComponent>
+                        <TextComponent style={styles.summaryValue}>
                             {duration}{" "}
                             {pricingType === "hourly" ? "hours" : pricingType === "daily" ? "days" : "months"}
-                        </Text>
+                        </TextComponent>
                     </View>
                     <View style={styles.divider} />
                     <View style={styles.summaryRow}>
-                        <Text style={[styles.summaryLabel, { fontWeight: "600" }]}>Total Amount:</Text>
-                        <Text style={[styles.summaryValue, { fontWeight: "600" }]}>₱{totalPrice.toFixed(2)}</Text>
+                        <TextComponent style={[styles.summaryLabel, { fontWeight: "600" }]}>
+                            Total Amount:
+                        </TextComponent>
+                        <TextComponent style={[styles.summaryValue, { fontWeight: "600" }]}>
+                            ₱{totalPrice.toFixed(2)}
+                        </TextComponent>
                     </View>
                 </View>
 
@@ -332,20 +325,20 @@ const SlotInfo = () => {
                     <Pressable onPress={() => setAgreed(!agreed)} style={styles.checkbox}>
                         <View style={[styles.checkboxSquare, agreed && styles.checkboxSelected]} />
                     </Pressable>
-                    <Text style={styles.checkboxLabel}>
+                    <TextComponent style={styles.checkboxLabel}>
                         I agree to the parking terms and conditions, including the cancellation policy.
-                    </Text>
+                    </TextComponent>
                 </View>
 
                 <View style={styles.checkboxRow}>
                     <Pressable onPress={() => setTerms(!terms)} style={styles.checkbox}>
                         <View style={[styles.checkboxSquare, terms && styles.checkboxSelected]} />
                     </Pressable>
-                    <Text style={styles.checkboxLabel}>
+                    <TextComponent style={styles.checkboxLabel}>
                         I agree that the price indicated here is final regardless if I used the parking slot for a
                         shorter duration. I also agree that the establishment has the right to charge me for any damages
                         incurred during my stay if the establishment can prove that I am responsible.
-                    </Text>
+                    </TextComponent>
                 </View>
 
                 {/* Confirm Booking Button */}
@@ -355,18 +348,20 @@ const SlotInfo = () => {
                     onPress={handleConfirmBooking}
                 >
                     {transactionCheckoutData.has_ongoing_transaction ? (
-                        <Text style={styles.confirmButtonText}>You have an ongoing transaction.</Text>
+                        <TextComponent style={styles.confirmButtonText}>You have an ongoing transaction.</TextComponent>
                     ) : isSubmitting ? (
                         <>
-                            <ActivityIndicator size="small" color="#ffffff" />
-                            <Text style={[styles.confirmButtonText, { marginLeft: 8 }]}>Confirming...</Text>
+                            <LoadingComponent text="Confirming..." />
+                            <TextComponent style={[styles.confirmButtonText, { marginLeft: 8 }]}>
+                                Confirming...
+                            </TextComponent>
                         </>
                     ) : (
-                        <Text style={styles.confirmButtonText}>Confirm Booking</Text>
+                        <TextComponent style={styles.confirmButtonText}>Confirm Booking</TextComponent>
                     )}
                 </Pressable>
             </View>
-        </ScrollView>
+        </ResponsiveContainer>
     );
 };
 
@@ -394,7 +389,6 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
         elevation: 2,
-        marginHorizontal: 16,
     },
     title: {
         fontSize: 20,
@@ -447,13 +441,11 @@ const styles = StyleSheet.create({
         borderColor: "#d1d5db",
         borderWidth: 1,
         borderRadius: 4,
-        padding: 8,
     },
     planOption: {
         backgroundColor: "#ffffff",
         marginVertical: 4,
         paddingVertical: 6,
-        paddingHorizontal: 8,
         borderRadius: 4,
         borderColor: "#d1d5db",
         borderWidth: 1,
@@ -467,7 +459,6 @@ const styles = StyleSheet.create({
     },
     summaryContainer: {
         backgroundColor: "#f3f4f6",
-        padding: 12,
         borderRadius: 6,
         marginBottom: 16,
     },

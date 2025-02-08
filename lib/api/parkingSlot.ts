@@ -3,9 +3,8 @@ import type { ParkingSlot } from "../models/parking-slot";
 
 const parkingSlotRoot = "/slot" as const;
 
-export const createParkingSlot = async (newSlotData: ParkingSlot, establishmentId: number) => {
+export const createParkingSlot = async (newSlotData: ParkingSlot) => {
     const result = await axiosInstance.post(`${parkingSlotRoot}/create`, {
-        // establishment_uuid: newSlotData.establishment_uuid,
         slot_code: newSlotData.slot_code,
         is_premium: newSlotData.is_premium,
         vehicle_type_id: newSlotData.vehicle_type_id,
@@ -24,3 +23,9 @@ export const getParkingSlotsParkingManager = async () => {
     const result = await axiosInstance.get(`${parkingSlotRoot}/all`);
     return result.data.slots as ParkingSlot[];
 };
+
+
+export const getAllParkingSlots = async (establishment_uuid: string) => {
+    const result = await axiosInstance.get(`${parkingSlotRoot}/get-all-slots?establishment_uuid=${establishment_uuid}`);
+    return result.data.slots as ParkingSlot[];
+}

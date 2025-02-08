@@ -38,7 +38,7 @@ const VehicleTypes = () => {
         });
     }, []);
 
-    const handleInputChange = (field, value) => {
+    const handleInputChange = (field: string, value: string | boolean) => {
         setNewVehicleType({ ...newVehicleType, [field]: value });
     };
 

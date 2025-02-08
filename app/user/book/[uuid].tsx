@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import { View, Text, StyleSheet, Linking } from "react-native";
 import WebView from "react-native-webview";
-import SlotCard from "@/components/SlotCard";
 import { OperatingHour } from "@/lib/models/operating-hour";
 import { PaymentMethod } from "@/lib/models/payment-method";
 import { PricingPlan } from "@/lib/models/pricing-plan";
@@ -11,6 +10,7 @@ import LinkComponent from "@/components/LinkComponent";
 import CardComponent from "@/components/CardComponent";
 import TextComponent from "@/components/TextComponent";
 import ButtonComponent from "@/components/ButtonComponent";
+import { useLocalSearchParams, useGlobalSearchParams } from "expo-router";
 
 interface ParkingEstablishment {
     uuid: string;
@@ -41,6 +41,8 @@ interface EstablishmentData {
 }
 
 const EstablishmentView = () => {
+    const { uuid, slot } = useLocalSearchParams();
+    console.log(uuid, slot);
     const mockEstablishmentData = {
         establishment: {
             uuid: "e123-456",
@@ -234,15 +236,15 @@ const EstablishmentView = () => {
             <View style={{ marginVertical: 16 }}>
                 <TextComponent style={styles.sectionMainTitle}>Available Parking Slots</TextComponent>
                 <View style={styles.slotGrid}>
-                    {mockEstablishmentData.slots.map((slot) => (
-                        <SlotCard
-                            key={slot.uuid}
-                            slotInfo={slot}
-                            rates={mockEstablishmentData.pricing_plans}
-                            establishmentUuid={mockEstablishmentData.establishment.uuid}
-                            slotUuid={slot.uuid}
-                        />
-                    ))}
+                    {/* {mockEstablishmentData.slots.map((slot) => (
+                        // <SlotCard
+                        //     key={slot.uuid}
+                        //     slotInfo={slot}
+                        //     rates={mockEstablishmentData.pricing_plans}
+                        //     establishmentUuid={mockEstablishmentData.establishment.uuid}
+                        //     slotUuid={slot.uuid}
+                        // />
+                    ))} */}
                 </View>
             </View>
         </ResponsiveContainer>

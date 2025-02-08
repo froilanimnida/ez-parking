@@ -2,7 +2,7 @@ import { StyleSheet, View, TouchableOpacity, Linking } from "react-native";
 import React, { useEffect, useState } from "react";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
-import SlotCard from "@/components/SlotCard";
+import SlotCard from "@/components/guest/SlotCard";
 import calculateDistance from "@/lib/function/calculateDistance";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -16,6 +16,7 @@ import WebView from "react-native-webview";
 import PlatformType from "@/lib/platform";
 import { useLocalSearchParams } from "expo-router";
 import { fetchEstablishmentInfo } from "@/lib/api/establishment";
+import LinkComponent from "@/components/LinkComponent";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;

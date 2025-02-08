@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, SafeAreaView, Platform, StatusBar, ScrollView } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React, { useState } from "react";
 import ButtonComponent from "@/components/ButtonComponent";
 import LinkComponent from "@/components/LinkComponent";
@@ -74,7 +74,6 @@ const ParkingManagerSignUp = () => {
         }));
     };
 
-    // Add handler after existing handlers
     const handleFacilitiesChange = (section: string, field: string, value: string) => {
         setFacilitiesAndAmenities((prev) => ({
             ...prev,
@@ -85,32 +84,7 @@ const ParkingManagerSignUp = () => {
         }));
     };
 
-    const [pricingData, setPricingData] = useState({
-        hourly: {
-            enabled: false,
-            rate: 0,
-        },
-        daily: {
-            enabled: false,
-            rate: 0,
-        },
-        monthly: {
-            enabled: false,
-            rate: 0,
-        },
-    });
-
     const [agreed, setAgreed] = useState(false);
-
-    const handlePricingChange = (type: string, field: "enabled" | "rate", value: boolean | number) => {
-        setPricingData((prev) => ({
-            ...prev,
-            [type]: {
-                ...prev[type],
-                [field]: value,
-            },
-        }));
-    };
 
     const handleInputChange = (key: string, value: string) => {
         setOwnerInformation({ ...ownerInformation, [key]: value });
@@ -367,34 +341,6 @@ const ParkingManagerSignUp = () => {
                             onChangeText={(value) => handleFacilitiesChange("facilities", "nearbyFacilities", value)}
                             numberOfLines={3}
                         />
-                    </View>
-                </CardComponent>
-
-                <CardComponent
-                    header="Pricing Structure"
-                    subHeader="Set your parking rates"
-                    customStyles={{ width: "95%", maxWidth: 768 }}
-                >
-                    <View style={styles.form}>
-                        {Object.entries(pricingData).map(([type, config]) => (
-                            <View key={type} style={styles.priceRow}>
-                                <CheckboxComponent
-                                    placeholder={`${type.charAt(0).toUpperCase() + type.slice(1)} Rate`}
-                                    value={config.enabled}
-                                    onValueChange={(value) => handlePricingChange(type, "enabled", value)}
-                                />
-                                <View style={styles.priceInputContainer}>
-                                    <Text style={styles.currencySymbol}>₱</Text>
-                                    <TextInputComponent
-                                        value={String(config.rate)}
-                                        onChangeText={(value) => handlePricingChange(type, "rate", Number(value))}
-                                        keyboardType="numeric"
-                                        editable={config.enabled}
-                                        customStyles={[styles.priceInput, !config.enabled && styles.disabledInput]}
-                                    />
-                                </View>
-                            </View>
-                        ))}
                     </View>
                 </CardComponent>
 
