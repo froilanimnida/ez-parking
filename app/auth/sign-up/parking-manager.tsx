@@ -154,7 +154,7 @@ const ParkingManagerSignUp = () => {
                 <CardComponent
                     header="Owner Information"
                     subHeader="Enter your information below"
-                    customStyles={{ width: "95%", maxWidth: 768 }}
+                    customStyles={{ width: "95%" }}
                 >
                     <View style={styles.form}>
                         <SelectComponent
@@ -236,7 +236,7 @@ const ParkingManagerSignUp = () => {
                 <CardComponent
                     header="Parking Location"
                     subHeader="Enter the location details"
-                    customStyles={{ width: "95%", maxWidth: 768 }}
+                    customStyles={{ width: "95%" }}
                 >
                     <View style={styles.form}>
                         <TextInputComponent
@@ -330,7 +330,7 @@ const ParkingManagerSignUp = () => {
                 <CardComponent
                     header="Facilities & Amenities"
                     subHeader="Specify your parking facility details"
-                    customStyles={{ width: "95%", maxWidth: 768 }}
+                    customStyles={{ width: "95%" }}
                 >
                     <View style={styles.form}>
                         <SelectComponent
@@ -409,7 +409,7 @@ const ParkingManagerSignUp = () => {
                 <CardComponent
                     header="Accepted Payment Methods"
                     subHeader="Select available payment options"
-                    customStyles={{ width: "95%", maxWidth: 768 }}
+                    customStyles={{ width: "95%" }}
                 >
                     <View style={styles.form}>
                         <View style={styles.checkboxGroup}>
@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     submitContainer: {
-        width: "100%",
+        width: "95%",
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
@@ -510,6 +510,7 @@ const styles = StyleSheet.create({
     checkboxContainer: {
         width: "100%",
         marginBottom: 16,
+        gap: 16,
     },
     submitButton: {
         width: "100%",
@@ -519,8 +520,8 @@ const styles = StyleSheet.create({
         backgroundColor: "#EFF6FF",
         borderRadius: 8,
         padding: 16,
-        maxWidth: 768,
-        marginBottom: 20,
+        width: "95%",
+        marginBottom: 40,
     },
     infoHeader: {
         flexDirection: "row",

@@ -1,4 +1,4 @@
-import { ScrollView, View, Platform, KeyboardAvoidingView } from "react-native";
+import { ScrollView, View, KeyboardAvoidingView } from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import PlatformType from "@/lib/platform";
@@ -10,19 +10,20 @@ interface ResponsiveContainerProps {
 const ResponsiveContainer = ({ children }: ResponsiveContainerProps) => {
     return (
         <SafeAreaView
-            style={{ flex: 1, paddingTop: PlatformType() == "web" ? 16 : 0 }}
-            edges={["top", "left", "right"]}
+            style={{ flex: 1 }}
+            edges={PlatformType() === "web" ? ["left", "right"] : ["left", "right", "bottom", "top"]}
         >
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
+                behavior={PlatformType() === "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={PlatformType() === "ios" ? 64 : 0}
             >
                 <ScrollView
                     contentContainerStyle={{
                         flexGrow: 1,
+                        paddingVertical: 32,
                         alignItems: "center",
-                        ...(Platform.OS === "web" && {
+                        ...(PlatformType() === "web" && {
                             display: "flex",
                             flex: 1,
                         }),
@@ -35,8 +36,7 @@ const ResponsiveContainer = ({ children }: ResponsiveContainerProps) => {
                             width: "100%",
                             maxWidth: 1536,
                             paddingHorizontal: 16,
-                            paddingBottom: Platform.OS !== "web" ? 24 : 0,
-                            ...(Platform.OS === "web" && {
+                            ...(PlatformType() === "web" && {
                                 flex: 1,
                             }),
                         }}
