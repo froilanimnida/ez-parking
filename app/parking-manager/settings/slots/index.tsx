@@ -63,6 +63,7 @@ const Slots = () => {
             setIsFetching(false);
             setSlots(slots);
         };
+        fetchSlots();
     });
 
     return (
@@ -165,40 +166,40 @@ const Slots = () => {
                 <TextComponent variant="h1" style={styles.sectionTitle}>
                     Existing Parking Slots
                 </TextComponent>
-                ( isFetching ? (
-                <LoadingComponent text="Getting all the slot..." />
-                ): (
-                <View style={styles.slotsGrid}>
-                    {slots.map((slot, index) => (
-                        <CardComponent
-                            header="Slot Code"
-                            key={index}
-                            customStyles={[
-                                styles.slotCard,
-                                slot.slot_status === "open" && styles.slotOpen,
-                                slot.slot_status === "reserved" && styles.slotReserved,
-                                slot.slot_status === "occupied" && styles.slotOccupied,
-                            ]}
-                        >
-                            <View style={styles.slotHeader}>
-                                <TextComponent style={styles.slotCode}>{slot.slot_code}</TextComponent>
-                                <View
-                                    style={[
-                                        styles.statusBadge,
-                                        slot.slot_status === "open" && styles.statusOpen,
-                                        slot.slot_status === "reserved" && styles.statusReserved,
-                                        slot.slot_status === "occupied" && styles.statusOccupied,
-                                    ]}
-                                >
-                                    <TextComponent style={styles.statusText}>
-                                        {slot.slot_status.toUpperCase()}
-                                    </TextComponent>
+                {isFetching ? (
+                    <LoadingComponent text="Getting all the slot..." />
+                ) : (
+                    <View style={styles.slotsGrid}>
+                        {slots.map((slot, index) => (
+                            <CardComponent
+                                header="Slot Code"
+                                key={index}
+                                customStyles={[
+                                    styles.slotCard,
+                                    slot.slot_status === "open" && styles.slotOpen,
+                                    slot.slot_status === "reserved" && styles.slotReserved,
+                                    slot.slot_status === "occupied" && styles.slotOccupied,
+                                ]}
+                            >
+                                <View style={styles.slotHeader}>
+                                    <TextComponent style={styles.slotCode}>{slot.slot_code}</TextComponent>
+                                    <View
+                                        style={[
+                                            styles.statusBadge,
+                                            slot.slot_status === "open" && styles.statusOpen,
+                                            slot.slot_status === "reserved" && styles.statusReserved,
+                                            slot.slot_status === "occupied" && styles.statusOccupied,
+                                        ]}
+                                    >
+                                        <TextComponent style={styles.statusText}>
+                                            {slot.slot_status.toUpperCase()}
+                                        </TextComponent>
+                                    </View>
                                 </View>
-                            </View>
-                        </CardComponent>
-                    ))}
-                </View>
-                ) )
+                            </CardComponent>
+                        ))}
+                    </View>
+                )}
                 <View style={styles.slotsGrid}>
                     {/* {slots.map((slot, index) => (
                             <CardComponent

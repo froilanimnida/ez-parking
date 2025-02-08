@@ -1,4 +1,4 @@
-import { StyleSheet, View, TouchableOpacity, Linking } from "react-native";
+import { StyleSheet, View, Linking } from "react-native";
 import React, { useEffect, useState } from "react";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";

@@ -11,6 +11,7 @@ import CardComponent from "@/components/CardComponent";
 import TextComponent from "@/components/TextComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import { useLocalSearchParams, useGlobalSearchParams } from "expo-router";
+import PlatformType from "@/lib/platform";
 
 interface ParkingEstablishment {
     uuid: string;
@@ -142,9 +143,7 @@ const EstablishmentView = () => {
 
     return (
         <ResponsiveContainer>
-            <LinkComponent style={{ width: "auto", marginBottom: 16 }} href="../../user">
-                ← Back to Dashboard
-            </LinkComponent>
+            <LinkComponent label="← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="../../user" />
 
             <CardComponent
                 customStyles={styles.card}
@@ -206,13 +205,29 @@ const EstablishmentView = () => {
                 <View style={styles.mapHeader}>
                     <TextComponent style={styles.sectionTitle}>Location</TextComponent>
                     <View style={styles.mapLinks}>
-                        <ButtonComponent onPress={() => openNavigation("google")}>Google Maps</ButtonComponent>
-                        <ButtonComponent onPress={() => openNavigation("waze")}>Waze</ButtonComponent>
+                        <ButtonComponent title="Google Maps" onPress={() => openNavigation("google")} />
+                        <ButtonComponent title="Waze" onPress={() => openNavigation("waze")}/>
                     </View>
                 </View>
-                <View style={styles.mapContainer}>
-                    <WebView source={{ uri: mapUrl }} style={{ flex: 1 }} />
-                </View>
+                <CardComponent
+                    header="Map"
+                    subHeader="View the location of the parking establishment"
+                    customStyles={styles.mapContainer}
+                >
+                    {PlatformType() === "web" ? (
+                        <iframe
+                            width="100%"
+                            height="100%"
+                            frameBorder={0}
+                            scrolling="no"
+                            marginHeight={0}
+                            marginWidth={0}
+                            src={mapUrl}
+                        />
+                    ) : (
+                        <WebView source={{ uri: mapUrl }} style={{ flex: 1 }} />
+                    )}
+                </CardComponent>
             </View>
 
             {/* Operating Hours */}
@@ -342,6 +357,7 @@ const styles = StyleSheet.create({
         flex: 1,
         borderRadius: 8,
         overflow: "hidden",
+        height: 300,
     },
     operatingHourText: {
         color: "#6b7280",

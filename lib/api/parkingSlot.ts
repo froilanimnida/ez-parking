@@ -20,12 +20,11 @@ export const createParkingSlot = async (newSlotData: ParkingSlot) => {
 };
 
 export const getParkingSlotsParkingManager = async () => {
-    const result = await axiosInstance.get(`${parkingSlotRoot}/all`);
+    const result = await axiosInstance.get(`${parkingSlotRoot}/get-all-slots`);
     return result.data.slots as ParkingSlot[];
 };
-
 
 export const getAllParkingSlots = async (establishment_uuid: string) => {
     const result = await axiosInstance.get(`${parkingSlotRoot}/get-all-slots?establishment_uuid=${establishment_uuid}`);
     return result.data.slots as ParkingSlot[];
-}
+};

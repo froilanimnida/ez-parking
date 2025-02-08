@@ -7,7 +7,7 @@ import CardComponent from "@/components/CardComponent";
 import axiosInstance from "@/lib/axiosInstance";
 import TextInputComponent from "@/components/TextInputComponent";
 import type { AxiosError } from "axios";
-import { getAuthHeaders } from "@/lib/credentialsManager";
+import { getAuthHeaders, isAuthenticated } from "@/lib/credentialsManager";
 import { router, useLocalSearchParams, type ExternalPathString, type RelativePathString } from "expo-router";
 import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
@@ -46,18 +46,24 @@ const LoginForm = () => {
     };
 
     useEffect(() => {
-        const nextParams = local.next as RelativePathString | ExternalPathString;
-        if (nextParams) {
-            setTimeout(() => {
-                router.replace(nextParams);
-            }, 1500);
-        }
+        const checkAuthStatus = async () => {
+            try {
+                const nextParams = local.next as RelativePathString | ExternalPathString;
+                const loggedIn = await isAuthenticated();
+                if (nextParams && loggedIn) {
+                    router.replace(nextParams);
+                }
+            } catch (error) {
+                console.error("Error checking authentication:", error);
+            }
+        };
 
-        let interval: NodeJS.Timeout;
+        checkAuthStatus();
+
         if (timer > 0) {
-            interval = setInterval(() => setTimer((t) => t - 1), 1000);
+            const interval = setInterval(() => setTimer((t) => t - 1), 1000);
+            return () => clearInterval(interval);
         }
-        return () => clearInterval(interval);
     }, [timer]);
 
     const handleOtpOnChange = (otp: string) => {
@@ -140,7 +146,7 @@ const LoginForm = () => {
                         </CardComponent>
                     </View>
                 ) : (
-                    <View>
+                    <View style={styles.loginForm}>
                         <CardComponent
                             header="Verify your email"
                             subHeader={`Enter the 6-digit code sent to ${email}`}

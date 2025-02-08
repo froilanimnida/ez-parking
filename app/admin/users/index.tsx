@@ -52,7 +52,7 @@ const Users = () => {
                 <TextComponent bold variant="h1">
                     Users
                 </TextComponent>
-                <ButtonComponent style={styles.exportButton} onPress={() => {}} title="Export Users"></ButtonComponent>
+                <ButtonComponent style={styles.exportButton} onPress={() => {}} title="Export Users"/>
             </View>
 
             <View style={styles.filters}>

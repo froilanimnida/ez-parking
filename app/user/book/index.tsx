@@ -9,7 +9,7 @@ const index = () => {
             <LinkComponent style={{ width: "auto", marginBottom: 16 }} href="../user">
                 ← Back to Dashboard
             </LinkComponent>
-            <EstablishmentSearch />
+            <EstablishmentSearch guest={false} />
         </ResponsiveContainer>
     );
 };

@@ -68,15 +68,17 @@ const SlotCard = ({ slotInfo, rates, establishmentUuid, slotUuid }: SlotCardProp
                     <>
                         <View style={styles.rateRow}>
                             <View style={styles.rateContainer}>
-                                <TextComponent style={styles.rateText}>₦{slotInfo.base_price_per_hour}</TextComponent>
+                                <TextComponent style={styles.rateText}>PHP{slotInfo.base_price_per_hour}</TextComponent>
                                 <TextComponent style={styles.rateTypeText}>per hour</TextComponent>
                             </View>
                             <View style={styles.rateContainer}>
-                                <TextComponent style={styles.rateText}>₦{slotInfo.base_price_per_day}</TextComponent>
+                                <TextComponent style={styles.rateText}>PHP{slotInfo.base_price_per_day}</TextComponent>
                                 <TextComponent style={styles.rateTypeText}>per day</TextComponent>
                             </View>
                             <View style={styles.rateContainer}>
-                                <TextComponent style={styles.rateText}>₦{slotInfo.base_price_per_month}</TextComponent>
+                                <TextComponent style={styles.rateText}>
+                                    PHP{slotInfo.base_price_per_month}
+                                </TextComponent>
                                 <TextComponent style={styles.rateTypeText}>per month</TextComponent>
                             </View>
                         </View>

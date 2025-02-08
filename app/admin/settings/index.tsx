@@ -142,9 +142,12 @@ const AdminSettings = () => {
             </CardComponent>
 
             <View style={styles.buttonContainer}>
-                <ButtonComponent onPress={handleSave} disabled={isUpdating} loading={isUpdating}>
-                    {isUpdating ? "Saving..." : "Save Changes"}
-                </ButtonComponent>
+                <ButtonComponent
+                    onPress={handleSave}
+                    disabled={isUpdating}
+                    loading={isUpdating}
+                    title={`${isUpdating}` ? "Saving..." : "Save Changes"}
+                />
             </View>
         </ResponsiveContainer>
     );

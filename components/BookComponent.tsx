@@ -23,7 +23,7 @@ export interface EstablishmentQuery extends ParkingEstablishment {
 const getNearestEstablishments = async (latitude: number, longitude: number) =>
     await getNearbyEstablishments(latitude, longitude);
 
-export default function EstablishmentSearch() {
+const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
     const [establishments, setEstablishments] = useState<EstablishmentQuery[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
@@ -114,10 +114,15 @@ export default function EstablishmentSearch() {
                                         handleSearch();
                                         setModalVisible(false);
                                     }}
-                                >
-                                    <MaterialCommunityIcons name="clock-time-four-outline" size={24} color="#6b7280" />
-                                    <TextComponent style={styles.recentSearchText}>{search}</TextComponent>
-                                </ButtonComponent>
+                                    title={search}
+                                    icon={
+                                        <MaterialCommunityIcons
+                                            name="clock-time-four-outline"
+                                            size={24}
+                                            color="#6b7280"
+                                        />
+                                    }
+                                />
                             ))}
                         </ScrollView>
                     </View>
@@ -134,6 +139,7 @@ export default function EstablishmentSearch() {
                     <View style={styles.results}>
                         {establishments.map((establishment) => (
                             <EstablishmentItem
+                                guest={guest}
                                 key={establishment.establishment_id}
                                 establishment={establishment}
                                 userLat={location.latitude}
@@ -145,7 +151,9 @@ export default function EstablishmentSearch() {
             </ScrollView>
         </View>
     );
-}
+};
+
+export default EstablishmentSearch;
 
 const styles = StyleSheet.create({
     header: {

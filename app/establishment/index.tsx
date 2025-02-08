@@ -6,7 +6,7 @@ import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 const EstablishmentSearchPage = () => {
     return (
         <ResponsiveContainer>
-            <EstablishmentSearch />
+            <EstablishmentSearch guest={true} />
         </ResponsiveContainer>
     );
 };

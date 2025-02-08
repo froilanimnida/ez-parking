@@ -199,7 +199,7 @@ const SlotInfo = () => {
 
     return (
         <ResponsiveContainer>
-            <LinkComponent href={`./user/book/${establishmentUuid}`} style={styles.backLink}>
+            <LinkComponent href={`../../../user/book/${establishmentUuid}`} style={styles.backLink}>
                 ← Back to Dashboard
             </LinkComponent>
 

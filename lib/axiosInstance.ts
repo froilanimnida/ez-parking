@@ -53,7 +53,7 @@ const API_BASE_URL = __DEV__
 const axiosInstance = axios.create({
     withCredentials: true,
     // baseURL: API_BASE_URL,
-    baseURL: "https://ez-parking-system.onrender.com/api/v1",
+    baseURL: "https://ez-parking-system-pr-54.onrender.com/api/v1",
     headers: {
         Accept: "application/json",
     },

@@ -5,16 +5,30 @@ import { router } from "expo-router";
 
 const PLATFORM = PlatformType();
 
+function getCookieValue(cookieName: string) {
+    return (
+        document.cookie
+            .split("; ")
+            .find((row) => row.startsWith(cookieName + "="))
+            ?.split("=")[1] || ""
+    );
+}
+
 export async function getAuthHeaders() {
     try {
         if (PLATFORM === "web") {
-            const xsrfToken = document.cookie.split(";").find((cookie) => cookie.includes("X-CSRF-TOKEN"));
-            const csrfRefreshToken = document.cookie.split(";").find((cookie) => cookie.includes("csrf_refresh_token"));
+            const xsrfToken = getCookieValue("X-CSRF-TOKEN");
+            const csrfRefreshToken = getCookieValue("csrf_refresh_token");
+
+            console.log("xsrfToken:", xsrfToken);
+            console.log("csrfRefreshToken:", csrfRefreshToken);
+
             return {
-                "X-CSRF-TOKEN": xsrfToken || "",
-                csrf_refresh_token: csrfRefreshToken || "",
+                "X-CSRF-TOKEN": xsrfToken,
+                csrf_refresh_token: csrfRefreshToken,
             };
         }
+
         const authorization = await SecureStore.getItemAsync("Authorization");
         const xsrfToken = await SecureStore.getItemAsync("X-CSRF-TOKEN");
         const csrfRefreshToken = await SecureStore.getItemAsync("csrf_refresh_token");
@@ -27,6 +41,7 @@ export async function getAuthHeaders() {
             refresh_token_cookie: refreshToken || "",
         };
     } catch (error) {
+        console.error("Error fetching auth headers:", error);
         return {};
     }
 }
@@ -35,7 +50,6 @@ export async function isAuthenticated() {
     try {
         const authHeaders = await getAuthHeaders();
         if (!authHeaders.Authorization) {
-            router.replace("/auth/login");
             return false;
         }
 
@@ -43,10 +57,8 @@ export async function isAuthenticated() {
         if (response.data?.role) {
             return true;
         }
-        router.replace("/auth/login");
         return false;
     } catch (error) {
-        router.replace("/auth/login");
         return false;
     }
 }

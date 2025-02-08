@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, SafeAreaView, Platform, StatusBar } from "react-native";
+import { StyleSheet, View, Platform, StatusBar } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useCameraPermissions } from "expo-camera";
 import { CameraView } from "expo-camera";
@@ -7,55 +7,101 @@ import TextComponent from "@/components/TextComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import CardComponent from "@/components/CardComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import * as RNImagePicker from "expo-image-picker";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
+import LoadingComponent from "@/components/reusable/LoadingComponent";
+import * as ImageManipulator from "expo-image-manipulator";
+import jsQR from "jsqr";
+import { router } from "expo-router";
 
 const ScanQRCode = () => {
     const [permission, requestPermission] = useCameraPermissions();
     const [scanning, setScanning] = useState(true);
     const [scanSuccess, setScanSuccess] = useState(false);
     const [error, setError] = useState("");
+    const [qrCodeData, setQrCodeData] = useState<string | null>(null);
     useEffect(() => {
         if (permission === null) {
             requestPermission();
         }
     });
 
+    const processImage = async (uri: string) => {
+        try {
+            const manipulatedImage = await ImageManipulator.manipulateAsync(uri, [], {
+                base64: false,
+                format: ImageManipulator.SaveFormat.PNG,
+            });
+
+            const response = await fetch(manipulatedImage.uri);
+            const blob = await response.blob();
+            const imageBitmap = await createImageBitmap(blob);
+
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+
+            if (!ctx) return;
+
+            canvas.width = imageBitmap.width;
+            canvas.height = imageBitmap.height;
+            ctx.drawImage(imageBitmap, 0, 0, canvas.width, canvas.height);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+            if (code) {
+                router.push(`../parking-manager/scan/${code.data}`);
+            } else {
+                setQrCodeData("No QR code found.");
+            }
+        } catch (error) {
+            console.error("Error processing image:", error);
+            setQrCodeData("Error scanning QR code.");
+        }
+    };
+
     const handleBarCodeScanned = ({ data, type }: { type: string; data: string }) => {
         if (type !== "qr") return;
         setScanning(false);
         setScanSuccess(true);
-        setTimeout(() => {
-            console.log(data);
-        }, 1500);
+        router.push(`../parking-manager/scan/${data}`);
     };
 
     const pickImage = async () => {
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 1,
-        });
-
-        if (!result.canceled) {
-            // TODOs:
-            // Handle QR code from image
-            // Note: Direct QR scanning from image requires additional processing
-            setError("QR code scanning from image not supported yet");
+        const { status } = await RNImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status === "granted") {
+            const result = await RNImagePicker.launchImageLibraryAsync({
+                allowsEditing: false,
+                allowsMultipleSelection: false,
+                mediaTypes: "images",
+                quality: 1,
+                selectionLimit: 1,
+                base64: true,
+            });
+            if (!result.canceled && result.assets.length > 0) {
+                const image = result.assets[0];
+                processImage(image.uri);
+            }
         }
     };
 
     if (permission === null) {
-        return <TextComponent>Requesting camera permission...</TextComponent>;
+        return (
+            <ResponsiveContainer>
+                <LoadingComponent text="Requesting camera permission..." />
+            </ResponsiveContainer>
+        );
     }
     if (!permission) {
-        return <TextComponent>No access to camera</TextComponent>;
+        alert("No access to camera");
+        return <ResponsiveContainer>No access to camera</ResponsiveContainer>;
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <ResponsiveContainer>
             <View style={styles.content}>
                 <CardComponent header="Scan QR Code" subHeader="Scan the QR code">
-                    <View style={{ height: 400, width: 400 }}>
+                    <View style={{ height: 600, width: "100%" }}>
                         {scanning && (
                             <CameraView
                                 barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
@@ -90,7 +136,7 @@ const ScanQRCode = () => {
                     )}
                 </CardComponent>
             </View>
-        </SafeAreaView>
+        </ResponsiveContainer>
     );
 };
 
