@@ -9,6 +9,7 @@ import TextComponent from "@/components/TextComponent";
 import CheckboxComponent from "@/components/CheckboxComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import LocationPicker from "@/components/auth/parking-manager/LocationPicker";
 
 const ParkingManagerSignUp = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -72,6 +73,36 @@ const ParkingManagerSignUp = () => {
                 [method]: value,
             },
         }));
+    };
+
+    const searchLocation = async () => {
+        if (!addressData.address.street) {
+            // Show error message
+            return;
+        }
+
+        try {
+            const query = `${addressData.address.street}, ${addressData.address.city}, Philippines`;
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
+            );
+            const data = await response.json();
+
+            if (data.length > 0) {
+                const { lat, lon } = data[0];
+                setAddressData((prev) => ({
+                    ...prev,
+                    location: {
+                        latitude: Number(lat),
+                        longitude: Number(lon),
+                    },
+                }));
+            } else {
+                // Show "Location not found" message
+            }
+        } catch (error) {
+            // Show error message
+        }
     };
 
     const handleFacilitiesChange = (section: string, field: string, value: string) => {
@@ -260,7 +291,18 @@ const ParkingManagerSignUp = () => {
                             />
                         </View>
 
-                        <View style={styles.mapContainer}>{/* {<MapView></MapView>} */}</View>
+                        <View style={styles.mapContainer}>
+                            <LocationPicker
+                                initialLatitude={addressData.location.latitude}
+                                initialLongitude={addressData.location.longitude}
+                                onLocationChange={(latitude: number, longitude: number) => {
+                                    setAddressData((prev) => ({
+                                        ...prev,
+                                        location: { latitude, longitude },
+                                    }));
+                                }}
+                            />
+                        </View>
 
                         <View style={styles.formGroup}>
                             <TextInputComponent
@@ -477,7 +519,6 @@ const styles = StyleSheet.create({
         backgroundColor: "#EFF6FF",
         borderRadius: 8,
         padding: 16,
-        width: "95%",
         maxWidth: 768,
         marginBottom: 20,
     },
