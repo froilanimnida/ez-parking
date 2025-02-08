@@ -17,6 +17,7 @@ import PlatformType from "@/lib/platform";
 import { useLocalSearchParams } from "expo-router";
 import { fetchEstablishmentInfo } from "@/lib/api/establishment";
 import LinkComponent from "@/components/LinkComponent";
+import ButtonComponent from "@/components/ButtonComponent";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;
@@ -130,28 +131,28 @@ const EstablishmentOverview = () => {
             <CardComponent customStyles={[styles.card, styles.mapCard]} header="Location">
                 <View style={styles.mapHeader}>
                     <View style={styles.mapLinks}>
-                        <TouchableOpacity
+                        <ButtonComponent
                             onPress={() =>
                                 Linking.openURL(
                                     `https://www.google.com/maps/dir/?api=1&destination=${establishment.establishment.latitude},${establishment.establishment.longitude}`
                                 )
                             }
-                        >
-                            <TextComponent style={styles.mapLink}>Google Maps</TextComponent>
-                        </TouchableOpacity>
-                        <TouchableOpacity
+                            title="Google Maps"
+                        />
+                        <ButtonComponent
+                            title="Waze"
                             onPress={() =>
                                 Linking.openURL(
                                     `https://www.waze.com/ul?ll=${establishment.establishment.latitude},${establishment.establishment.longitude}&navigate=yes`
                                 )
                             }
-                        >
-                            <TextComponent style={styles.mapLink}>Waze</TextComponent>
-                        </TouchableOpacity>
+                        />
                     </View>
                 </View>
                 <View style={styles.mapContainer}>
-                    {PlatformType() === "web" ? (
+                    {PlatformType() !== "web" ? (
+                        <WebView source={{ uri: mapUrl }} style={styles.map} />
+                    ) : (
                         <iframe
                             frameBorder="0"
                             marginHeight={0}
@@ -160,8 +161,6 @@ const EstablishmentOverview = () => {
                             src={mapUrl}
                             style={styles.map}
                         />
-                    ) : (
-                        <WebView source={{ uri: mapUrl }} style={styles.map} />
                     )}
                 </View>
             </CardComponent>

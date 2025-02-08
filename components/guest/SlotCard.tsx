@@ -31,8 +31,7 @@ function getRateDisplay(baseRate: number, rates: PricingPlan[]): { amount: strin
 }
 
 const SlotCard = ({ slotInfo, rates, establishmentUuid, slotUuid }: SlotCardProps) => {
-    const { amount, type } = getRateDisplay(slotInfo.base_rate, rates);
-
+    // const { amount, type } = getRateDisplay(parseFloat(slotInfo.base_price_per_hour), rates);
     const getBorderColor = () => {
         switch (slotInfo.slot_status) {
             case "open":
@@ -56,7 +55,10 @@ const SlotCard = ({ slotInfo, rates, establishmentUuid, slotUuid }: SlotCardProp
     };
 
     return (
-        <CardComponent customStyles={[getBorderColor()]} header={slotInfo.slot_code} subHeader={slotInfo.slot_status}>
+        <CardComponent customStyles={[getBorderColor()]} header={slotInfo.slot_code}>
+            <View style={styles.header}>
+                <TextComponent style={getStatusBadgeStyle()}>{slotInfo.slot_status}</TextComponent>
+            </View>
             <View style={styles.infoContainer}>
                 <TextComponent style={styles.infoText}>Floor: {slotInfo.floor_level}</TextComponent>
                 <TextComponent style={styles.infoText}>Accommodates: {slotInfo.vehicle_type_name}</TextComponent>
@@ -65,10 +67,18 @@ const SlotCard = ({ slotInfo, rates, establishmentUuid, slotUuid }: SlotCardProp
                 {slotInfo.slot_status === "open" && (
                     <>
                         <View style={styles.rateRow}>
-                            <TextComponent style={styles.rateText}>
-                                ₱{amount}/{type === "hourly" ? "hr" : type === "daily" ? "day" : "mo"}
-                            </TextComponent>
-                            <Text style={styles.rateTypeText}>{type} rate</Text>
+                            <View style={styles.rateContainer}>
+                                <TextComponent style={styles.rateText}>₦{slotInfo.base_price_per_hour}</TextComponent>
+                                <TextComponent style={styles.rateTypeText}>per hour</TextComponent>
+                            </View>
+                            <View style={styles.rateContainer}>
+                                <TextComponent style={styles.rateText}>₦{slotInfo.base_price_per_day}</TextComponent>
+                                <TextComponent style={styles.rateTypeText}>per day</TextComponent>
+                            </View>
+                            <View style={styles.rateContainer}>
+                                <TextComponent style={styles.rateText}>₦{slotInfo.base_price_per_month}</TextComponent>
+                                <TextComponent style={styles.rateTypeText}>per month</TextComponent>
+                            </View>
                         </View>
 
                         <LinkComponent
@@ -98,9 +108,13 @@ const styles = StyleSheet.create({
     },
     header: {
         flexDirection: "row",
+        marginBottom: 8,
+    },
+    rateContainer: {
+        flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 8,
+        marginTop: 8,
     },
     slotCode: {
         fontSize: 16,
@@ -135,9 +149,7 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     rateRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
+        flexDirection: "column",
         marginTop: 8,
     },
     rateText: {
