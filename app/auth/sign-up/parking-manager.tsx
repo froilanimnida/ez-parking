@@ -220,18 +220,38 @@ const ParkingManagerSignUp = () => {
                                 value={addressData.address.barangay}
                                 onChangeText={(value) => handleAddressChange("barangay", value)}
                             />
-                            <TextInputComponent
+                            <SelectComponent
+                                items={[
+                                    { label: "Manila", value: "manila" },
+                                    { label: "Quezon City", value: "quezon_city" },
+                                    { label: "Makati", value: "makati" },
+                                    { label: "Pasig", value: "pasig" },
+                                    { label: "Taguig", value: "taguig" },
+                                    { label: "Mandaluyong", value: "mandaluyong" },
+                                    { label: "San Juan", value: "san_juan" },
+                                    { label: "Pasay", value: "pasay" },
+                                    { label: "Parañaque", value: "paranaque" },
+                                    { label: "Las Piñas", value: "las_pinas" },
+                                    { label: "Muntinlupa", value: "muntinlupa" },
+                                    { label: "Valenzuela", value: "valenzuela" },
+                                    { label: "Caloocan", value: "caloocan" },
+                                    { label: "Malabon", value: "malabon" },
+                                    { label: "Navotas", value: "navotas" },
+                                    { label: "Marikina", value: "marikina" },
+                                    { label: "Pateros", value: "pateros" },
+                                ]}
                                 placeholder="City/Municipality"
-                                value={addressData.address.city}
-                                onChangeText={(value) => handleAddressChange("city", value)}
+                                selectedValue={addressData.address.city}
+                                onValueChange={(value) => handleAddressChange("city", value)}
                             />
                         </View>
 
                         <View style={styles.formGroup}>
-                            <TextInputComponent
+                            <SelectComponent
+                                items={[{ label: "Metro Manila", value: "metro_manila" }]}
                                 placeholder="Province"
-                                value={addressData.address.province}
-                                onChangeText={(value) => handleAddressChange("province", value)}
+                                selectedValue={addressData.address.province}
+                                onValueChange={(value) => handleAddressChange("province", value)}
                             />
                             <TextInputComponent
                                 placeholder="Postal Code"

@@ -290,7 +290,7 @@ const SlotInfo = () => {
                 </View>
 
                 {/* Pricing Summary */}
-                <View style={styles.summaryContainer}>
+                <View>
                     <TextComponent style={styles.summaryText}>
                         Base Rate: ₱
                         {(
@@ -421,7 +421,6 @@ const styles = StyleSheet.create({
     },
     input: {
         backgroundColor: "#ffffff",
-        borderColor: "#d1d5db",
         borderWidth: 1,
         borderRadius: 4,
         paddingHorizontal: 12,
@@ -449,11 +448,6 @@ const styles = StyleSheet.create({
     },
     formLabelSmall: {
         fontSize: 14,
-    },
-    summaryContainer: {
-        backgroundColor: "#f3f4f6",
-        borderRadius: 6,
-        marginBottom: 16,
     },
     summaryText: {
         fontSize: 14,
