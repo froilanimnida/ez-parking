@@ -31,7 +31,7 @@ function getRateDisplay(baseRate: number, rates: PricingPlan[]): { amount: strin
 }
 
 const SlotCard = ({ slotInfo, rates, establishmentUuid, slotUuid }: SlotCardProps) => {
-    const { amount, type } = getRateDisplay(slotInfo.base_rate, rates);
+    // const { amount, type } = getRateDisplay(parseFloat(slotInfo.base_price_per_hour), rates);
 
     const getBorderColor = () => {
         switch (slotInfo.slot_status) {
@@ -65,10 +65,18 @@ const SlotCard = ({ slotInfo, rates, establishmentUuid, slotUuid }: SlotCardProp
                 {slotInfo.slot_status === "open" && (
                     <>
                         <View style={styles.rateRow}>
-                            <TextComponent style={styles.rateText}>
-                                ₱{amount}/{type === "hourly" ? "hr" : type === "daily" ? "day" : "mo"}
-                            </TextComponent>
-                            <Text style={styles.rateTypeText}>{type} rate</Text>
+                            <View>
+                                <TextComponent style={styles.rateText}>₦{slotInfo.base_price_per_hour}</TextComponent>
+                                <TextComponent style={styles.rateTypeText}>per hour</TextComponent>
+                            </View>
+                            <View>
+                                <TextComponent style={styles.rateText}>₦{slotInfo.base_price_per_day}</TextComponent>
+                                <TextComponent style={styles.rateTypeText}>per day</TextComponent>
+                            </View>
+                            <View>
+                                <TextComponent style={styles.rateText}>₦{slotInfo.base_price_per_month}</TextComponent>
+                                <TextComponent style={styles.rateTypeText}>per month</TextComponent>
+                            </View>
                         </View>
 
                         <LinkComponent
