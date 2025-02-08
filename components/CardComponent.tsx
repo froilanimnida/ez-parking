@@ -5,7 +5,7 @@ import TextComponent from "@/components/TextComponent";
 interface CardComponentProps {
     header: string;
     subHeader?: string;
-    children: React.ReactNode;
+    children?: React.ReactNode;
     customStyles?: StyleProp<ViewStyle>;
 }
 

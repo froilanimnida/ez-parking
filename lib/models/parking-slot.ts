@@ -6,11 +6,13 @@ export interface ParkingSlot {
     vehicle_type_id: number;
     slot_status: "open" | "occupied" | "reserved" | "closed";
     is_active: boolean;
-    slot_features: "standard" | "premium";
+    slot_features: "standard" | "covered" | "vip" | "disabled" | "ev_charging";
     is_premium: boolean;
-    base_rate: number;
-    slot_multiplier: number;
     floor_level: number;
     created_at: string;
     updated_at: string;
+    base_price_per_hour: string;
+    base_price_per_day: string;
+    base_price_per_month: string;
+    price_multiplier: string;
 }

@@ -9,6 +9,9 @@ import ButtonComponent from "@/components/ButtonComponent";
 import TextInputComponent from "@/components/TextInputComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import PlatformType from "@/lib/platform";
+import { getNearbyEstablishments } from "@/lib/api/establishment";
+import { askLocationPermission, getIPBasedLocation } from "@/lib/location";
+import LoadingComponent from "./reusable/LoadingComponent";
 export interface EstablishmentQuery extends ParkingEstablishment {
     open_slots: number;
     total_slots: number;
@@ -17,131 +20,21 @@ export interface EstablishmentQuery extends ParkingEstablishment {
     pricing_plans: PricingPlan[];
 }
 
+const getNearestEstablishments = async (latitude: number, longitude: number) =>
+    await getNearbyEstablishments(latitude, longitude);
+
 export default function EstablishmentSearch() {
     const [establishments, setEstablishments] = useState<EstablishmentQuery[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [recentSearches, setRecentSearches] = useState([]);
-    const [loading, setLoading] = useState(false);
-
-    const mockParkingEstablishments: ParkingEstablishment[] = [
-        {
-            access_info: "Gate on 2nd Street",
-            accessibility: "Wheelchair Accessible",
-            created_at: "2023-09-01T08:00:00Z",
-            custom_access: "VIP Access Only",
-            custom_layout: "Level-based",
-            dimensions: "10x20",
-            establishment_id: 1,
-            facilities: "Elevator, CCTV, Security Guard",
-            is24_7: true,
-            latitude: 34.0522,
-            lighting: "Bright LED",
-            longitude: -118.2437,
-            name: "Downtown Parking",
-            nearby_landmarks: "City Hall, Central Park",
-            profile_id: 101,
-            space_layout: "Row-based",
-            space_type: "Covered",
-            updated_at: "2023-09-01T09:00:00Z",
-            uuid: "abc123",
-            verified: true,
-        },
-        {
-            access_info: "Entrance via Main Street",
-            accessibility: "Limited Access",
-            created_at: "2023-08-20T10:30:00Z",
-            custom_access: "Tenant Only",
-            custom_layout: "Multi-level",
-            dimensions: "12x22",
-            establishment_id: 2,
-            facilities: "Security Cameras, Electric Charging",
-            is24_7: false,
-            latitude: 40.7128,
-            lighting: "Standard",
-            longitude: -74.006,
-            name: "Liberty Garage",
-            nearby_landmarks: "Statue of Liberty, Pier 17",
-            profile_id: 102,
-            space_layout: "Stacked",
-            space_type: "Open",
-            updated_at: "2023-08-21T12:00:00Z",
-            uuid: "def456",
-            verified: false,
-        },
-        {
-            access_info: "Side entrance on Elm Ave",
-            accessibility: "Wheelchair Accessible",
-            created_at: "2023-07-15T14:00:00Z",
-            custom_access: "Members Only",
-            custom_layout: "Flat ground",
-            dimensions: "9x18",
-            establishment_id: 3,
-            facilities: "EV Charging, Covered Parking",
-            is24_7: true,
-            latitude: 37.7749,
-            lighting: "Bright LED",
-            longitude: -122.4194,
-            name: "Bay Area Parking",
-            nearby_landmarks: "Golden Gate Bridge",
-            profile_id: 103,
-            space_layout: "Row-based",
-            space_type: "Outdoor",
-            updated_at: "2023-07-16T08:00:00Z",
-            uuid: "ghi789",
-            verified: true,
-        },
-        {
-            access_info: "Through residential complex",
-            accessibility: "No wheelchair access",
-            created_at: "2023-06-01T09:00:00Z",
-            custom_access: "Staff Only",
-            custom_layout: "Single-level",
-            dimensions: "8x15",
-            establishment_id: 4,
-            facilities: "Minimal lighting",
-            is24_7: false,
-            latitude: 51.5074,
-            lighting: "Dim",
-            longitude: -0.1278,
-            name: "London Central Parking",
-            nearby_landmarks: "Big Ben, London Eye",
-            profile_id: 104,
-            space_layout: "Flat",
-            space_type: "Basement",
-            updated_at: "2023-06-02T12:00:00Z",
-            uuid: "jkl012",
-            verified: false,
-        },
-        {
-            access_info: "Main gate next to supermarket",
-            accessibility: "Wheelchair Accessible",
-            created_at: "2023-08-10T07:00:00Z",
-            custom_access: "Open to public",
-            custom_layout: "Levels A, B, C",
-            dimensions: "10x19",
-            establishment_id: 5,
-            facilities: "Security, CCTV, Washroom",
-            is24_7: true,
-            latitude: 48.8566,
-            lighting: "Fluorescent",
-            longitude: 2.3522,
-            name: "Paris Underground Parking",
-            nearby_landmarks: "Louvre, River Seine",
-            profile_id: 105,
-            space_layout: "Multi-level",
-            space_type: "Covered",
-            updated_at: "2023-08-11T11:00:00Z",
-            uuid: "mno345",
-            verified: true,
-        },
-    ];
+    const [loading, setLoading] = useState(true);
 
     const animation = new Animated.Value(0);
 
     const handleSearch = async () => {
         setLoading(true);
-        // Implement your search API call here
+
         setLoading(false);
     };
 
@@ -159,39 +52,30 @@ export default function EstablishmentSearch() {
 
     useEffect(() => {
         (async () => {
-            let { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== "granted") {
-                getIPBasedLocation();
+            let status = await askLocationPermission();
+            if (!status) {
+                const data = await getIPBasedLocation();
+                setLocation({ latitude: data.latitude, longitude: data.longitude });
                 return;
             }
 
             try {
-                let location = await Location.getCurrentPositionAsync({});
+                let location = await Location.getCurrentPositionAsync({
+                    accuracy: Location.Accuracy.BestForNavigation,
+                });
                 setLocation({
                     latitude: location.coords.latitude,
                     longitude: location.coords.longitude,
                 });
             } catch (error) {
-                getIPBasedLocation();
+                const data = await getIPBasedLocation();
+                setLocation({ latitude: data.latitude, longitude: data.longitude });
             }
+            const data = await getNearestEstablishments(location.latitude, location.longitude);
+            setEstablishments(data.data.establishments);
+            setLoading(false);
         })();
     }, []);
-
-    const getIPBasedLocation = async () => {
-        try {
-            const response = await fetch("https://ipapi.co/json/");
-            const data = await response.json();
-            setLocation({
-                latitude: data.latitude,
-                longitude: data.longitude,
-            });
-        } catch (error) {
-            setLocation({
-                latitude: 14.5995,
-                longitude: 120.9842,
-            });
-        }
-    };
 
     return (
         <View style={{ flex: 1, gap: 16 }}>
@@ -243,12 +127,12 @@ export default function EstablishmentSearch() {
             {/* Main Content */}
             <ScrollView style={styles.content}>
                 {loading ? (
-                    <View style={styles.loadingContainer}>{/* Loading indicator */}</View>
-                ) : mockParkingEstablishments.length === 0 ? (
+                    <LoadingComponent text="Searching for nearby parking establishments..." />
+                ) : establishments.length === 0 ? (
                     <View style={styles.noResults}>{/* No results UI */}</View>
                 ) : (
                     <View style={styles.results}>
-                        {mockParkingEstablishments.map((establishment) => (
+                        {establishments.map((establishment) => (
                             <EstablishmentItem
                                 key={establishment.establishment_id}
                                 establishment={establishment}

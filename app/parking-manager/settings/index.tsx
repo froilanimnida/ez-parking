@@ -1,9 +1,11 @@
+import ButtonComponent from "@/components/ButtonComponent";
 import CardComponent from "@/components/CardComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import TextComponent from "@/components/TextComponent";
 import TextInputComponent from "@/components/TextInputComponent";
+import { logoutCurrentUser } from "@/lib/credentialsManager";
 import React, { useState } from "react";
-import { View, TouchableOpacity, StyleSheet,  } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
 
 type UserData = {
     user_id: number;
@@ -135,6 +137,7 @@ export default function Settings() {
             <TouchableOpacity style={styles.button} onPress={handleSave} disabled={isUpdating}>
                 <TextComponent style={styles.buttonText}>{isUpdating ? "Saving..." : "Save Changes"}</TextComponent>
             </TouchableOpacity>
+            <ButtonComponent onPress={() => logoutCurrentUser()} title="Logout" variant="destructive" />
         </ResponsiveContainer>
     );
 }
@@ -179,9 +182,9 @@ const styles = StyleSheet.create({
     button: {
         backgroundColor: "#4f46e5",
         padding: 12,
+        marginVertical: 16,
         borderRadius: 6,
         alignItems: "center",
-        marginTop: 16,
     },
     buttonText: {
         color: "white",

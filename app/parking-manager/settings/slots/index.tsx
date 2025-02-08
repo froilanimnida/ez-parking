@@ -1,30 +1,69 @@
 import { StyleSheet, View, TextInput, Switch } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import TextComponent from "@/components/TextComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import CardComponent from "@/components/CardComponent";
-import { Picker } from "@react-native-picker/picker";
 import SelectComponent from "@/components/SelectComponent";
 import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
+import LoadingComponent from "@/components/reusable/LoadingComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
+import TextInputComponent from "@/components/TextInputComponent";
+import { createParkingSlot, getParkingSlotsParkingManager } from "@/lib/api/parkingSlot";
+import { ParkingSlot } from "@/lib/models/parking-slot";
 
-const slotFeatures = ["standard", "covered", "vip", "disabled", "ev_charging"] as const;
-const slotStatus = ["open", "occupied", "reserved", "closed"] as const;
+const slotFeatures = [
+    {
+        label: "standard",
+        value: "standard",
+    },
+    {
+        label: "covered",
+        value: "covered",
+    },
+    {
+        label: "vip",
+        value: "vip",
+    },
+    {
+        label: "disabled",
+        value: "disabled",
+    },
+    {
+        label: "ev_charging",
+        value: "ev_charging",
+    },
+];
+const slotStatus = [
+    { label: "open", value: "open" },
+    { label: "occupied", value: "occupied" },
+    { label: "reserved", value: "reserved" },
+    { label: "closed", value: "closed" },
+];
 
 const Slots = () => {
     const [formData, setFormData] = useState({
         slot_code: "",
         is_premium: false,
-        base_rate: "",
-        slot_multiplier: "",
         floor_level: "",
         vehicle_type_id: "",
         slot_features: "standard",
         slot_status: "open",
         is_active: true,
+        base_price_per_hour: "",
+        base_price_per_day: "",
+        base_price_per_month: "",
+        price_multiplier: "",
     });
+    const [isFetching, setIsFetching] = useState(true);
+    const [slots, setSlots] = useState([] as ParkingSlot[]);
 
-    let slots;
+    useEffect(() => {
+        const fetchSlots = async () => {
+            let slots = await getParkingSlotsParkingManager();
+            setIsFetching(false);
+            setSlots(slots);
+        };
+    });
 
     return (
         <ResponsiveContainer>
@@ -53,43 +92,63 @@ const Slots = () => {
                         </View>
 
                         <View style={styles.inputGroup}>
-                            <TextComponent style={styles.label}>Base Rate *</TextComponent>
-                            <TextInput
-                                style={styles.input}
-                                keyboardType="numeric"
-                                value={formData.base_rate}
-                                onChangeText={(text) => setFormData({ ...formData, base_rate: text })}
+                            <TextComponent style={styles.label}>Features *</TextComponent>
+                            <SelectComponent
+                                items={slotFeatures}
+                                selectedValue="standard"
+                                onValueChange={(value: string) => setFormData({ ...formData, slot_features: value })}
                             />
                         </View>
 
                         <View style={styles.inputGroup}>
-                            <TextComponent style={styles.label}>Features *</TextComponent>
-                            <Picker
-                                selectedValue={formData.slot_features}
-                                onValueChange={(value) => setFormData({ ...formData, slot_features: value })}
-                                style={styles.picker}
-                            >
-                                {slotFeatures.map((feature) => (
-                                    <Picker.Item
-                                        key={feature}
-                                        label={feature.replace("_", " ").toUpperCase()}
-                                        value={feature}
-                                    />
-                                ))}
-                            </Picker>
+                            <TextComponent style={styles.label}>Status *</TextComponent>
+                            <SelectComponent
+                                items={slotStatus}
+                                selectedValue="open"
+                                onValueChange={(value: string) => setFormData({ ...formData, slot_status: value })}
+                            />
                         </View>
-
+                        <View style={styles.inputGroup}>
+                            <TextComponent style={styles.label}> Base Price Per Hour </TextComponent>
+                            <TextInputComponent
+                                placeholder="Base Price Per Hour"
+                                keyboardType="numeric"
+                                value={formData.base_price_per_hour}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <TextComponent style={styles.label}> Base Price Per Day </TextComponent>
+                            <TextInputComponent
+                                placeholder="Base Price Per Day"
+                                keyboardType="numeric"
+                                value={formData.base_price_per_day}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <TextComponent style={styles.label}> Base Price Per Day </TextComponent>
+                            <TextInputComponent
+                                placeholder="Base Price Per Month"
+                                keyboardType="numeric"
+                                value={formData.base_price_per_month}
+                                onChangeText={(text) => setFormData({ ...formData, base_price_per_month: text })}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <TextComponent style={styles.label}> Price Multiplier </TextComponent>
+                            <TextInputComponent
+                                placeholder="Price Multiplier"
+                                keyboardType="numeric"
+                                value={formData.price_multiplier}
+                                onChangeText={(text) => setFormData({ ...formData, price_multiplier: text })}
+                            />
+                        </View>
                         <View style={styles.inputGroup}>
                             <TextComponent style={styles.label}>Status *</TextComponent>
-                            <Picker
-                                selectedValue={formData.slot_status}
-                                onValueChange={(value) => setFormData({ ...formData, slot_status: value })}
-                                style={styles.picker}
-                            >
-                                {slotStatus.map((status) => (
-                                    <Picker.Item key={status} label={status.toUpperCase()} value={status} />
-                                ))}
-                            </Picker>
+                            <SelectComponent
+                                items={slotStatus}
+                                selectedValue="open"
+                                onValueChange={(value: string) => setFormData({ ...formData, slot_status: value })}
+                            />
                         </View>
                     </View>
 
@@ -102,11 +161,44 @@ const Slots = () => {
                 </CardComponent>
             </>
 
-            <View>
-                <TextComponent variant="h2" style={styles.sectionTitle}>
+            <View style={{ marginTop: 32 }}>
+                <TextComponent variant="h1" style={styles.sectionTitle}>
                     Existing Parking Slots
                 </TextComponent>
-
+                ( isFetching ? (
+                <LoadingComponent text="Getting all the slot..." />
+                ): (
+                <View style={styles.slotsGrid}>
+                    {slots.map((slot, index) => (
+                        <CardComponent
+                            header="Slot Code"
+                            key={index}
+                            customStyles={[
+                                styles.slotCard,
+                                slot.slot_status === "open" && styles.slotOpen,
+                                slot.slot_status === "reserved" && styles.slotReserved,
+                                slot.slot_status === "occupied" && styles.slotOccupied,
+                            ]}
+                        >
+                            <View style={styles.slotHeader}>
+                                <TextComponent style={styles.slotCode}>{slot.slot_code}</TextComponent>
+                                <View
+                                    style={[
+                                        styles.statusBadge,
+                                        slot.slot_status === "open" && styles.statusOpen,
+                                        slot.slot_status === "reserved" && styles.statusReserved,
+                                        slot.slot_status === "occupied" && styles.statusOccupied,
+                                    ]}
+                                >
+                                    <TextComponent style={styles.statusText}>
+                                        {slot.slot_status.toUpperCase()}
+                                    </TextComponent>
+                                </View>
+                            </View>
+                        </CardComponent>
+                    ))}
+                </View>
+                ) )
                 <View style={styles.slotsGrid}>
                     {/* {slots.map((slot, index) => (
                             <CardComponent
@@ -150,6 +242,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         marginBottom: 16,
+        fontWeight: "600",
     },
     form: {
         padding: 16,

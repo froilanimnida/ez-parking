@@ -8,7 +8,7 @@ import axiosInstance from "@/lib/axiosInstance";
 import TextInputComponent from "@/components/TextInputComponent";
 import type { AxiosError } from "axios";
 import { getAuthHeaders } from "@/lib/credentialsManager";
-import { router } from "expo-router";
+import { router, useLocalSearchParams, type ExternalPathString, type RelativePathString } from "expo-router";
 import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 
@@ -36,6 +36,7 @@ const LoginForm = () => {
     const [rememberMe, setRememberMe] = useState(false);
     const [loggingIn, setLoggingIn] = useState(false);
     const [timer, setTimer] = useState(0);
+    const local = useLocalSearchParams();
     const isEmailValid = (email: string) => {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     };
@@ -45,6 +46,13 @@ const LoginForm = () => {
     };
 
     useEffect(() => {
+        const nextParams = local.next as RelativePathString | ExternalPathString;
+        if (nextParams) {
+            setTimeout(() => {
+                router.replace(nextParams);
+            }, 1500);
+        }
+
         let interval: NodeJS.Timeout;
         if (timer > 0) {
             interval = setInterval(() => setTimer((t) => t - 1), 1000);
@@ -77,13 +85,17 @@ const LoginForm = () => {
         setLoggingIn(true);
         try {
             const result = await verifyOTP(email, otp, rememberMe);
+            const role = result.data.role as string;
+
+            const nextParams = local.next as RelativePathString | ExternalPathString;
             const headers = await getAuthHeaders();
             if (!headers.Authorization) {
                 console.warn("No authorization token found");
             }
-            console.log(result.data.role);
-            router.replace(result.data.role);
-
+            if (nextParams) {
+                router.replace(nextParams);
+            }
+            router.replace(role.replace("_", "-") as ExternalPathString);
             alert("Logged in successfully.");
             setLoggingIn(false);
         } catch (error) {

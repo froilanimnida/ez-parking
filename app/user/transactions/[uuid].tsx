@@ -163,7 +163,6 @@ const TransactionDetails = () => {
                             <TextComponent style={styles.lineValue}>{transactionDetails.contact_number}</TextComponent>
                         </View>
 
-                        {/* Distance if reserved */}
                         {transactionDetails.transaction_data.status === "reserved" && (
                             <View style={styles.lineRow}>
                                 <TextComponent style={styles.lineLabel}>Distance</TextComponent>

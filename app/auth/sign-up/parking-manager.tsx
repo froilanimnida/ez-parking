@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, SafeAreaView, Platform, StatusBar, ScrollView } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React, { useState } from "react";
 import ButtonComponent from "@/components/ButtonComponent";
 import LinkComponent from "@/components/LinkComponent";
@@ -74,7 +74,6 @@ const ParkingManagerSignUp = () => {
         }));
     };
 
-    // Add handler after existing handlers
     const handleFacilitiesChange = (section: string, field: string, value: string) => {
         setFacilitiesAndAmenities((prev) => ({
             ...prev,
@@ -85,32 +84,7 @@ const ParkingManagerSignUp = () => {
         }));
     };
 
-    const [pricingData, setPricingData] = useState({
-        hourly: {
-            enabled: false,
-            rate: 0,
-        },
-        daily: {
-            enabled: false,
-            rate: 0,
-        },
-        monthly: {
-            enabled: false,
-            rate: 0,
-        },
-    });
-
     const [agreed, setAgreed] = useState(false);
-
-    const handlePricingChange = (type: string, field: "enabled" | "rate", value: boolean | number) => {
-        setPricingData((prev) => ({
-            ...prev,
-            [type]: {
-                ...prev[type],
-                [field]: value,
-            },
-        }));
-    };
 
     const handleInputChange = (key: string, value: string) => {
         setOwnerInformation({ ...ownerInformation, [key]: value });
@@ -246,18 +220,38 @@ const ParkingManagerSignUp = () => {
                                 value={addressData.address.barangay}
                                 onChangeText={(value) => handleAddressChange("barangay", value)}
                             />
-                            <TextInputComponent
+                            <SelectComponent
+                                items={[
+                                    { label: "Manila", value: "manila" },
+                                    { label: "Quezon City", value: "quezon_city" },
+                                    { label: "Makati", value: "makati" },
+                                    { label: "Pasig", value: "pasig" },
+                                    { label: "Taguig", value: "taguig" },
+                                    { label: "Mandaluyong", value: "mandaluyong" },
+                                    { label: "San Juan", value: "san_juan" },
+                                    { label: "Pasay", value: "pasay" },
+                                    { label: "Parañaque", value: "paranaque" },
+                                    { label: "Las Piñas", value: "las_pinas" },
+                                    { label: "Muntinlupa", value: "muntinlupa" },
+                                    { label: "Valenzuela", value: "valenzuela" },
+                                    { label: "Caloocan", value: "caloocan" },
+                                    { label: "Malabon", value: "malabon" },
+                                    { label: "Navotas", value: "navotas" },
+                                    { label: "Marikina", value: "marikina" },
+                                    { label: "Pateros", value: "pateros" },
+                                ]}
                                 placeholder="City/Municipality"
-                                value={addressData.address.city}
-                                onChangeText={(value) => handleAddressChange("city", value)}
+                                selectedValue={addressData.address.city}
+                                onValueChange={(value) => handleAddressChange("city", value)}
                             />
                         </View>
 
                         <View style={styles.formGroup}>
-                            <TextInputComponent
+                            <SelectComponent
+                                items={[{ label: "Metro Manila", value: "metro_manila" }]}
                                 placeholder="Province"
-                                value={addressData.address.province}
-                                onChangeText={(value) => handleAddressChange("province", value)}
+                                selectedValue={addressData.address.province}
+                                onValueChange={(value) => handleAddressChange("province", value)}
                             />
                             <TextInputComponent
                                 placeholder="Postal Code"
@@ -371,34 +365,6 @@ const ParkingManagerSignUp = () => {
                 </CardComponent>
 
                 <CardComponent
-                    header="Pricing Structure"
-                    subHeader="Set your parking rates"
-                    customStyles={{ width: "95%", maxWidth: 768 }}
-                >
-                    <View style={styles.form}>
-                        {Object.entries(pricingData).map(([type, config]) => (
-                            <View key={type} style={styles.priceRow}>
-                                <CheckboxComponent
-                                    placeholder={`${type.charAt(0).toUpperCase() + type.slice(1)} Rate`}
-                                    value={config.enabled}
-                                    onValueChange={(value) => handlePricingChange(type, "enabled", value)}
-                                />
-                                <View style={styles.priceInputContainer}>
-                                    <Text style={styles.currencySymbol}>₱</Text>
-                                    <TextInputComponent
-                                        value={String(config.rate)}
-                                        onChangeText={(value) => handlePricingChange(type, "rate", Number(value))}
-                                        keyboardType="numeric"
-                                        editable={config.enabled}
-                                        customStyles={[styles.priceInput, !config.enabled && styles.disabledInput]}
-                                    />
-                                </View>
-                            </View>
-                        ))}
-                    </View>
-                </CardComponent>
-
-                <CardComponent
                     header="Accepted Payment Methods"
                     subHeader="Select available payment options"
                     customStyles={{ width: "95%", maxWidth: 768 }}
@@ -490,7 +456,6 @@ export default ParkingManagerSignUp;
 const styles = StyleSheet.create({
     header: {
         width: "100%",
-        flex: 1,
         paddingBottom: 16,
         alignItems: "center",
     },

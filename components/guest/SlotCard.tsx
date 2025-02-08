@@ -1,10 +1,10 @@
 import React from "react";
-import { View, Text, StyleSheet, Pressable, Linking } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { PricingPlan } from "@/lib/models/pricing-plan";
 import { ParkingSlot } from "@/lib/models/parking-slot";
-import CardComponent from "./CardComponent";
-import TextComponent from "./TextComponent";
-import { router, type RelativePathString } from "expo-router";
+import CardComponent from "../CardComponent";
+import TextComponent from "../TextComponent";
+import LinkComponent from "../LinkComponent";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;
@@ -30,8 +30,8 @@ function getRateDisplay(baseRate: number, rates: PricingPlan[]): { amount: strin
     };
 }
 
-const SlotCard: React.FC<SlotCardProps> = ({ slotInfo, rates, establishmentUuid, slotUuid }) => {
-    const { amount, type } = getRateDisplay(Number(slotInfo.base_price_per_hour), rates);
+const SlotCard = ({ slotInfo, rates, establishmentUuid, slotUuid }: SlotCardProps) => {
+    const { amount, type } = getRateDisplay(slotInfo.base_rate, rates);
 
     const getBorderColor = () => {
         switch (slotInfo.slot_status) {
@@ -55,12 +55,6 @@ const SlotCard: React.FC<SlotCardProps> = ({ slotInfo, rates, establishmentUuid,
         }
     };
 
-    const handleBookSlot = () => {
-        const nextUrl = `/user/book/${establishmentUuid}?slot=${slotUuid}`;
-        const loginUrl = `/auth/login?next=${encodeURIComponent(nextUrl)}` as RelativePathString;
-        router.push(loginUrl);
-    };
-
     return (
         <CardComponent customStyles={[getBorderColor()]} header={slotInfo.slot_code} subHeader={slotInfo.slot_status}>
             <View style={styles.infoContainer}>
@@ -77,9 +71,12 @@ const SlotCard: React.FC<SlotCardProps> = ({ slotInfo, rates, establishmentUuid,
                             <Text style={styles.rateTypeText}>{type} rate</Text>
                         </View>
 
-                        <Pressable style={styles.bookButton} onPress={handleBookSlot}>
-                            <Text style={styles.bookButtonText}>Book this slot</Text>
-                        </Pressable>
+                        <LinkComponent
+                            style={styles.bookButton}
+                            href={`../auth/login?next=${encodeURIComponent(`/user/book/slot/${slotUuid}`)}`}
+                        >
+                            Book this slot
+                        </LinkComponent>
                     </>
                 )}
 
@@ -159,6 +156,9 @@ const styles = StyleSheet.create({
         borderRadius: 4,
         paddingVertical: 10,
         alignItems: "center",
+        justifyContent: "center",
+        alignSelf: "center",
+        width: "100%",
     },
     bookButtonText: {
         color: "#ffffff",

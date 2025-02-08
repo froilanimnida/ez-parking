@@ -23,7 +23,11 @@ const SelectComponent = ({ items, selectedValue, onValueChange, placeholder, cus
             placeholder={placeholder}
         >
             {items.map((item, index) => (
-                <Picker.Item key={index} label={item.label} value={item.value} />
+                <Picker.Item
+                    key={index}
+                    label={(item.label.charAt(0).toUpperCase() + item.label.slice(1)).replaceAll(/_/g, " ")}
+                    value={item.value}
+                />
             ))}
         </Picker>
     );
