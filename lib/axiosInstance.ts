@@ -52,7 +52,7 @@ const API_BASE_URL = __DEV__
 
 const axiosInstance = axios.create({
     withCredentials: true,
-    // baseURL: API_BASE_URL,
+    // baseURL: " https://enjoyed-mosquito-daily.ngrok-free.app/api/v1",
     baseURL: "https://ez-parking-system-pr-54.onrender.com/api/v1",
     headers: {
         Accept: "application/json",
@@ -64,12 +64,17 @@ axiosInstance.interceptors.request.use(
         const requestUrl = value.url;
         if (requestUrl?.endsWith("/login")) {
             if (PlatformType() !== "web") {
-                const authToken = await SecureStore.getItemAsync("Authorization");
-                const xsrfToken = await SecureStore.getItemAsync("X-CSRF-TOKEN");
+                const access_token_cookie = await SecureStore.getItemAsync("access_token_cookie");
+                const csrf_access_token = await SecureStore.getItemAsync("csrf_access_token");
                 const csrf_refresh_token = await SecureStore.getItemAsync("csrf_refresh_token");
                 const refresh_token_cookie = await SecureStore.getItemAsync("refresh_token_cookie");
 
-                const userRole = await verifyAndGetRole(authToken, xsrfToken, csrf_refresh_token, refresh_token_cookie);
+                const userRole = await verifyAndGetRole(
+                    access_token_cookie,
+                    csrf_access_token,
+                    csrf_refresh_token,
+                    refresh_token_cookie
+                );
                 if (userRole) {
                     value.url = getRedirectPath(userRole);
                 }
@@ -81,11 +86,16 @@ axiosInstance.interceptors.request.use(
             requestUrl?.endsWith("/parking-manager")
         ) {
             if (PlatformType() !== "web") {
-                const authToken = await SecureStore.getItemAsync("Authorization");
-                const xsrfToken = await SecureStore.getItemAsync("X-CSRF-TOKEN");
+                const access_token_cookie = await SecureStore.getItemAsync("Authorization");
+                const csrf_access_token = await SecureStore.getItemAsync("X-CSRF-TOKEN");
                 const csrf_refresh_token = await SecureStore.getItemAsync("csrf_refresh_token");
                 const refresh_token_cookie = await SecureStore.getItemAsync("refresh_token_cookie");
-                const userRole = await verifyAndGetRole(authToken, xsrfToken, csrf_refresh_token, refresh_token_cookie);
+                const userRole = await verifyAndGetRole(
+                    access_token_cookie,
+                    csrf_access_token,
+                    csrf_refresh_token,
+                    refresh_token_cookie
+                );
                 if (!userRole) {
                     value.url = "/login";
                 }
@@ -113,7 +123,7 @@ axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
         if (error.response?.status === 401) {
-            router.replace("./auth/login");
+            router.replace("/auth/login");
         }
         return Promise.reject(error);
     }

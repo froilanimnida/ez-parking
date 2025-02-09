@@ -4,31 +4,13 @@ import Checkbox from "expo-checkbox";
 import TextComponent from "components/TextComponent";
 import ButtonComponent from "components/ButtonComponent";
 import CardComponent from "@/components/CardComponent";
-import axiosInstance from "@/lib/axiosInstance";
 import TextInputComponent from "@/components/TextInputComponent";
 import type { AxiosError } from "axios";
 import { getAuthHeaders, isAuthenticated } from "@/lib/credentialsManager";
 import { router, useLocalSearchParams, type ExternalPathString, type RelativePathString } from "expo-router";
 import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
-
-const loginUser = async (email: string) => {
-    const result = await axiosInstance.post("auth/login", {
-        email: email,
-    });
-    if (result.status >= 400) return Promise.reject(result.data);
-    console.log(result);
-    return result;
-};
-
-const verifyOTP = async (email: string, otp: string, rememberMe: boolean) => {
-    const result = await axiosInstance.patch(`/auth/verify-otp`, {
-        email: email,
-        otp: otp,
-        remember_me: rememberMe,
-    });
-    return result;
-};
+import { loginUser, verifyOTP } from "@/lib/api/auth";
 
 const LoginForm = () => {
     const [showOtpForm, setShowOtpForm] = useState(false);
@@ -92,17 +74,12 @@ const LoginForm = () => {
         try {
             const result = await verifyOTP(email, otp, rememberMe);
             const role = result.data.role as string;
-
             const nextParams = local.next as RelativePathString | ExternalPathString;
-            const headers = await getAuthHeaders();
-            if (!headers.Authorization) {
-                console.warn("No authorization token found");
-            }
-            if (nextParams) {
+            alert("Logged in successfully.");
+            if (nextParams && role === "user") {
                 router.replace(nextParams);
             }
             router.replace(role.replace("_", "-") as ExternalPathString);
-            alert("Logged in successfully.");
             setLoggingIn(false);
         } catch (error) {
             console.error("Login error:", error);

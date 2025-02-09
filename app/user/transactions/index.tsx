@@ -10,6 +10,7 @@ import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { fetchUserTransactions } from "@/lib/api/transaction";
 import { isAuthenticated } from "@/lib/credentialsManager";
+import LoadingComponent from "@/components/reusable/LoadingComponent";
 
 const getPaymentStatusStyle = (status: string) => {
     switch (status) {
@@ -37,9 +38,8 @@ const getTransactionStatusStyle = (status: string) => {
     }
 };
 
-interface UserTransaction {
+interface UserTransaction extends ParkingSlot {
     amount_due: string;
-    base_rate: string;
     created_at: string;
     duration_type: string;
     entry_time: any;
@@ -50,10 +50,8 @@ interface UserTransaction {
     is_premium: boolean;
     payment_status: string;
     slot_code: string;
-    slot_features: string;
     slot_id: number;
     slot_multiplier: string;
-    slot_status: string;
     status: string;
     transaction_id: number;
     updated_at: string;
@@ -78,9 +76,7 @@ const Transactions = () => {
 
     return (
         <ResponsiveContainer>
-            <LinkComponent style={{ width: "auto", marginBottom: 16 }} href="../user">
-                ← Back to Dashboard
-            </LinkComponent>
+            <LinkComponent style={{ width: "auto", marginBottom: 16 }} href="../user" label="← Back to Dashboard" />
             <TextComponent bold style={styles.title}>
                 My Transactions
             </TextComponent>
@@ -94,9 +90,7 @@ const Transactions = () => {
             <View style={styles.transactionList}>
                 {fetching && (
                     <View style={{ alignItems: "center", justifyContent: "center", padding: 16 }}>
-                        {" "}
-                        <ActivityIndicator size="large" color="#0000ff" />{" "}
-                        <TextComponent>Crunching your latest transaction...</TextComponent>
+                        <LoadingComponent text="Crunching your latest transaction..." />
                     </View>
                 )}
                 {transactions.map((transaction) => (
@@ -160,8 +154,22 @@ const Transactions = () => {
                                     </TextComponent>
                                 </View>
                                 <View style={styles.detailRow}>
-                                    <TextComponent style={styles.detailLabel}>Base Rate:</TextComponent>
-                                    <TextComponent style={styles.detailValue}>{transaction.base_rate}x</TextComponent>
+                                    <TextComponent style={styles.detailLabel}>Daily Rate:</TextComponent>
+                                    <TextComponent style={styles.detailValue}>
+                                        {transaction.base_price_per_day} PHP
+                                    </TextComponent>
+                                </View>
+                                <View style={styles.detailRow}>
+                                    <TextComponent style={styles.detailLabel}>Hourly Rate:</TextComponent>
+                                    <TextComponent style={styles.detailValue}>
+                                        {transaction.base_price_per_hour} PHP
+                                    </TextComponent>
+                                </View>
+                                <View style={styles.detailRow}>
+                                    <TextComponent style={styles.detailLabel}>Monthly Rate:</TextComponent>
+                                    <TextComponent style={styles.detailValue}>
+                                        {transaction.base_price_per_month} PHP
+                                    </TextComponent>
                                 </View>
                                 <View style={styles.detailRow}>
                                     <TextComponent style={styles.detailLabel}>Amount Due:</TextComponent>
@@ -278,6 +286,7 @@ const styles = StyleSheet.create({
     detailsSection: {
         flex: 1,
         gap: 8,
+        marginBottom: 16,
     },
     middleSection: {
         borderLeftWidth: 1,

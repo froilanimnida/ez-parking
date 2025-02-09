@@ -6,7 +6,7 @@ import PlatformType from "@/lib/platform";
 import TextComponent from "@/components/TextComponent";
 import LinkComponent from "@/components/LinkComponent";
 import ButtonComponent from "@/components/ButtonComponent";
-import { viewTransaction } from "@/lib/api/transaction";
+import { cancelTransaction, viewTransaction } from "@/lib/api/transaction";
 import { router, useLocalSearchParams } from "expo-router";
 import type { TransactionDetailsType } from "@/lib/models/userRoleTypes";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
@@ -17,7 +17,7 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 }
 
 const TransactionDetails = () => {
-    const [transactionDetails, setTransactionDetails] = useState<TransactionDetailsType>({});
+    const [transactionDetails, setTransactionDetails] = useState<TransactionDetailsType | null>(null);
     const [isFetching, setIsFetching] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -52,9 +52,15 @@ const TransactionDetails = () => {
         getTransactionDetails();
     }, []);
 
-    const handleCancelTransaction = () => {
+    const handleCancelTransaction = async () => {
         setIsCancelModalOpen(false);
-        Alert.alert("Transaction cancelled.");
+        try {
+            const result = await cancelTransaction(uuid);
+            Alert.alert("Transaction cancelled.");
+            router.replace("/user/transactions");
+        } catch {
+            Alert.alert("Error cancelling transaction.");
+        }
     };
 
     const establishmentLatitude = transactionDetails?.establishment_info?.latitude;
@@ -67,14 +73,12 @@ const TransactionDetails = () => {
               )})&t=&z=14&ie=UTF8&iwloc=B&output=embed`
             : "";
     const distanceKm =
-        transactionDetails.slot_info?.slot_status === "reserved"
+        transactionDetails?.slot_info?.slot_status === "reserved"
             ? calculateDistance(establishmentLatitude, establishmentLongitude, userLatitude, userLongitude).toFixed(1)
             : null;
     return (
         <ResponsiveContainer>
-            <LinkComponent style={{ marginBottom: 16 }} href="../transactions">
-                ← Back to Transaction
-            </LinkComponent>
+            <LinkComponent style={{ marginBottom: 16 }} href="../transactions" label="← Back to Transaction" />
             {isFetching && <LoadingComponent text="Fetching transaction details..." />}
 
             {!isFetching && transactionDetails && (
@@ -229,7 +233,6 @@ const TransactionDetails = () => {
                         </View>
                     </CardComponent>
 
-                    {/* Slot Details */}
                     <CardComponent header="Slot Details">
                         <View style={styles.lineRow}>
                             <TextComponent style={styles.lineLabel}>Slot Code</TextComponent>
@@ -258,14 +261,13 @@ const TransactionDetails = () => {
                         </View>
                     </CardComponent>
 
-                    {/* QR Code if active or reserved */}
                     {transactionDetails.qr_code &&
                         ["active", "reserved"].includes(transactionDetails.transaction_data.status) && (
                             <CardComponent header="QR Code">
                                 <View style={{ alignItems: "center", marginTop: 16 }}>
                                     <Image
                                         source={{ uri: `data:image/png;base64,${transactionDetails.qr_code}` }}
-                                        style={{ width: 100, height: 100, marginBottom: 16 }}
+                                        style={{ width: "100&", height: 100, marginBottom: 16 }}
                                     />
                                     <Image
                                         source={require("@/assets/images/mock_qr.png")}
@@ -281,11 +283,10 @@ const TransactionDetails = () => {
                             </CardComponent>
                         )}
 
-                    {/* Map Location */}
                     <CardComponent header="Location Details">
                         <View style={styles.mapContainer}>
                             {PlatformType() === "web" ? (
-                                <iframe src={mapUrl} style={{ width: "100%", height: "100%" }}></iframe>
+                                <iframe src={mapUrl} style={{ width: "100%", height: "100%" }} />
                             ) : (
                                 <WebView source={{ uri: mapUrl }} style={{ flex: 1 }} />
                             )}
@@ -327,15 +328,12 @@ const TransactionDetails = () => {
                                     Are you sure you want to cancel this transaction? This action cannot be undone.
                                 </Text>
                                 <View style={styles.modalActions}>
-                                    <Pressable
-                                        style={styles.modalCancelBtn}
-                                        onPress={() => setIsCancelModalOpen(false)}
-                                    >
-                                        <Text style={styles.modalCancelText}>No, keep it</Text>
-                                    </Pressable>
-                                    <Pressable style={styles.modalConfirmBtn} onPress={handleCancelTransaction}>
-                                        <Text style={styles.modalConfirmText}>Yes, cancel transaction</Text>
-                                    </Pressable>
+                                    <ButtonComponent onPress={() => setIsCancelModalOpen(false)} title="No, keep it" />
+                                    <ButtonComponent
+                                        variant="destructive"
+                                        onPress={handleCancelTransaction}
+                                        title="Yes, cancel transaction"
+                                    />
                                 </View>
                             </View>
                         </Pressable>
@@ -349,13 +347,10 @@ const TransactionDetails = () => {
                     >
                         <Pressable style={styles.qrModalOverlay} onPress={() => setIsModalOpen(false)}>
                             <View style={styles.qrModalContent}>
-                                <Pressable onPress={() => setIsModalOpen(false)} style={styles.qrModalClose}>
-                                    <Text style={{ color: "#fff" }}>Close</Text>
-                                </Pressable>
-                                <Image
-                                    source={require("@/assets/images/mock_qr.png")}
-                                    style={styles.qrModalImage}
-                                    resizeMode="contain"
+                                <ButtonComponent
+                                    title="Close"
+                                    onPress={() => setIsModalOpen(false)}
+                                    style={styles.qrModalClose}
                                 />
                                 <Image
                                     source={require("@/assets/images/mock_qr.png")}
@@ -522,9 +517,9 @@ const styles = StyleSheet.create({
     modalActions: {
         flexDirection: "row",
         justifyContent: "flex-end",
+        gap: 8,
     },
     modalCancelBtn: {
-        backgroundColor: "#f9fafb",
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 4,
@@ -553,16 +548,20 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontWeight: "600",
     },
-    // QR Modal
     qrModalOverlay: {
         flex: 1,
         backgroundColor: "rgba(0,0,0,0.6)",
         justifyContent: "center",
+        width: "100%",
         alignItems: "center",
     },
     qrModalContent: {
         position: "relative",
+        width: "90%",
         maxWidth: "90%",
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
         maxHeight: "90%",
     },
     qrModalClose: {
@@ -573,7 +572,7 @@ const styles = StyleSheet.create({
     },
     qrModalImage: {
         width: "100%",
-        height: "auto",
+        height: "100%",
         borderRadius: 8,
     },
 });

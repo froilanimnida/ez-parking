@@ -186,13 +186,7 @@ const EstablishmentOverview = () => {
                 <TextComponent variant="h2">Available Parking Slots</TextComponent>
                 <View style={styles.slotsGrid}>
                     {establishment.slots.map((slot, index) => (
-                        <SlotCard
-                            key={index}
-                            slotInfo={slot}
-                            isGuest={true}
-                            establishmentUuid={uuid}
-                            slotUuid={slot.uuid}
-                        />
+                        <SlotCard key={index} slotInfo={slot} isGuest={true} slotUuid={slot.uuid} />
                     ))}
                 </View>
             </View>

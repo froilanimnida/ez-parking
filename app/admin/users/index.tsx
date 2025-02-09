@@ -3,25 +3,11 @@ import React, { useEffect, useState } from "react";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import type { User } from "@/lib/models/user";
-import { getAuthHeaders } from "@/lib/credentialsManager";
-import axiosInstance from "@/lib/axiosInstance";
 import ButtonComponent from "@/components/ButtonComponent";
 import TextInputComponent from "@/components/TextInputComponent";
 import SelectComponent from "@/components/SelectComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
-
-const fetchUsers = async () => {
-    const cookiesObject = await getAuthHeaders();
-    const res = await axiosInstance.get(`${process.env.EXPO_PUBLIC_API_ADMIN_ROOT}/users`, {
-        headers: {
-            Authorization: cookiesObject.Authorization,
-            "X-CSRF-TOKEN": cookiesObject["X-CSRF-TOKEN"],
-            csrf_refresh_token: cookiesObject.csrf_refresh_token,
-            refresh_token_cookie: cookiesObject.refresh_token_cookie,
-        },
-    });
-    return res.data.data as User[];
-};
+import { getAllUsers } from "@/lib/api/admin";
 
 const Users = () => {
     const [users, setUsers] = useState<User[]>([]);
@@ -32,8 +18,8 @@ const Users = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const data = await fetchUsers();
-            setUsers(data);
+            const data = await getAllUsers();
+            setUsers(data.data.users);
         };
         fetchData();
     }, []);
@@ -52,7 +38,7 @@ const Users = () => {
                 <TextComponent bold variant="h1">
                     Users
                 </TextComponent>
-                <ButtonComponent style={styles.exportButton} onPress={() => {}} title="Export Users"/>
+                <ButtonComponent style={styles.exportButton} onPress={() => {}} title="Export Users" />
             </View>
 
             <View style={styles.filters}>

@@ -197,10 +197,10 @@ const EstablishmentView = () => {
                         <View style={styles.slotGrid}>
                             {establishmentData.slots.map((slot) => (
                                 <SlotCard
+                                    establishmentUuid={uuid}
                                     key={slot.uuid}
                                     isGuest={false}
                                     slotInfo={slot}
-                                    establishmentUuid={establishmentData.establishment.uuid}
                                     slotUuid={slot.uuid}
                                 />
                             ))}

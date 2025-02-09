@@ -7,6 +7,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { getAuthHeaders } from "@/lib/credentialsManager";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import axiosInstance from "@/lib/axiosInstance";
+import { protectedRoute } from "@/lib/api/auth";
 
 interface UserActionTypes {
     title: string;
@@ -40,7 +41,7 @@ const UserDashboard = () => {
         const fetchAuthHeaders = async () => {
             try {
                 const headers = await getAuthHeaders();
-                const result = await axiosInstance.post("/auth/protected-route");
+                const result = await protectedRoute();
                 console.log("Result from protected route:", result);
             } catch (error) {
                 console.error("Error fetching auth headers:", error);

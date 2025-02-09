@@ -14,12 +14,12 @@ interface Slot extends ParkingSlot {
 
 interface SlotCardProps {
     slotInfo: Slot;
-    establishmentUuid: string;
     slotUuid: string;
     isGuest?: boolean;
+    establishmentUuid: string;
 }
 
-const SlotCard = ({ slotInfo, establishmentUuid, slotUuid, isGuest }: SlotCardProps) => {
+const SlotCard = ({ slotInfo, slotUuid, isGuest, establishmentUuid }: SlotCardProps) => {
     const getBorderColor = () => {
         switch (slotInfo.slot_status) {
             case "open":
@@ -73,14 +73,15 @@ const SlotCard = ({ slotInfo, establishmentUuid, slotUuid, isGuest }: SlotCardPr
 
                         <LinkComponent
                             style={styles.bookButton}
+                            label="Book Slot"
                             href={
                                 isGuest
-                                    ? `../auth/login?next=${encodeURIComponent(`/user/book/slot/${slotUuid}`)}`
-                                    : (`/user/book/slot/${slotUuid}` as RelativePathString)
+                                    ? (`../auth/login?next=${encodeURIComponent(
+                                          `/user/book/slot/${slotUuid}?establishment_uuid=${establishmentUuid}`
+                                      )}` as RelativePathString)
+                                    : (`/user/book/slot/${slotUuid}?establishment_uuid=${establishmentUuid}` as RelativePathString)
                             }
-                        >
-                            Book this slot
-                        </LinkComponent>
+                        />
                     </>
                 )}
 

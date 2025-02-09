@@ -15,6 +15,7 @@ import TextInputComponent from "@/components/TextInputComponent";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import SelectComponent from "@/components/SelectComponent";
 import CheckboxComponent from "@/components/CheckboxComponent";
+import { checkoutTransaction } from "@/lib/api/transaction";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;
@@ -32,9 +33,10 @@ interface TransactionCheckoutData {
 }
 
 const SlotInfo = () => {
-    const { slot_uuid } = useLocalSearchParams();
-    console.log(slot_uuid);
-    const [establishmentUuid, setEstablishmentUuid] = useState("");
+    const { establishment_uuid } = useLocalSearchParams() as { establishment_uuid: string };
+    const { uuid } = useLocalSearchParams() as { uuid: string };
+    console.log("slot_uuid", uuid);
+    console.log("establishment_uuid", establishment_uuid);
     const transactionCheckoutData: TransactionCheckoutData = {
         address: {
             street: "123 Main Street",
@@ -179,10 +181,18 @@ const SlotInfo = () => {
 
     useEffect(() => {
         updateTotalPrice(duration, pricingType);
+        const checkoutInfo = async () => {
+            try {
+                const result = await checkoutTransaction(establishment_uuid, uuid);
+                console.log(result);
+            } catch (error) {
+                console.error("Error checking out transaction:", error);
+            }
+        };
+        checkoutInfo();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [duration, pricingType]);
 
-    // Simulate form submission
     const handleConfirmBooking = () => {
         setIsSubmitting(true);
         // Mock some async operation
@@ -199,9 +209,11 @@ const SlotInfo = () => {
 
     return (
         <ResponsiveContainer>
-            <LinkComponent href={`../../../user/book/${establishmentUuid}`} style={styles.backLink}>
-                ← Back to Dashboard
-            </LinkComponent>
+            <LinkComponent
+                href={`../../../user/book/${establishment_uuid}`}
+                style={styles.backLink}
+                label="← Back to Dashboard"
+            />
 
             <CardComponent
                 customStyles={styles.card}
