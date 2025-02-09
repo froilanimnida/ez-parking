@@ -353,7 +353,7 @@ const TransactionDetails = () => {
                                     style={styles.qrModalClose}
                                 />
                                 <Image
-                                    source={require("@/assets/images/mock_qr.png")}
+                                    source={{ uri: `data:image/png;base64,${transactionDetails.qr_code}` }}
                                     style={styles.qrModalImage}
                                     resizeMode="contain"
                                 />

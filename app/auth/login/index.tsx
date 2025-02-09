@@ -6,7 +6,7 @@ import ButtonComponent from "components/ButtonComponent";
 import CardComponent from "@/components/CardComponent";
 import TextInputComponent from "@/components/TextInputComponent";
 import type { AxiosError } from "axios";
-import { getAuthHeaders, isAuthenticated } from "@/lib/credentialsManager";
+import { isAuthenticated } from "@/lib/credentialsManager";
 import { router, useLocalSearchParams, type ExternalPathString, type RelativePathString } from "expo-router";
 import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
