@@ -2,7 +2,7 @@ import { StyleSheet, View, Linking } from "react-native";
 import React, { useEffect, useState } from "react";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
-import SlotCard from "@/components/guest/SlotCard";
+import SlotCard from "@/components/SlotCard";
 import calculateDistance from "@/lib/function/calculateDistance";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -189,7 +189,7 @@ const EstablishmentOverview = () => {
                         <SlotCard
                             key={index}
                             slotInfo={slot}
-                            rates={establishment.pricing_plans}
+                            isGuest={true}
                             establishmentUuid={uuid}
                             slotUuid={slot.uuid}
                         />
