@@ -1,4 +1,4 @@
-import { StyleSheet, View, TextInput, Switch } from "react-native";
+import { StyleSheet, View, TextInput, Alert } from "react-native";
 import React, { useEffect, useState } from "react";
 import TextComponent from "@/components/TextComponent";
 import ButtonComponent from "@/components/ButtonComponent";
@@ -7,7 +7,6 @@ import SelectComponent from "@/components/SelectComponent";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import TextInputComponent from "@/components/TextInputComponent";
-import { createParkingSlot } from "@/lib/api/parkingSlot";
 import { addParkingSlot, getParkingSlotsParkingManager, getVehicleTypes } from "@/lib/api/parkingManager";
 import { ParkingSlot } from "@/lib/models/parking-slot";
 import { VehicleType } from "@/lib/models/vehicle-types";
@@ -104,7 +103,7 @@ const Slots = () => {
             base_price_per_month: "",
             price_multiplier: "",
         });
-        console.log(result);
+        Alert.alert("Slot Added");
     };
 
     return (
