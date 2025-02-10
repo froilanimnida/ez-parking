@@ -10,6 +10,7 @@ import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import TextInputComponent from "@/components/TextInputComponent";
 import { createParkingSlot, getParkingSlotsParkingManager } from "@/lib/api/parkingSlot";
 import { ParkingSlot } from "@/lib/models/parking-slot";
+import { getAllSlots } from "@/lib/api/parkingManager";
 
 const slotFeatures = [
     {
@@ -59,9 +60,9 @@ const Slots = () => {
 
     useEffect(() => {
         const fetchSlots = async () => {
-            let slots = await getParkingSlotsParkingManager();
+            let data = await getAllSlots();
             setIsFetching(false);
-            setSlots(slots);
+            setSlots(data.data.slots);
         };
         fetchSlots();
     });

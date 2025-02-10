@@ -9,7 +9,6 @@ import TextInputComponent from "@/components/TextInputComponent";
 import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { fetchUserTransactions } from "@/lib/api/transaction";
-import { isAuthenticated } from "@/lib/credentialsManager";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 
 const getPaymentStatusStyle = (status: string) => {

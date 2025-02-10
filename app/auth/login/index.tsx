@@ -26,27 +26,23 @@ const LoginForm = () => {
     const startTimer = () => {
         setTimer(300);
     };
-
     useEffect(() => {
-        const checkAuthStatus = async () => {
-            try {
-                const nextParams = local.next as RelativePathString | ExternalPathString;
-                const loggedIn = await isAuthenticated();
-                if (nextParams && loggedIn) {
-                    router.replace(nextParams);
-                }
-            } catch (error) {
-                console.error("Error checking authentication:", error);
-            }
-        };
-
-        checkAuthStatus();
-
-        if (timer > 0) {
-            const interval = setInterval(() => setTimer((t) => t - 1), 1000);
-            return () => clearInterval(interval);
+        if (timer === 0) {
+            setShowOtpForm(false);
         }
     }, [timer]);
+
+    const nextParams = local.next as RelativePathString | ExternalPathString;
+    useEffect(() => {
+        const checkAuthStatus = async () => {
+            const loggedIn = await isAuthenticated();
+            if (nextParams && loggedIn && loggedIn.role === "user") {
+                console.log("Redirecting to:", nextParams);
+                router.replace(nextParams);
+            }
+        };
+        checkAuthStatus();
+    }, []);
 
     const handleOtpOnChange = (otp: string) => {
         if (otp.length === 6) {

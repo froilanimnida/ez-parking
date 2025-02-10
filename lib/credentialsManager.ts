@@ -3,6 +3,8 @@ import PlatformType from "./platform";
 import axiosInstance from "./axiosInstance";
 import { router } from "expo-router";
 
+let authState: { loggedIn: boolean; role: string } | null = null;
+
 export async function getAuthHeaders() {
     try {
         if (PlatformType() === "web") return;
@@ -23,20 +25,29 @@ export async function getAuthHeaders() {
     }
 }
 
-export async function isAuthenticated() {
+export async function isAuthenticated(): Promise<{ loggedIn: boolean; role: string }> {
+    if (authState !== null) {
+        return authState;
+    }
+
     try {
         const authHeaders = await getAuthHeaders();
         if (!authHeaders?.access_token_cookie) {
-            return false;
+            authState = { loggedIn: false, role: "" };
+            return authState;
         }
 
         const response = await axiosInstance.post("/auth/verify-token", {}, { headers: authHeaders });
         if (response.data?.role) {
-            return true;
+            authState = { loggedIn: true, role: response.data.role as string };
+            return authState;
         }
-        return false;
+
+        authState = { loggedIn: false, role: "" };
+        return authState;
     } catch (error) {
-        return false;
+        authState = { loggedIn: false, role: "" };
+        return authState;
     }
 }
 

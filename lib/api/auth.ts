@@ -19,6 +19,11 @@ export const verifyOTP = async (email: string, otp: string, rememberMe: boolean)
     return result;
 };
 
+export const verifyToken = async () => {
+    const result = await axiosInstance.post(`${root}/verify-token`);
+    return result;
+}
+
 
 export const protectedRoute = async () => {
     const result = await axiosInstance.post(`${root}/protected-route`);

@@ -10,7 +10,7 @@ interface ResponsiveContainerProps {
 const ResponsiveContainer = ({ children }: ResponsiveContainerProps) => {
     return (
         <SafeAreaView
-            style={{ flex: 1 }}
+            style={{ flex: 1, height: "100%" }}
             edges={PlatformType() === "web" ? ["left", "right"] : ["left", "right", "bottom", "top"]}
         >
             <KeyboardAvoidingView

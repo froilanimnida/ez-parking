@@ -33,10 +33,10 @@ interface TransactionCheckoutData {
 }
 
 const SlotInfo = () => {
-    const { establishment_uuid } = useLocalSearchParams() as { establishment_uuid: string };
-    const { uuid } = useLocalSearchParams() as { uuid: string };
-    console.log("slot_uuid", uuid);
-    console.log("establishment_uuid", establishment_uuid);
+    const { uuid, establishment_uuid } = useLocalSearchParams();
+    console.log("Slot UUID:", uuid);
+    console.log("Establishment UUID:", establishment_uuid);
+    // const { uuid } = useLocalSearchParams() as { uuid: string };
     const transactionCheckoutData: TransactionCheckoutData = {
         address: {
             street: "123 Main Street",
