@@ -12,6 +12,8 @@ import PlatformType from "@/lib/platform";
 import { getNearbyEstablishments } from "@/lib/api/establishment";
 import { askLocationPermission, getIPBasedLocation } from "@/lib/location";
 import LoadingComponent from "./reusable/LoadingComponent";
+import SelectComponent from "./SelectComponent";
+import { city, METRO_MANILA_CITIES } from "@/lib/models/cities";
 export interface EstablishmentQuery extends ParkingEstablishment {
     open_slots: number;
     total_slots: number;
@@ -26,7 +28,8 @@ const getNearestEstablishments = async (latitude: number, longitude: number) =>
 const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
     const [establishments, setEstablishments] = useState<EstablishmentQuery[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
-    const [searchTerm, setSearchTerm] = useState("");
+    const [searchTerm, setSearchTerm] = useState<city>("");
+    const [selectedCity, setSelectedCity] = useState("");
     const [recentSearches, setRecentSearches] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -92,21 +95,29 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
                 <Modal animationType="slide" visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
                     <View style={styles.modalContainer}>
                         <View style={styles.modalHeader}>
-                            <Pressable onPress={() => setModalVisible(false)}>
+                            <Pressable onPress={() => setModalVisible(false)} style={styles.backButton}>
                                 <MaterialCommunityIcons name="arrow-left" size={24} color="#000" />
                             </Pressable>
-                            <TextInputComponent
-                                customStyles={styles.modalSearchInput}
-                                placeholder="Search parking locations"
-                                value={searchTerm}
-                                onChangeText={setSearchTerm}
-                                autoFocus
+                            <View style={styles.citySelectContainer}>
+                                <TextInputComponent
+                                    placeholder="Search parking locations"
+                                    value={searchTerm}
+                                    onChangeText={setSearchTerm}
+                                    autoFocus
+                                />
+                            </View>
+                            <SelectComponent
+                                items={METRO_MANILA_CITIES.map((city) => ({ label: city.toLowerCase(), value: city }))}
+                                selectedValue={selectedCity}
+                                onValueChange={(city) => {
+                                    setSelectedCity(city);
+                                }}
+                                placeholder="Select City"
                             />
                         </View>
-
                         <ScrollView style={styles.modalContent}>
                             {recentSearches.map((search, index) => (
-                                <ButtonComponent
+                                <Pressable
                                     key={index}
                                     style={styles.recentSearchItem}
                                     onPress={() => {
@@ -114,15 +125,10 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
                                         handleSearch();
                                         setModalVisible(false);
                                     }}
-                                    title={search}
-                                    icon={
-                                        <MaterialCommunityIcons
-                                            name="clock-time-four-outline"
-                                            size={24}
-                                            color="#6b7280"
-                                        />
-                                    }
-                                />
+                                >
+                                    <MaterialCommunityIcons name="clock-time-four-outline" size={24} color="#6b7280" />
+                                    <TextComponent style={styles.recentSearchText}>{search}</TextComponent>
+                                </Pressable>
                             ))}
                         </ScrollView>
                     </View>
@@ -168,6 +174,15 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         marginTop: 16,
         gap: 8,
+    },
+    citySelectContainer: {
+        marginTop: 16,
+        paddingHorizontal: 16,
+    },
+    backButton: {
+        position: "absolute",
+        left: 16,
+        top: 16,
     },
     searchInput: {
         flex: 1,
@@ -234,7 +249,7 @@ const styles = StyleSheet.create({
         paddingTop: PlatformType() === "ios" ? 40 : 0,
     },
     modalHeader: {
-        flexDirection: "row",
+        flexDirection: "column",
         alignItems: "center",
         padding: 16,
         borderBottomWidth: 1,

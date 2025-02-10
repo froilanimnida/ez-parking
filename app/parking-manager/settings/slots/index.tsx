@@ -1,16 +1,16 @@
-import { StyleSheet, View, TextInput, Switch } from "react-native";
+import { StyleSheet, View, TextInput, Alert } from "react-native";
 import React, { useEffect, useState } from "react";
 import TextComponent from "@/components/TextComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import CardComponent from "@/components/CardComponent";
 import SelectComponent from "@/components/SelectComponent";
-import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import TextInputComponent from "@/components/TextInputComponent";
-import { createParkingSlot, getParkingSlotsParkingManager } from "@/lib/api/parkingSlot";
+import { addParkingSlot, getParkingSlotsParkingManager, getVehicleTypes } from "@/lib/api/parkingManager";
 import { ParkingSlot } from "@/lib/models/parking-slot";
-import { getAllSlots } from "@/lib/api/parkingManager";
+import { VehicleType } from "@/lib/models/vehicle-types";
+import CheckboxComponent from "@/components/CheckboxComponent";
 
 const slotFeatures = [
     {
@@ -42,11 +42,23 @@ const slotStatus = [
 ];
 
 const Slots = () => {
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<{
+        slot_code: string;
+        is_premium: boolean;
+        floor_level: string;
+        vehicle_type_id: number;
+        slot_features: "standard" | "covered" | "vip" | "disabled" | "ev_charging";
+        slot_status: "open" | "occupied" | "reserved" | "closed";
+        is_active: boolean;
+        base_price_per_hour: string;
+        base_price_per_day: string;
+        base_price_per_month: string;
+        price_multiplier: string;
+    }>({
         slot_code: "",
         is_premium: false,
         floor_level: "",
-        vehicle_type_id: "",
+        vehicle_type_id: 0,
         slot_features: "standard",
         slot_status: "open",
         is_active: true,
@@ -56,16 +68,43 @@ const Slots = () => {
         price_multiplier: "",
     });
     const [isFetching, setIsFetching] = useState(true);
-    const [slots, setSlots] = useState([] as ParkingSlot[]);
+    const [vehicleTypes, setVehicleTypes] = useState<VehicleType[]>([]);
+    const [slots, setSlots] = useState<
+        (ParkingSlot & { vehicle_type_code: string; vehicle_type_name: string; vehicle_type_size: string })[]
+    >([]);
 
     useEffect(() => {
-        const fetchSlots = async () => {
-            let data = await getAllSlots();
+        const fetchData = async () => {
+            let slots = await getParkingSlotsParkingManager();
+            let vehicleTypes = await getVehicleTypes();
             setIsFetching(false);
-            setSlots(data.data.slots);
+            setSlots(slots.data.data);
+            setVehicleTypes(vehicleTypes.data.data);
         };
-        fetchSlots();
-    });
+        fetchData();
+    }, []);
+
+    const setFormDataValue = (key: string, value: string | boolean) => {
+        setFormData({ ...formData, [key]: value });
+    };
+
+    const addSlot = async () => {
+        const result = await addParkingSlot(formData);
+        setFormData({
+            slot_code: "",
+            is_premium: false,
+            floor_level: "",
+            vehicle_type_id: 0,
+            slot_features: "standard",
+            slot_status: "open",
+            is_active: true,
+            base_price_per_hour: "",
+            base_price_per_day: "",
+            base_price_per_month: "",
+            price_multiplier: "",
+        });
+        Alert.alert("Slot Added");
+    };
 
     return (
         <ResponsiveContainer>
@@ -81,15 +120,30 @@ const Slots = () => {
                             <TextInput
                                 style={styles.input}
                                 value={formData.slot_code}
-                                onChangeText={(text) => setFormData({ ...formData, slot_code: text })}
+                                onChangeText={(text) => setFormDataValue("slot_code", text)}
                             />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <TextComponent style={styles.label}>Slot Vehicle Type *</TextComponent>
+                            {isFetching && vehicleTypes ? (
+                                <LoadingComponent text="Getting vehicle types..." />
+                            ) : (
+                                <SelectComponent
+                                    items={vehicleTypes.map((type) => ({
+                                        label: type.name,
+                                        value: type.vehicle_type_id.toString(),
+                                    }))}
+                                    selectedValue={formData.vehicle_type_id.toString()}
+                                    onValueChange={(value: string) => setFormDataValue("vehicle_type_id", value)}
+                                />
+                            )}
                         </View>
 
                         <View style={styles.inputGroup}>
                             <TextComponent style={styles.label}>Is Premium</TextComponent>
-                            <Switch
+                            <CheckboxComponent
                                 value={formData.is_premium}
-                                onValueChange={(value) => setFormData({ ...formData, is_premium: value })}
+                                onValueChange={(value) => setFormDataValue("is_premium", value)}
                             />
                         </View>
 
@@ -98,7 +152,7 @@ const Slots = () => {
                             <SelectComponent
                                 items={slotFeatures}
                                 selectedValue="standard"
-                                onValueChange={(value: string) => setFormData({ ...formData, slot_features: value })}
+                                onValueChange={(value: string) => setFormDataValue("slot_features", value)}
                             />
                         </View>
 
@@ -107,7 +161,16 @@ const Slots = () => {
                             <SelectComponent
                                 items={slotStatus}
                                 selectedValue="open"
-                                onValueChange={(value: string) => setFormData({ ...formData, slot_status: value })}
+                                onValueChange={(value: string) => setFormDataValue("slot_status", value)}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <TextComponent style={styles.label}> Floor Level </TextComponent>
+                            <TextInputComponent
+                                placeholder="Floor Level"
+                                keyboardType="numeric"
+                                value={formData.floor_level}
+                                onChangeText={(text) => setFormDataValue("floor_level", text)}
                             />
                         </View>
                         <View style={styles.inputGroup}>
@@ -116,6 +179,7 @@ const Slots = () => {
                                 placeholder="Base Price Per Hour"
                                 keyboardType="numeric"
                                 value={formData.base_price_per_hour}
+                                onChangeText={(text) => setFormDataValue("base_price_per_hour", text)}
                             />
                         </View>
                         <View style={styles.inputGroup}>
@@ -124,15 +188,16 @@ const Slots = () => {
                                 placeholder="Base Price Per Day"
                                 keyboardType="numeric"
                                 value={formData.base_price_per_day}
+                                onChangeText={(text) => setFormDataValue("base_price_per_day", text)}
                             />
                         </View>
                         <View style={styles.inputGroup}>
-                            <TextComponent style={styles.label}> Base Price Per Day </TextComponent>
+                            <TextComponent style={styles.label}> Base Price Per Month </TextComponent>
                             <TextInputComponent
                                 placeholder="Base Price Per Month"
                                 keyboardType="numeric"
                                 value={formData.base_price_per_month}
-                                onChangeText={(text) => setFormData({ ...formData, base_price_per_month: text })}
+                                onChangeText={(text) => setFormDataValue("base_price_per_month", text)}
                             />
                         </View>
                         <View style={styles.inputGroup}>
@@ -141,7 +206,7 @@ const Slots = () => {
                                 placeholder="Price Multiplier"
                                 keyboardType="numeric"
                                 value={formData.price_multiplier}
-                                onChangeText={(text) => setFormData({ ...formData, price_multiplier: text })}
+                                onChangeText={(text) => setFormDataValue("price_multiplier", text)}
                             />
                         </View>
                         <View style={styles.inputGroup}>
@@ -149,14 +214,16 @@ const Slots = () => {
                             <SelectComponent
                                 items={slotStatus}
                                 selectedValue="open"
-                                onValueChange={(value: string) => setFormData({ ...formData, slot_status: value })}
+                                onValueChange={(value: string) => setFormDataValue("slot_status", value)}
                             />
                         </View>
                     </View>
 
                     <ButtonComponent
                         title="Add Slot"
-                        onPress={() => {}}
+                        onPress={() => {
+                            addSlot();
+                        }}
                         variant="primary"
                         style={styles.submitButton}
                     />
@@ -164,11 +231,13 @@ const Slots = () => {
             </>
 
             <View style={{ marginTop: 32 }}>
-                <TextComponent variant="h1" style={styles.sectionTitle}>
+                <TextComponent variant="h1" bold>
                     Existing Parking Slots
                 </TextComponent>
                 {isFetching ? (
                     <LoadingComponent text="Getting all the slot..." />
+                ) : slots.length === 0 ? (
+                    <TextComponent>No slots available</TextComponent>
                 ) : (
                     <View style={styles.slotsGrid}>
                         {slots.map((slot, index) => (
@@ -197,51 +266,24 @@ const Slots = () => {
                                         </TextComponent>
                                     </View>
                                 </View>
+                                <TextComponent>Vehicle Type: {slot.vehicle_type_name}</TextComponent>
+                                <TextComponent>Floor Level: {slot.floor_level}</TextComponent>
+                                <TextComponent>Features: {slot.slot_features}</TextComponent>
+                                <TextComponent>Base Price Per Hour: {slot.base_price_per_hour}</TextComponent>
+                                <TextComponent>Base Price Per Day: {slot.base_price_per_day}</TextComponent>
+                                <TextComponent>Base Price Per Month: {slot.base_price_per_month}</TextComponent>
+                                <TextComponent>Is Premium: {slot.is_premium ? "Yes" : "No"}</TextComponent>
+                                <TextComponent>Is Active: {slot.is_active ? "Yes" : "No"}</TextComponent>
                             </CardComponent>
                         ))}
                     </View>
                 )}
-                <View style={styles.slotsGrid}>
-                    {/* {slots.map((slot, index) => (
-                            <CardComponent
-                                key={index}
-                                style={[
-                                    styles.slotCard,
-                                    slot.slot_status === "open" && styles.slotOpen,
-                                    slot.slot_status === "reserved" && styles.slotReserved,
-                                    slot.slot_status === "occupied" && styles.slotOccupied,
-                                ]}
-                            >
-                                <View style={styles.slotHeader}>
-                                    <TextComponent style={styles.slotCode}>{slot.slot_code}</TextComponent>
-                                    <View
-                                        style={[
-                                            styles.statusBadge,
-                                            slot.slot_status === "open" && styles.statusOpen,
-                                            slot.slot_status === "reserved" && styles.statusReserved,
-                                            slot.slot_status === "occupied" && styles.statusOccupied,
-                                        ]}
-                                    >
-                                        <TextComponent style={styles.statusText}>
-                                            {slot.slot_status.toUpperCase()}
-                                        </TextComponent>
-                                    </View>
-                                </View>
-                            </CardComponent>
-                        ))} */}
-                </View>
             </View>
         </ResponsiveContainer>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        ...defaultContainerStyles,
-    },
-    body: {
-        ...defaultBodyStyles,
-    },
     sectionTitle: {
         marginBottom: 16,
         fontWeight: "600",
