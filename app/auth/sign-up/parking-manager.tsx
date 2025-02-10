@@ -10,79 +10,117 @@ import CheckboxComponent from "@/components/CheckboxComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import LocationPicker from "@/components/auth/parking-manager/LocationPicker";
+import {
+    ParkingCompanyProfile,
+    ParkingPaymentMethodData,
+    type ParkingAddressData,
+    type ParkingEstablishmentData,
+    type ParkingOwnerInformation,
+    type ParkinOperatingHoursData,
+} from "@/lib/models/parkingManagerSignUpTypes";
+import OperatingHoursForm from "@/components/auth/parking-manager/OperatingHoursForm";
+interface OperatingHours {
+    enabled: boolean;
+    open: string;
+    close: string;
+}
 
 const ParkingManagerSignUp = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [ownerInformation, setOwnerInformation] = useState({
-        ownerType: "individual",
-        firstName: "",
-        middleName: "",
-        lastName: "",
-        suffix: "",
+    const [userInformation, setUserInformation] = useState<ParkingOwnerInformation>({
         email: "",
-        contactNumber: "",
+        first_name: "",
+        last_name: "",
+        middle_name: "",
+        suffix: "",
+        phone_number: "",
+    });
+    const [companyProfile, setCompanyProfile] = useState<ParkingCompanyProfile>({
+        owner_type: "individual",
+        company_name: "",
+        company_reg_number: "",
         tin: "",
+    });
+    const [addressData, setAddressData] = useState<ParkingAddressData>({
+        street: "",
+        barangay: "",
+        city: "",
+        province: "",
+        postal_code: "",
+    });
+
+    const [parkingEstablishmentData, setParkingEstablishmentData] = useState<ParkingEstablishmentData>({
+        space_type: "",
+        space_layout: "",
+        custom_layout: "",
+        dimensions: "",
+        is24_7: false,
+        access_info: "no_specific_access",
+        custom_access: "",
         name: "",
-        companyName: "",
-        companyRegNumber: "",
-    });
-    const [addressData, setAddressData] = useState({
-        address: {
-            street: "",
-            barangay: "",
-            city: "",
-            province: "",
-            postalCode: "",
-        },
-        location: {
-            latitude: 14.5995,
-            longitude: 120.9842,
-        },
-        landmarks: "",
-    });
-    const [facilitiesAndAmenities, setFacilitiesAndAmenities] = useState({
-        facilities: {
-            accessInformation: "gate_code",
-            customAccess: "",
-            lightingAndSecurity: "",
-            accessibility: "",
-            nearbyFacilities: "",
-        },
-        parkingDetails: {
-            spaceType: "indoor",
-            spaceLayout: "parallel",
-            customLayout: "",
-            dimensions: "",
-        },
+        lighting: "",
+        accessibility: "",
+        facilities: "",
+        longitude: "14.5995",
+        latitude: "120.9842",
+        nearby_landmarks: "",
     });
 
-    const [paymentData, setPaymentData] = useState({
-        paymentMethods: {
-            cash: false,
-            mobile: false,
-            other: false,
-            otherText: "",
-        },
+    const [is24_7, setIs24_7] = useState(false);
+    const [operatingHours, setOperatingHours] = useState({
+        monday: { enabled: false, open: "", close: "" },
+        tuesday: { enabled: false, open: "", close: "" },
+        wednesday: { enabled: false, open: "", close: "" },
+        thursday: { enabled: false, open: "", close: "" },
+        friday: { enabled: false, open: "", close: "" },
+        saturday: { enabled: false, open: "", close: "" },
+        sunday: { enabled: false, open: "", close: "" },
     });
 
-    // Add handler after existing handlers
-    const handlePaymentChange = (method: string, value: boolean | string) => {
-        setPaymentData((prev) => ({
-            paymentMethods: {
-                ...prev.paymentMethods,
-                [method]: value,
+    const [paymentMethodData, setPaymentMethodData] = useState<ParkingPaymentMethodData>({
+        accepts_cash: false,
+        accepts_mobile: false,
+        accepts_other: false,
+        other_methods: "",
+    });
+
+    const handleParkingOwnerInfo = (key: string, value: string) => {
+        setUserInformation({ ...userInformation, [key]: value });
+    };
+
+    const handleCompanyInfoChange = (key: string, value: string) => {
+        setCompanyProfile({ ...companyProfile, [key]: value });
+    };
+
+    const handleAddressInfoChange = (key: string, value: string) => {
+        setAddressData({ ...addressData, [key]: value });
+    };
+
+    const handleParkingEstablishmentData = (key: string, value: string) => {
+        setParkingEstablishmentData({ ...parkingEstablishmentData, [key]: value });
+    };
+
+    const handleOperatingHoursData = (day: string, field: keyof OperatingHours, value: string | boolean) => {
+        setOperatingHours((prev) => ({
+            ...prev,
+            [day]: {
+                ...prev[day],
+                [field]: value,
             },
         }));
     };
 
+    const handlePaymentDataChange = (key: string, value: boolean | string) => {
+        setPaymentMethodData({ ...paymentMethodData, [key]: value });
+    };
+
     const searchLocation = async () => {
-        if (!addressData.address.street) {
-            // Show error message
+        if (!addressData.street) {
             return;
         }
 
         try {
-            const query = `${addressData.address.street}, ${addressData.address.city}, Philippines`;
+            const query = `${addressData.street}, ${addressData.city}, Philippines`;
             const response = await fetch(
                 `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
             );
@@ -105,39 +143,7 @@ const ParkingManagerSignUp = () => {
         }
     };
 
-    const handleFacilitiesChange = (section: string, field: string, value: string) => {
-        setFacilitiesAndAmenities((prev) => ({
-            ...prev,
-            [section]: {
-                ...prev[section],
-                [field]: value,
-            },
-        }));
-    };
-
     const [agreed, setAgreed] = useState(false);
-
-    const handleInputChange = (key: string, value: string) => {
-        setOwnerInformation({ ...ownerInformation, [key]: value });
-    };
-
-    const handleAddressChange = (field: string, value: string) => {
-        setAddressData((prev) => ({
-            ...prev,
-            address: {
-                ...prev.address,
-                [field]: value,
-            },
-        }));
-    };
-
-    // const handleLocationSelect = (event) => {
-    //     const { latitude, longitude } = event.nativeEvent.coordinate;
-    //     setAddressData((prev) => ({
-    //         ...prev,
-    //         location: { latitude, longitude },
-    //     }));
-    // };
     const handleSubmit = () => {
         throw new Error("Not implemented");
     };
@@ -162,44 +168,44 @@ const ParkingManagerSignUp = () => {
                                 { label: "Individual", value: "individual" },
                                 { label: "Company", value: "company" },
                             ]}
-                            selectedValue={ownerInformation.ownerType}
-                            onValueChange={(value) => handleInputChange("ownerType", value)}
+                            selectedValue={companyProfile.owner_type}
+                            onValueChange={(value) => handleCompanyInfoChange("owner_type", value)}
                         />
 
-                        {ownerInformation.ownerType === "company" ? (
+                        {companyProfile.owner_type === "company" ? (
                             <View style={styles.formGroup}>
                                 <TextInputComponent
                                     placeholder="Company Name"
-                                    value={ownerInformation.companyName}
-                                    onChangeText={(value) => handleInputChange("companyName", value)}
+                                    value={companyProfile.company_name}
+                                    onChangeText={(value) => handleCompanyInfoChange("company_name", value)}
                                 />
                                 <TextInputComponent
                                     placeholder="Company Registration Number"
-                                    value={ownerInformation.companyRegNumber}
-                                    onChangeText={(value) => handleInputChange("companyRegNumber", value)}
+                                    value={companyProfile.company_name}
+                                    onChangeText={(value) => handleCompanyInfoChange("company_reg_number", value)}
                                 />
                             </View>
                         ) : (
                             <View style={styles.formGroup}>
                                 <TextInputComponent
                                     placeholder="First Name"
-                                    value={ownerInformation.firstName}
-                                    onChangeText={(value) => handleInputChange("firstName", value)}
+                                    value={userInformation.first_name}
+                                    onChangeText={(value) => handleParkingOwnerInfo("first_name", value)}
                                 />
                                 <TextInputComponent
                                     placeholder="Middle Name (optional)"
-                                    value={ownerInformation.middleName}
-                                    onChangeText={(value) => handleInputChange("middleName", value)}
+                                    value={userInformation.middle_name}
+                                    onChangeText={(value) => handleParkingOwnerInfo("last_name", value)}
                                 />
                                 <TextInputComponent
                                     placeholder="Last Name"
-                                    value={ownerInformation.lastName}
-                                    onChangeText={(value) => handleInputChange("lastName", value)}
+                                    value={userInformation.last_name}
+                                    onChangeText={(value) => handleParkingOwnerInfo("last_name", value)}
                                 />
                                 <TextInputComponent
                                     placeholder="Suffix (optional)"
-                                    value={ownerInformation.suffix}
-                                    onChangeText={(value) => handleInputChange("suffix", value)}
+                                    value={userInformation.suffix}
+                                    onChangeText={(value) => handleParkingOwnerInfo("suffix", value)}
                                 />
                             </View>
                         )}
@@ -207,28 +213,28 @@ const ParkingManagerSignUp = () => {
                         <View style={styles.formGroup}>
                             <TextInputComponent
                                 placeholder="Email"
-                                value={ownerInformation.email}
-                                onChangeText={(value) => handleInputChange("email", value)}
+                                value={userInformation.email}
+                                onChangeText={(value) => handleParkingOwnerInfo("email", value)}
                                 keyboardType="email-address"
                             />
                             <TextInputComponent
                                 placeholder="Phone Number"
-                                value={ownerInformation.contactNumber}
-                                onChangeText={(value) => handleInputChange("contactNumber", value)}
+                                value={userInformation.phone_number}
+                                onChangeText={(value) => handleParkingOwnerInfo("phone_number", value)}
                                 keyboardType="phone-pad"
                             />
                         </View>
 
                         <TextInputComponent
                             placeholder="TIN (Tax Identification Number)"
-                            value={ownerInformation.tin}
-                            onChangeText={(value) => handleInputChange("tin", value)}
+                            value={companyProfile.tin}
+                            onChangeText={(value) => handleCompanyInfoChange("tin", value)}
                         />
 
                         <TextInputComponent
                             placeholder="Parking Establishment Name"
-                            value={ownerInformation.name}
-                            onChangeText={(value) => handleInputChange("name", value)}
+                            value={companyProfile.company_name}
+                            onChangeText={(value) => handleCompanyInfoChange("name", value)}
                         />
                     </View>
                 </CardComponent>
@@ -241,15 +247,15 @@ const ParkingManagerSignUp = () => {
                     <View style={styles.form}>
                         <TextInputComponent
                             placeholder="Street Address"
-                            value={addressData.address.street}
-                            onChangeText={(value) => handleAddressChange("street", value)}
+                            value={addressData.street}
+                            onChangeText={(value) => handleAddressInfoChange("street", value)}
                         />
 
                         <View style={styles.formGroup}>
                             <TextInputComponent
                                 placeholder="Barangay"
-                                value={addressData.address.barangay}
-                                onChangeText={(value) => handleAddressChange("barangay", value)}
+                                value={addressData.barangay}
+                                onChangeText={(value) => handleAddressInfoChange("barangay", value)}
                             />
                             <SelectComponent
                                 items={[
@@ -272,8 +278,8 @@ const ParkingManagerSignUp = () => {
                                     { label: "Pateros", value: "pateros" },
                                 ]}
                                 placeholder="City/Municipality"
-                                selectedValue={addressData.address.city}
-                                onValueChange={(value) => handleAddressChange("city", value)}
+                                selectedValue={addressData.city}
+                                onValueChange={(value) => handleAddressInfoChange("city", value)}
                             />
                         </View>
 
@@ -281,20 +287,20 @@ const ParkingManagerSignUp = () => {
                             <SelectComponent
                                 items={[{ label: "Metro Manila", value: "metro_manila" }]}
                                 placeholder="Province"
-                                selectedValue={addressData.address.province}
-                                onValueChange={(value) => handleAddressChange("province", value)}
+                                selectedValue={addressData.province}
+                                onValueChange={(value) => handleAddressInfoChange("province", value)}
                             />
                             <TextInputComponent
                                 placeholder="Postal Code"
-                                value={addressData.address.postalCode}
-                                onChangeText={(value) => handleAddressChange("postalCode", value)}
+                                value={addressData.postal_code}
+                                onChangeText={(value) => handleAddressInfoChange("postal_code", value)}
                             />
                         </View>
 
                         <View style={styles.mapContainer}>
                             <LocationPicker
-                                initialLatitude={addressData.location.latitude}
-                                initialLongitude={addressData.location.longitude}
+                                initialLatitude={Number(parkingEstablishmentData.latitude)}
+                                initialLongitude={Number(parkingEstablishmentData.longitude)}
                                 onLocationChange={(latitude: number, longitude: number) => {
                                     setAddressData((prev) => ({
                                         ...prev,
@@ -307,20 +313,22 @@ const ParkingManagerSignUp = () => {
                         <View style={styles.formGroup}>
                             <TextInputComponent
                                 placeholder="Longitude"
-                                value={String(addressData.location.longitude)}
+                                value={String(parkingEstablishmentData.longitude)}
                                 editable={false}
                             />
                             <TextInputComponent
                                 placeholder="Latitude"
-                                value={String(addressData.location.latitude)}
+                                value={String(parkingEstablishmentData.latitude)}
                                 editable={false}
                             />
                         </View>
 
                         <TextInputComponent
                             placeholder="Landmarks: e.g., near a mall, beside a church"
-                            value={addressData.landmarks}
-                            onChangeText={(value) => setAddressData((prev) => ({ ...prev, landmarks: value }))}
+                            value={parkingEstablishmentData.nearby_landmarks}
+                            onChangeText={(value) =>
+                                setParkingEstablishmentData((prev) => ({ ...prev, landmarks: value }))
+                            }
                             multiline
                             numberOfLines={3}
                         />
@@ -342,15 +350,15 @@ const ParkingManagerSignUp = () => {
                                 { label: "No Special Access", value: "no_special_access" },
                                 { label: "Other", value: "other" },
                             ]}
-                            selectedValue={facilitiesAndAmenities.facilities.accessInformation}
-                            onValueChange={(value) => handleFacilitiesChange("facilities", "accessInformation", value)}
+                            selectedValue={parkingEstablishmentData.access_info}
+                            onValueChange={(value) => handleParkingEstablishmentData("access_info", value)}
                         />
 
                         <TextInputComponent
                             placeholder="Other? (Specify it here)"
-                            value={facilitiesAndAmenities.facilities.customAccess}
-                            onChangeText={(value) => handleFacilitiesChange("facilities", "customAccess", value)}
-                            editable={facilitiesAndAmenities.facilities.accessInformation === "other"}
+                            value={parkingEstablishmentData.custom_access}
+                            onChangeText={(value) => handleParkingEstablishmentData("custom_access", value)}
+                            editable={parkingEstablishmentData.access_info === "other"}
                         />
 
                         <SelectComponent
@@ -361,8 +369,8 @@ const ParkingManagerSignUp = () => {
                                 { label: "Covered", value: "covered" },
                                 { label: "Uncovered", value: "uncovered" },
                             ]}
-                            selectedValue={facilitiesAndAmenities.parkingDetails.spaceType}
-                            onValueChange={(value) => handleFacilitiesChange("parkingDetails", "spaceType", value)}
+                            selectedValue={parkingEstablishmentData.space_type}
+                            onValueChange={(value) => handleParkingEstablishmentData("space_type", value)}
                         />
 
                         <SelectComponent
@@ -373,38 +381,44 @@ const ParkingManagerSignUp = () => {
                                 { label: "Angled", value: "angled" },
                                 { label: "Other", value: "other" },
                             ]}
-                            selectedValue={facilitiesAndAmenities.parkingDetails.spaceLayout}
-                            onValueChange={(value) => handleFacilitiesChange("parkingDetails", "spaceLayout", value)}
+                            selectedValue={parkingEstablishmentData.space_layout}
+                            onValueChange={(value) => handleParkingEstablishmentData("space_layout", value)}
                         />
 
                         <TextInputComponent
                             placeholder="Dimensions (e.g., 2.5m x 5m)"
-                            value={facilitiesAndAmenities.parkingDetails.dimensions}
-                            onChangeText={(value) => handleFacilitiesChange("parkingDetails", "dimensions", value)}
+                            value={parkingEstablishmentData.dimensions}
+                            onChangeText={(value) => handleParkingEstablishmentData("dimensions", value)}
                         />
 
                         <TextInputComponent
                             placeholder="Lighting & Security Features: e.g., CCTV, guards, lighting"
-                            value={facilitiesAndAmenities.facilities.lightingAndSecurity}
-                            onChangeText={(value) => handleFacilitiesChange("facilities", "lightingAndSecurity", value)}
+                            value={parkingEstablishmentData.lighting}
+                            onChangeText={(value) => handleParkingEstablishmentData("lighting", value)}
                             numberOfLines={3}
                         />
 
                         <TextInputComponent
                             placeholder="Accessibility Features: e.g., ramps, elevators"
-                            value={facilitiesAndAmenities.facilities.accessibility}
-                            onChangeText={(value) => handleFacilitiesChange("facilities", "accessibility", value)}
+                            value={parkingEstablishmentData.accessibility}
+                            onChangeText={(value) => handleParkingEstablishmentData("accessibility", value)}
                             numberOfLines={3}
                         />
 
                         <TextInputComponent
                             placeholder="Nearby Facilities: e.g., EV charging stations, Restrooms, Elevators"
-                            value={facilitiesAndAmenities.facilities.nearbyFacilities}
-                            onChangeText={(value) => handleFacilitiesChange("facilities", "nearbyFacilities", value)}
+                            value={parkingEstablishmentData.facilities}
+                            onChangeText={(value) => handleParkingEstablishmentData("facilities", value)}
                             numberOfLines={3}
                         />
                     </View>
                 </CardComponent>
+                <OperatingHoursForm
+                    is24_7={is24_7}
+                    operatingHours={operatingHours}
+                    onIs24_7Change={setIs24_7}
+                    onOperatingHoursChange={handleOperatingHoursData}
+                />
 
                 <CardComponent
                     header="Accepted Payment Methods"
@@ -415,30 +429,30 @@ const ParkingManagerSignUp = () => {
                         <View style={styles.checkboxGroup}>
                             <CheckboxComponent
                                 placeholder="Cash"
-                                value={paymentData.paymentMethods.cash}
-                                onValueChange={(value) => handlePaymentChange("cash", value)}
+                                value={paymentMethodData.accepts_cash}
+                                onValueChange={(value) => handlePaymentDataChange("accepts_cash", value)}
                             />
 
                             <CheckboxComponent
                                 placeholder="Mobile Payment"
-                                value={paymentData.paymentMethods.mobile}
-                                onValueChange={(value) => handlePaymentChange("mobile", value)}
+                                value={paymentMethodData.accepts_mobile}
+                                onValueChange={(value) => handlePaymentDataChange("accepts_mobile", value)}
                             />
 
                             <View style={styles.otherPaymentContainer}>
                                 <CheckboxComponent
                                     placeholder="Other"
-                                    value={paymentData.paymentMethods.other}
-                                    onValueChange={(value) => handlePaymentChange("other", value)}
+                                    value={paymentMethodData.accepts_other}
+                                    onValueChange={(value) => handlePaymentDataChange("accepts_other", value)}
                                 />
                                 <TextInputComponent
                                     placeholder="Specify other payment method"
-                                    value={paymentData.paymentMethods.otherText}
-                                    onChangeText={(value) => handlePaymentChange("otherText", value)}
-                                    editable={paymentData.paymentMethods.other}
+                                    value={paymentMethodData.other_methods}
+                                    onChangeText={(value) => handlePaymentDataChange("other_methods", value)}
+                                    editable={paymentMethodData.accepts_other}
                                     customStyles={[
                                         styles.otherInput,
-                                        !paymentData.paymentMethods.other && styles.disabledInput,
+                                        !paymentMethodData.other_methods && styles.disabledInput,
                                     ]}
                                 />
                             </View>
