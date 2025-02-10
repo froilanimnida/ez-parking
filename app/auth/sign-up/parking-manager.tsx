@@ -19,6 +19,7 @@ import {
     type ParkinOperatingHoursData,
 } from "@/lib/models/parkingManagerSignUpTypes";
 import OperatingHoursForm from "@/components/auth/parking-manager/OperatingHoursForm";
+import { parkingManagerSignUp } from "@/lib/api/parkingManager";
 interface OperatingHours {
     enabled: boolean;
     open: string;
@@ -145,7 +146,24 @@ const ParkingManagerSignUp = () => {
 
     const [agreed, setAgreed] = useState(false);
     const handleSubmit = () => {
-        throw new Error("Not implemented");
+        setIsSubmitting(true);
+        parkingManagerSignUp(
+            userInformation,
+            companyProfile,
+            addressData,
+            parkingEstablishmentData,
+            operatingHours,
+            paymentMethodData
+        )
+            .then(() => {
+                // Show success message
+            })
+            .catch(() => {
+                // Show error message
+            })
+            .finally(() => {
+                setIsSubmitting(false);
+            });
     };
     const [zoningCompliance, setZoningCompliance] = useState(false);
     return (

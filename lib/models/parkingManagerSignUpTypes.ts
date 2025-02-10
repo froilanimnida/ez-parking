@@ -1,25 +1,25 @@
 export interface ParkingOwnerInformation {
-    email: "";
-    first_name: "";
-    last_name: "";
-    middle_name: "";
-    suffix: "";
-    phone_number: "";
+    email: string;
+    first_name: string;
+    last_name: string;
+    middle_name: string;
+    suffix: string;
+    phone_number: string;
 }
 
 export interface ParkingCompanyProfile {
     owner_type: "company" | "individual";
-    company_name: "";
-    company_reg_number: "";
-    tin: "";
+    company_name: string;
+    company_reg_number: string;
+    tin: string;
 }
 
 export interface ParkingAddressData {
-    street: "";
-    barangay: "";
-    city: "";
-    province: "";
-    postal_code: "";
+    street: string;
+    barangay: string;
+    city: string;
+    province: string;
+    postal_code: string;
 }
 
 export interface ParkingEstablishmentData {
@@ -40,14 +40,14 @@ export interface ParkingEstablishmentData {
 }
 
 export interface ParkinOperatingHoursData {
-    enabled: false;
-    open: "";
-    close: "";
+    enabled: boolean;
+    open: string;
+    close: string;
 }
 
 export interface ParkingPaymentMethodData {
     accepts_cash: false;
     accepts_mobile: false;
     accepts_other: false;
-    other_methods: "";
+    other_methods: string;
 }
