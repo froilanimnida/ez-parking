@@ -46,8 +46,8 @@ export function getRedirectPath(role: UserRole): RelativePathString {
 
 const axiosInstance = axios.create({
     withCredentials: true,
-    // baseURL: "http://192.168.254.12:5000/api/v1",
-    baseURL: "https://ez-parking-system-pr-54.onrender.com/api/v1",
+    baseURL: "https://192.168.254.1:5000/api/v1",
+    // baseURL: "https://ez-parking-system-pr-54.onrender.com/api/v1",
     headers: {
         Accept: "application/json",
     },
@@ -118,7 +118,12 @@ axiosInstance.interceptors.response.use(
         }
         return response;
     },
-    (error) => Promise.reject(error)
+    (error) => {
+        if (error.status === 401) {
+            router.replace("/auth/login");
+        }
+        Promise.reject(error);
+    }
 );
 
 export default axiosInstance;

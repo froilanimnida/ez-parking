@@ -5,7 +5,7 @@ import TextComponent from "components/TextComponent";
 import ButtonComponent from "components/ButtonComponent";
 import CardComponent from "@/components/CardComponent";
 import TextInputComponent from "@/components/TextInputComponent";
-import type { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { isAuthenticated } from "@/lib/credentialsManager";
 import { router, useLocalSearchParams, type ExternalPathString, type RelativePathString } from "expo-router";
 import LinkComponent from "@/components/LinkComponent";
@@ -79,9 +79,12 @@ const LoginForm = () => {
             setLoggingIn(false);
         } catch (error) {
             console.error("Login error:", error);
-            const errorBody = error as AxiosError;
-            const errorMessage = errorBody.response?.data as { code: string; message: string };
-            alert(errorMessage.message || "An error occurred");
+            if (error instanceof AxiosError) {
+                const errorMessage = error.response?.data?.message || "Invalid OTP code";
+                alert(errorMessage);
+            } else {
+                alert("An unexpected error occurred");
+            }
             setLoggingIn(false);
         }
     };

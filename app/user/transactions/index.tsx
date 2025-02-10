@@ -4,7 +4,6 @@ import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import { ParkingSlot } from "@/lib/models/parking-slot";
 import { Transaction } from "@/lib/models/transaction";
-import { ActivityIndicator } from "react-native";
 import TextInputComponent from "@/components/TextInputComponent";
 import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
@@ -65,10 +64,14 @@ const Transactions = () => {
     const [fetching, setFetching] = useState(true);
     useEffect(() => {
         const fetchTransactions = async () => {
-            fetchUserTransactions().then((response) => {
-                setFetching(false);
-                setTransactions(response.transactions);
-            });
+            try {
+                fetchUserTransactions().then((response) => {
+                    setFetching(false);
+                    setTransactions(response.transactions);
+                });
+            } catch (error) {
+                console.error("Error fetching transactions");
+            }
         };
         fetchTransactions();
     }, []);
