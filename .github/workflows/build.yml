@@ -29,12 +29,18 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y openjdk-17-jdk android-sdk
-          mkdir -p ~/.android && touch ~/.android/repositories.cfg
-          export ANDROID_SDK_ROOT=$HOME/android-sdk
-          export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
-          export PATH=$ANDROID_SDK_ROOT/platform-tools:$PATH
+          echo "export ANDROID_SDK_ROOT=$HOME/android-sdk" >> $HOME/.bashrc
+          echo "export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH" >> $HOME/.bashrc
+          echo "export PATH=$ANDROID_SDK_ROOT/platform-tools:$PATH" >> $HOME/.bashrc
+          echo "export PATH=$ANDROID_SDK_ROOT/tools/bin:$PATH" >> $HOME/.bashrc
+          source $HOME/.bashrc
+          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools/latest
+          cd $ANDROID_SDK_ROOT/cmdline-tools/latest
+          curl -o sdk-tools-linux.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          unzip sdk-tools-linux.zip
           yes | sdkmanager --licenses
           sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.1"
+
 
       - name: Build APK Locally
         run: eas build --platform android --local --output ./build-output/apk-release.apk
