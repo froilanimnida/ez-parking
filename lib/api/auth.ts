@@ -24,15 +24,14 @@ export const verifyEmail = async (code: string) => {
         verification_token: code,
     });
     return result;
-}
+};
 
 export const verifyToken = async () => {
     const result = await axiosInstance.post(`${root}/verify-token`);
     return result;
-}
-
+};
 
 export const protectedRoute = async () => {
     const result = await axiosInstance.post(`${root}/protected-route`);
     return result;
-}
+};
