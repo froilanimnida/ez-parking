@@ -34,13 +34,13 @@ async function verifyAndGetRole(
 export function getRedirectPath(role: UserRole): RelativePathString {
     switch (role) {
         case "admin":
-            return "/admin";
+            return "/admin" as RelativePathString;
         case "parking_manager":
-            return "/parking-manager";
+            return "/parking-manager" as RelativePathString;
         case "user":
-            return "/user";
+            return "/user" as RelativePathString;
         default:
-            return "/";
+            return "/" as RelativePathString;
     }
 }
 

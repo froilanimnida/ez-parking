@@ -11,7 +11,7 @@
         "test": "jest --watchAll",
         "lint": "expo lint",
         "build": "eas build",
-        "postinstall": "node ./bin/postInstall && node react-native-map-web-fix.js"
+        "postinstall": "node ./bin/postInstall && node react-native-map-web-fix.mjs"
     },
     "jest": {
         "preset": "jest-expo"

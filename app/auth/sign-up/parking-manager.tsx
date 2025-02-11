@@ -1,5 +1,5 @@
-import { StyleSheet, View } from "react-native";
-import React, { useState } from "react";
+import { Alert, StyleSheet, View } from "react-native";
+import React, { useEffect, useState } from "react";
 import ButtonComponent from "@/components/ButtonComponent";
 import LinkComponent from "@/components/LinkComponent";
 import TextInputComponent from "@/components/TextInputComponent";
@@ -29,6 +29,7 @@ interface OperatingHours {
 
 const ParkingManagerSignUp = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [query, setQuery] = useState("");
     const [userInformation, setUserInformation] = useState<ParkingOwnerInformation>({
         email: "",
         first_name: "",
@@ -117,12 +118,13 @@ const ParkingManagerSignUp = () => {
     };
 
     const searchLocation = async () => {
-        if (!addressData.street) {
+        if (!query) {
+            alert("Please enter an address above to search");
             return;
         }
 
         try {
-            const query = `${addressData.street}, ${addressData.city}, Philippines`;
+            // const query = `${addressData.street}, ${addressData.city}, Philippines`;
             const response = await fetch(
                 `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
             );
@@ -132,16 +134,14 @@ const ParkingManagerSignUp = () => {
                 const { lat, lon } = data[0];
                 setAddressData((prev) => ({
                     ...prev,
-                    location: {
-                        latitude: Number(lat),
-                        longitude: Number(lon),
-                    },
+                    latitude: parseFloat(lat),
+                    longitude: parseFloat(lon),
                 }));
             } else {
-                // Show "Location not found" message
+                alert("Location not found. Please enter a valid address");
             }
         } catch (error) {
-            // Show error message
+            alert("An error occurred while searching for the location");
         }
     };
 
@@ -264,6 +264,14 @@ const ParkingManagerSignUp = () => {
                     customStyles={{ width: "95%" }}
                 >
                     <View style={styles.form}>
+                        <TextInputComponent
+                            placeholder="Search for address to get coordinates and map data"
+                            value={query}
+                            onChangeText={(value) => setQuery(value)}
+                        />
+
+                        <ButtonComponent onPress={searchLocation} title="Search" />
+
                         <TextInputComponent
                             placeholder="Street Address"
                             value={addressData.street}
