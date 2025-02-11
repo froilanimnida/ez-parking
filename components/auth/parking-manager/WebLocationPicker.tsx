@@ -17,13 +17,11 @@ const WebLocationPicker: React.FC<WebLocationPickerProps> = ({
     useEffect(() => {
         if (!mapRef.current) return;
 
-        // Add Leaflet CSS
         const linkEl = document.createElement("link");
         linkEl.rel = "stylesheet";
         linkEl.href = "https://unpkg.com/leaflet@1.7.1/dist/leaflet.css";
         document.head.appendChild(linkEl);
 
-        // Add Leaflet JS
         const scriptEl = document.createElement("script");
         scriptEl.src = "https://unpkg.com/leaflet@1.7.1/dist/leaflet.js";
         scriptEl.onload = () => {
@@ -49,7 +47,6 @@ const WebLocationPicker: React.FC<WebLocationPickerProps> = ({
                 onLocationChange(e.latlng.lat, e.latlng.lng);
             });
 
-            // Cleanup function
             return () => {
                 map.remove();
                 document.head.removeChild(linkEl);

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import Checkbox from "expo-checkbox";
-import TextComponent from "components/TextComponent";
-import ButtonComponent from "components/ButtonComponent";
+import TextComponent from "@components/TextComponent";
+import ButtonComponent from "@components/ButtonComponent";
 import CardComponent from "@/components/CardComponent";
 import TextInputComponent from "@/components/TextInputComponent";
 import { AxiosError } from "axios";

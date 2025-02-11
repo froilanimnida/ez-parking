@@ -34,8 +34,8 @@ export interface ParkingEstablishmentData {
     lighting: string;
     accessibility: string;
     facilities: string;
-    longitude: string;
-    latitude: string;
+    longitude: number;
+    latitude: number;
     nearby_landmarks: string;
 }
 

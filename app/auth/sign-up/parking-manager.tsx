@@ -20,6 +20,7 @@ import {
 } from "@/lib/models/parkingManagerSignUpTypes";
 import OperatingHoursForm from "@/components/auth/parking-manager/OperatingHoursForm";
 import { parkingManagerSignUp } from "@/lib/api/parkingManager";
+import { METRO_MANILA_CITIES } from "@/lib/models/cities";
 interface OperatingHours {
     enabled: boolean;
     open: string;
@@ -62,8 +63,8 @@ const ParkingManagerSignUp = () => {
         lighting: "",
         accessibility: "",
         facilities: "",
-        longitude: "14.5995",
-        latitude: "120.9842",
+        longitude: 14.5995,
+        latitude: 120.9842,
         nearby_landmarks: "",
     });
 
@@ -276,25 +277,9 @@ const ParkingManagerSignUp = () => {
                                 onChangeText={(value) => handleAddressInfoChange("barangay", value)}
                             />
                             <SelectComponent
-                                items={[
-                                    { label: "Manila", value: "manila" },
-                                    { label: "Quezon City", value: "quezon_city" },
-                                    { label: "Makati", value: "makati" },
-                                    { label: "Pasig", value: "pasig" },
-                                    { label: "Taguig", value: "taguig" },
-                                    { label: "Mandaluyong", value: "mandaluyong" },
-                                    { label: "San Juan", value: "san_juan" },
-                                    { label: "Pasay", value: "pasay" },
-                                    { label: "Parañaque", value: "paranaque" },
-                                    { label: "Las Piñas", value: "las_pinas" },
-                                    { label: "Muntinlupa", value: "muntinlupa" },
-                                    { label: "Valenzuela", value: "valenzuela" },
-                                    { label: "Caloocan", value: "caloocan" },
-                                    { label: "Malabon", value: "malabon" },
-                                    { label: "Navotas", value: "navotas" },
-                                    { label: "Marikina", value: "marikina" },
-                                    { label: "Pateros", value: "pateros" },
-                                ]}
+                                items={METRO_MANILA_CITIES.map((city) => {
+                                    return { label: city, value: city.toLowerCase().replace(" ", "_") };
+                                })}
                                 placeholder="City/Municipality"
                                 selectedValue={addressData.city}
                                 onValueChange={(value) => handleAddressInfoChange("city", value)}
@@ -317,12 +302,14 @@ const ParkingManagerSignUp = () => {
 
                         <View style={styles.mapContainer}>
                             <LocationPicker
-                                initialLatitude={Number(parkingEstablishmentData.latitude)}
-                                initialLongitude={Number(parkingEstablishmentData.longitude)}
+                                initialLatitude={parkingEstablishmentData.latitude}
+                                initialLongitude={parkingEstablishmentData.longitude}
                                 onLocationChange={(latitude: number, longitude: number) => {
-                                    setAddressData((prev) => ({
+                                    console.log("Running: " + latitude + " " + longitude);
+                                    setParkingEstablishmentData((prev) => ({
                                         ...prev,
-                                        location: { latitude, longitude },
+                                        latitude,
+                                        longitude,
                                     }));
                                 }}
                             />
