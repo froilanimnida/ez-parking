@@ -15,7 +15,7 @@ import TextInputComponent from "@/components/TextInputComponent";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import SelectComponent from "@/components/SelectComponent";
 import CheckboxComponent from "@/components/CheckboxComponent";
-import { checkoutTransaction } from "@/lib/api/transaction";
+import { checkoutTransaction, createTransaction } from "@/lib/api/transaction";
 import ButtonComponent from "@/components/ButtonComponent";
 
 interface Slot extends ParkingSlot {
@@ -58,6 +58,7 @@ const SlotInfo = () => {
 
         return plans;
     };
+    const createNewTransaction = () => {};
     const getCurrentRate = () => {
         if (!transactionCheckoutInfo?.slot_info) return 0;
 
@@ -99,16 +100,19 @@ const SlotInfo = () => {
 
     const handleConfirmBooking = () => {
         setIsSubmitting(true);
-        // Mock some async operation
-        setTimeout(() => {
-            setIsSubmitting(false);
-            if (!transactionCheckoutInfo?.has_ongoing_transaction) {
-                alert("Booking confirmed!");
-                // Normally, navigate to '/user/transactions'
-            } else {
-                alert("You have an ongoing transaction already.");
-            }
-        }, 1500);
+        const result = createTransaction({
+            duration: duration,
+            duration_type: pricingType,
+            scheduled_entry_time: new Date().toISOString(),
+            scheduled_exit_time: new Date().toISOString(),
+            amount_due: getCurrentRate() * duration,
+        });
+        setIsSubmitting(false);
+        if (!transactionCheckoutInfo?.has_ongoing_transaction) {
+            alert("Booking confirmed!");
+        } else {
+            alert("You have an ongoing transaction already.");
+        }
     };
 
     return (
@@ -251,7 +255,9 @@ const SlotInfo = () => {
                                     : "Confirm Booking"
                             }
                             disabled={transactionCheckoutInfo?.has_ongoing_transaction || isSubmitting}
-                            onPress={() => {}}
+                            onPress={() => {
+                                handleConfirmBooking();
+                            }}
                         />
                     </View>
                 </>

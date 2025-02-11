@@ -22,9 +22,20 @@ export const checkoutTransaction = async (establishmentUuid: string, slotUuid: s
     return result;
 }
 
+export const createTransaction = async (data: {
+    duration: number;
+    duration_type: 'monthly' | 'daily' | 'hourly';
+    scheduled_entry_time: string;
+    scheduled_exit_time: string;
+    amount_due: number;
+}) => {
+    const result = await axiosInstance.post(`${root}/create`, data);
+    return result;
+};
+
 export const cancelTransaction = async (transactionUuid: string) => {
     const result = await axiosInstance.patch(`${root}/cancel`, {
         transaction_uuid: transactionUuid,
     });
     return result;
-}
+};
