@@ -1,0 +1,45 @@
+name: Expo Build Locally
+
+on:
+    workflow_dispatch: # Manual trigger
+    push:
+        branches:
+            - main # Run on push to main
+
+jobs:
+    build:
+        runs-on: self-hosted # Uses your local CI machine
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 18 # Use the latest stable version
+
+            - name: Install Dependencies
+              run: npm install
+
+            - name: Install Expo CLI
+              run: npm install -g expo-cli eas-cli
+
+            - name: Install Android SDK & Gradle
+              run: |
+                  sudo apt update
+                  sudo apt install -y openjdk-17-jdk android-sdk
+                  mkdir -p ~/.android && touch ~/.android/repositories.cfg
+                  export ANDROID_SDK_ROOT=$HOME/android-sdk
+                  export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
+                  export PATH=$ANDROID_SDK_ROOT/platform-tools:$PATH
+                  yes | sdkmanager --licenses
+                  sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.1"
+
+            - name: Build APK Locally
+              run: eas build --platform android --local
+
+            - name: Upload Build Artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: expo-apk
+                  path: ./build-output/apk-release.apk # Adjust based on your build output
