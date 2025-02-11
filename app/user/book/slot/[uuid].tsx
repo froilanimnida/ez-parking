@@ -16,189 +16,93 @@ import LoadingComponent from "@/components/reusable/LoadingComponent";
 import SelectComponent from "@/components/SelectComponent";
 import CheckboxComponent from "@/components/CheckboxComponent";
 import { checkoutTransaction } from "@/lib/api/transaction";
+import ButtonComponent from "@/components/ButtonComponent";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;
     vehicle_type_name: string;
     vehicle_type_size: string;
+    price_multiplier?: string;
 }
+
 interface TransactionCheckoutData {
     address: Address;
     establishment_info: ParkingEstablishment;
-    operating_hours: OperatingHour[];
-    payment_methods: PaymentMethod;
-    pricing_plans: PricingPlan[];
+    operating_hours: OperatingHour[]; // Can be empty array
+    payment_methods: PaymentMethod[] | []; // Changed to array type that can be empty
     slot_info: Slot;
     has_ongoing_transaction: boolean;
 }
 
 const SlotInfo = () => {
-    const { uuid, establishment_uuid } = useLocalSearchParams();
-    console.log("Slot UUID:", uuid);
-    console.log("Establishment UUID:", establishment_uuid);
-    // const { uuid } = useLocalSearchParams() as { uuid: string };
-    const transactionCheckoutData: TransactionCheckoutData = {
-        address: {
-            street: "123 Main Street",
-            city: "Makati",
-            province: "Metro Manila",
-            postal_code: "1200",
-            barangay: "Barangay 123",
-            address_id: 1,
-            created_at: "2021-10-01T00:00:00Z",
-            updated_at: "2021-10-01T00:00:00Z",
-            profile_id: 1,
-        },
-        establishment_info: {
-            uuid: "establishment-uuid",
-            name: "Sample Parking Establishment",
-            access_info: "Sample access info",
-            accessibility: "Sample accessibility",
-            created_at: "2021-10-01T00:00:00Z",
-            custom_access: "Sample custom access",
-            establishment_id: 1,
-            custom_layout: "Sample custom layout",
-            dimensions: "Sample dimensions",
-            facilities: "Sample facilities",
-            is24_7: false,
-            latitude: 14.5547,
-            lighting: "Sample lighting",
-            longitude: 121.0244,
-            nearby_landmarks: "Sample landmarks",
-            profile_id: 1,
-            space_layout: "Sample layout",
-            space_type: "Sample type",
-            updated_at: "2021-10-01T00:00:00Z",
-            verified: false,
-        },
-        operating_hours: [
-            {
-                day_of_week: "Monday",
-                is_enabled: true,
-                opening_time: "07:00",
-                closing_time: "22:00",
-                establishment_id: 1,
-                hours_id: 1,
-            },
-            // ... more days ...
-        ],
-        payment_methods: {
-            accepts_cash: true,
-            accepts_mobile: true,
-            accepts_other: true,
-            other_methods: "Credit Card",
-            created_at: "2021-10-01T00:00:00Z",
-            establishment_id: 1,
-            method_id: 1,
-            updated_at: "2021-10-01T00:00:00Z",
-        },
-        pricing_plans: [
-            {
-                rate: "50",
-                rate_type: "hourly",
-                is_enabled: true,
-                created_at: "2021-10-01T00:00:00Z",
-                establishment_id: 1,
-                plan_id: 1,
-                updated_at: "2021-10-01T00:00:00Z",
-            },
-            {
-                rate: "1000",
-                rate_type: "daily",
-                is_enabled: true,
-                created_at: "2021-10-01T00:00:00Z",
-                establishment_id: 1,
-                plan_id: 1,
-                updated_at: "2021-10-01T00:00:00Z",
-            },
-            {
-                rate: "5000",
-                rate_type: "monthly",
-                is_enabled: true,
-                created_at: "2021-10-01T00:00:00Z",
-                establishment_id: 1,
-                plan_id: 1,
-                updated_at: "2021-10-01T00:00:00Z",
-            },
-        ],
-        slot_info: {
-            slot_code: "SLOT-001",
-            floor_level: 3,
-            is_premium: true,
-            vehicle_type_code: "SUV",
-            vehicle_type_name: "Sport Utility Vehicle",
-            vehicle_type_size: "Large",
-            created_at: "2021-10-01T00:00:00Z",
-            establishment_id: 1,
-            is_active: true,
-            slot_features: "standard",
-            slot_id: 1,
-            slot_status: "open",
-            updated_at: "2021-10-01T00:00:00Z",
-            uuid: "slot-uuid",
-            vehicle_type_id: 1,
-            base_price_per_day: "1000",
-            base_price_per_hour: "50",
-            base_price_per_month: "5000",
-            price_multiplier: "1.5",
-        },
-        has_ongoing_transaction: false,
+    const { uuid, establishment_uuid } = useLocalSearchParams() as { uuid: string; establishment_uuid: string };
+    const [transactionCheckoutInfo, setTransactionCheckoutInfo] = useState<TransactionCheckoutData | null>(null);
+    const [pricingType, setPricingType] = useState<"hourly" | "daily" | "monthly">("hourly");
+
+    const getAvailablePricingPlans = () => {
+        if (!transactionCheckoutInfo?.slot_info) return [];
+
+        const plans = [];
+
+        if (parseFloat(transactionCheckoutInfo.slot_info.base_price_per_hour) > 0) {
+            plans.push({ label: "Hourly", value: "hourly" });
+        }
+
+        if (parseFloat(transactionCheckoutInfo.slot_info.base_price_per_day) > 0) {
+            plans.push({ label: "Daily", value: "daily" });
+        }
+
+        if (parseFloat(transactionCheckoutInfo.slot_info.base_price_per_month) > 0) {
+            plans.push({ label: "Monthly", value: "monthly" });
+        }
+
+        return plans;
     };
+    const getCurrentRate = () => {
+        if (!transactionCheckoutInfo?.slot_info) return 0;
+
+        const baseRate =
+            pricingType === "hourly"
+                ? transactionCheckoutInfo.slot_info.base_price_per_hour
+                : pricingType === "daily"
+                ? transactionCheckoutInfo.slot_info.base_price_per_day
+                : transactionCheckoutInfo.slot_info.base_price_per_month;
+
+        const multiplier = parseFloat(transactionCheckoutInfo.slot_info.price_multiplier || "1");
+        const premiumMultiplier = transactionCheckoutInfo.slot_info.is_premium ? 1.2 : 1;
+
+        return parseFloat(baseRate) * multiplier * premiumMultiplier;
+    };
+
+    const [loading, setLoading] = useState(true);
     const [agreed, setAgreed] = useState(false);
     const [terms, setTerms] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [duration, setDuration] = useState(0);
-    const [pricingType, setPricingType] = useState<"hourly" | "daily" | "monthly">("hourly");
     const [totalPrice, setTotalPrice] = useState(0);
 
-    const validPricingPlans = transactionCheckoutData.pricing_plans.filter((plan) => plan.is_enabled);
-
-    const updateTotalPrice = (newDuration: number, newPricingType: typeof pricingType) => {
-        const plan = validPricingPlans.find((p) => p.rate_type === newPricingType);
-        if (!plan) {
-            setTotalPrice(0);
-            return;
-        }
-
-        let rate = parseFloat(plan.rate);
-        rate *= parseFloat(transactionCheckoutData.slot_info.base_price_per_day);
-        if (transactionCheckoutData.slot_info.is_premium) {
-            // Add 20% for premium
-            rate *= 1.2;
-        }
-
-        let total = 0;
-        if (newPricingType === "hourly") {
-            total = newDuration * rate;
-        } else if (newPricingType === "daily") {
-            total = Math.ceil(newDuration / 24) * rate;
-        } else if (newPricingType === "monthly") {
-            total = Math.ceil(newDuration / (24 * 30)) * rate;
-        }
-        setTotalPrice(total);
-    };
-
     useEffect(() => {
-        updateTotalPrice(duration, pricingType);
+        setLoading(true);
         const checkoutInfo = async () => {
             try {
                 const result = await checkoutTransaction(establishment_uuid, uuid);
-                console.log(result);
+                setTransactionCheckoutInfo(result.data.transaction);
             } catch (error) {
                 console.error("Error checking out transaction:", error);
             }
         };
         checkoutInfo();
+        setLoading(false);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [duration, pricingType]);
+    }, [uuid, establishment_uuid]);
 
     const handleConfirmBooking = () => {
         setIsSubmitting(true);
         // Mock some async operation
         setTimeout(() => {
             setIsSubmitting(false);
-            if (!transactionCheckoutData.has_ongoing_transaction) {
+            if (!transactionCheckoutInfo?.has_ongoing_transaction) {
                 alert("Booking confirmed!");
                 // Normally, navigate to '/user/transactions'
             } else {
@@ -214,156 +118,144 @@ const SlotInfo = () => {
                 style={styles.backLink}
                 label="← Back to Dashboard"
             />
+            {loading || !transactionCheckoutInfo ? (
+                <LoadingComponent text="Loading..." />
+            ) : (
+                <>
+                    <CardComponent
+                        customStyles={styles.card}
+                        header="Confirm Your Booking"
+                        subHeader="Please review your booking details below"
+                    ></CardComponent>
 
-            <CardComponent
-                customStyles={styles.card}
-                header="Confirm Your Booking"
-                subHeader="Please review your booking details below"
-            ></CardComponent>
+                    <CardComponent
+                        customStyles={styles.card}
+                        header="Slot Information"
+                        subHeader={transactionCheckoutInfo?.slot_info.slot_code}
+                    >
+                        <View style={styles.infoGrid}>
+                            <View style={styles.infoBlock}>
+                                <TextComponent style={styles.subheading}>Establishment Details</TextComponent>
+                                <TextComponent style={styles.paragraph}>
+                                    {transactionCheckoutInfo?.establishment_info.name}
+                                </TextComponent>
+                                <TextComponent style={styles.paragraph}>
+                                    {transactionCheckoutInfo?.address.street} {transactionCheckoutInfo?.address.city},{" "}
+                                    {transactionCheckoutInfo?.address.province}{" "}
+                                    {transactionCheckoutInfo?.address.postal_code}
+                                </TextComponent>
+                            </View>
 
-            <CardComponent
-                customStyles={styles.card}
-                header="Slot Information"
-                subHeader={transactionCheckoutData.slot_info.slot_code}
-            >
-                <View style={styles.infoGrid}>
-                    <View style={styles.infoBlock}>
-                        <TextComponent style={styles.subheading}>Establishment Details</TextComponent>
-                        <TextComponent style={styles.paragraph}>
-                            {transactionCheckoutData.establishment_info.name}
-                        </TextComponent>
-                        <TextComponent style={styles.paragraph}>
-                            {transactionCheckoutData.address.street} {transactionCheckoutData.address.city},{" "}
-                            {transactionCheckoutData.address.province} {transactionCheckoutData.address.postal_code}
-                        </TextComponent>
-                        <TextComponent style={[styles.paragraph, styles.smallText]}>
-                            Base Rate: ₱{validPricingPlans.find((plan) => plan.rate_type === "hourly")?.rate}
-                            /hour
-                        </TextComponent>
-                    </View>
+                            <View style={styles.infoBlock}>
+                                <TextComponent style={styles.subheading}>Slot Information</TextComponent>
+                                <TextComponent style={styles.paragraph}>
+                                    Slot Code: {transactionCheckoutInfo?.slot_info.slot_code}
+                                </TextComponent>
+                                <TextComponent style={styles.paragraph}>
+                                    Floor Level: {transactionCheckoutInfo?.slot_info.floor_level}
+                                </TextComponent>
+                                <TextComponent style={styles.paragraph}>
+                                    Vehicle Type: {transactionCheckoutInfo?.slot_info.vehicle_type_name}
+                                </TextComponent>
+                            </View>
+                        </View>
+                    </CardComponent>
 
-                    <View style={styles.infoBlock}>
-                        <TextComponent style={styles.subheading}>Slot Information</TextComponent>
-                        <TextComponent style={styles.paragraph}>
-                            Slot Code: {transactionCheckoutData.slot_info.slot_code}
-                        </TextComponent>
-                        <TextComponent style={styles.paragraph}>
-                            Floor Level: {transactionCheckoutData.slot_info.floor_level}
-                        </TextComponent>
-                        <TextComponent style={styles.paragraph}>
-                            Vehicle Type: {transactionCheckoutData.slot_info.vehicle_type_name}
-                        </TextComponent>
-                    </View>
-                </View>
-            </CardComponent>
-
-            {/* Booking Form */}
-            <View style={styles.card}>
-                {/* Duration */}
-                <View style={styles.formRow}>
-                    <TextComponent style={styles.formLabel}>
-                        Parking Duration{" "}
-                        {pricingType === "hourly"
-                            ? "(in hours)"
-                            : pricingType === "daily"
-                            ? "(in days)"
-                            : "(in months)"}
-                    </TextComponent>
-                    <TextInputComponent
-                        customStyles={styles.input}
-                        keyboardType="number-pad"
-                        value={String(duration)}
-                        onChangeText={(val) => setDuration(Number(val))}
-                        placeholder="0"
-                    />
-                </View>
-
-                {/* Pricing Type */}
-                <View style={styles.formRow}>
-                    <TextComponent style={styles.formLabel}>Pricing Type</TextComponent>
-                    <View style={styles.selectBox}>
-                        <TextComponent style={styles.formLabel}>
-                            Current: {pricingType.charAt(0).toUpperCase() + pricingType.slice(1)}
-                        </TextComponent>
-                        <View style={{ marginTop: 8 }}>
-                            <SelectComponent
-                                items={[
-                                    { label: "Hourly", value: "hourly" },
-                                    { label: "Daily", value: "daily" },
-                                    { label: "Monthly", value: "monthly" },
-                                ]}
-                                onValueChange={(val) => setPricingType(val as typeof pricingType)}
-                                selectedValue={pricingType}
+                    {/* Booking Form */}
+                    <View style={styles.card}>
+                        {/* Duration */}
+                        <View style={styles.formRow}>
+                            <TextComponent style={styles.formLabel}>
+                                Parking Duration{" "}
+                                {pricingType === "hourly"
+                                    ? "(in hours)"
+                                    : pricingType === "daily"
+                                    ? "(in days)"
+                                    : "(in months)"}
+                            </TextComponent>
+                            <TextInputComponent
+                                customStyles={styles.input}
+                                keyboardType="number-pad"
+                                value={String(duration)}
+                                onChangeText={(val) => setDuration(Number(val))}
+                                placeholder="0"
                             />
                         </View>
-                    </View>
-                </View>
 
-                {/* Pricing Summary */}
-                <View>
-                    <TextComponent style={styles.summaryText}>
-                        Base Rate: ₱
-                        {(
-                            parseFloat(validPricingPlans.find((plan) => plan.rate_type === "hourly")?.rate ?? "0") *
-                            parseFloat(transactionCheckoutData.slot_info.price_multiplier) *
-                            (transactionCheckoutData.slot_info.is_premium ? 1.2 : 1)
-                        ).toFixed(2)}
-                        /hour{" "}
-                        {transactionCheckoutData.slot_info.is_premium && (
-                            <TextComponent style={styles.premiumText}>(Premium Slot)</TextComponent>
-                        )}
-                    </TextComponent>
-                    <View style={styles.summaryRow}>
-                        <TextComponent style={styles.summaryLabel}>Duration:</TextComponent>
-                        <TextComponent style={styles.summaryValue}>
-                            {duration}{" "}
-                            {pricingType === "hourly" ? "hours" : pricingType === "daily" ? "days" : "months"}
-                        </TextComponent>
-                    </View>
-                    <View style={styles.divider} />
-                    <View style={styles.summaryRow}>
-                        <TextComponent style={[styles.summaryLabel, { fontWeight: "600" }]}>
-                            Total Amount:
-                        </TextComponent>
-                        <TextComponent style={[styles.summaryValue, { fontWeight: "600" }]}>
-                            ₱{totalPrice.toFixed(2)}
-                        </TextComponent>
-                    </View>
-                </View>
+                        {/* Pricing Type */}
+                        <View style={styles.formRow}>
+                            <TextComponent style={styles.formLabel}>Pricing Type</TextComponent>
+                            <View style={styles.selectBox}>
+                                <TextComponent style={styles.formLabel}>
+                                    Current: {pricingType.charAt(0).toUpperCase() + pricingType.slice(1)}
+                                </TextComponent>
+                                <View style={{ marginTop: 8 }}>
+                                    <SelectComponent
+                                        items={getAvailablePricingPlans()}
+                                        onValueChange={(val) => setPricingType(val as typeof pricingType)}
+                                        selectedValue={pricingType}
+                                        placeholder="Select pricing type"
+                                    />
+                                </View>
+                            </View>
+                        </View>
 
-                <CheckboxComponent
-                    onValueChange={setAgreed}
-                    value={agreed}
-                    placeholder="I agree to the parking terms and conditions, including the cancellation policy."
-                />
-
-                <CheckboxComponent
-                    value={terms}
-                    onValueChange={setTerms}
-                    placeholder="I also agree that the establishment has the right to charge me for any damages
-                        incurred during my stay if the establishment can prove that I am responsible."
-                />
-
-                {/* Confirm Booking Button */}
-                <Pressable
-                    style={[styles.confirmButton, (!agreed || !terms || duration <= 0) && styles.disabledButton]}
-                    disabled={!agreed || !terms || duration <= 0 || transactionCheckoutData.has_ongoing_transaction}
-                    onPress={handleConfirmBooking}
-                >
-                    {transactionCheckoutData.has_ongoing_transaction ? (
-                        <TextComponent style={styles.confirmButtonText}>You have an ongoing transaction.</TextComponent>
-                    ) : isSubmitting ? (
-                        <>
-                            <LoadingComponent text="Confirming..." />
-                            <TextComponent style={[styles.confirmButtonText, { marginLeft: 8 }]}>
-                                Confirming...
+                        {/* Pricing Summary */}
+                        <View>
+                            <TextComponent style={styles.summaryText}>
+                                Base Rate: ₱{getCurrentRate().toFixed(2)}/
+                                {pricingType === "hourly" ? "hour" : pricingType === "daily" ? "day" : "month"}{" "}
+                                {transactionCheckoutInfo?.slot_info.is_premium && (
+                                    <TextComponent style={styles.premiumText}>(Premium Slot)</TextComponent>
+                                )}
                             </TextComponent>
-                        </>
-                    ) : (
-                        <TextComponent style={styles.confirmButtonText}>Confirm Booking</TextComponent>
-                    )}
-                </Pressable>
-            </View>
+                            <View style={styles.summaryRow}>
+                                <TextComponent style={styles.summaryLabel}>Duration:</TextComponent>
+                                <TextComponent style={styles.summaryValue}>
+                                    {duration}{" "}
+                                    {pricingType === "hourly" ? "hours" : pricingType === "daily" ? "days" : "months"}
+                                </TextComponent>
+                            </View>
+                            <View style={styles.divider} />
+                            <View style={styles.summaryRow}>
+                                <TextComponent style={[styles.summaryLabel, { fontWeight: "600" }]}>
+                                    Total Amount:
+                                </TextComponent>
+                                <TextComponent style={[styles.summaryValue, { fontWeight: "600" }]}>
+                                    ₱{(getCurrentRate() * duration).toFixed(2)}
+                                </TextComponent>
+                            </View>
+                        </View>
+
+                        <CheckboxComponent
+                            onValueChange={setAgreed}
+                            value={agreed}
+                            placeholder="I agree to the parking terms and conditions, including the cancellation policy."
+                        />
+
+                        <CheckboxComponent
+                            value={terms}
+                            onValueChange={setTerms}
+                            placeholder="I also agree that the establishment has the right to charge me for any damages
+                        incurred during my stay if the establishment can prove that I am responsible."
+                        />
+
+                        {/* Confirm Booking Button */}
+
+                        <ButtonComponent
+                            title={
+                                transactionCheckoutInfo?.has_ongoing_transaction
+                                    ? "You have an ongoing transaction"
+                                    : isSubmitting
+                                    ? "Confirming..."
+                                    : "Confirm Booking"
+                            }
+                            disabled={transactionCheckoutInfo?.has_ongoing_transaction || isSubmitting}
+                            onPress={() => {}}
+                        />
+                    </View>
+                </>
+            )}
         </ResponsiveContainer>
     );
 };

@@ -14,5 +14,5 @@ export interface ParkingSlot {
     base_price_per_hour: string;
     base_price_per_day: string;
     base_price_per_month: string;
-    price_multiplier: string;
+    price_multiplier?: string;
 }

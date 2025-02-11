@@ -46,7 +46,6 @@ export function getRedirectPath(role: UserRole): RelativePathString {
 
 const axiosInstance = axios.create({
     withCredentials: true,
-    // baseURL: "https://192.168.254.1:5000/api/v1",
     baseURL: "https://ez-parking-system-pr-54.onrender.com/api/v1",
     headers: {
         Accept: "application/json",
