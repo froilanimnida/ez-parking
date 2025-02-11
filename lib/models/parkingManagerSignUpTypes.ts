@@ -39,7 +39,7 @@ export interface ParkingEstablishmentData {
     nearby_landmarks: string;
 }
 
-export interface ParkinOperatingHoursData {
+export interface ParkingOperatingHoursData {
     enabled: boolean;
     open: string;
     close: string;
