@@ -18,7 +18,7 @@ interface qrContent {
     user_info: User;
 }
 
-const qrContent = () => {
+const QRContent = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [paymentStatus, setPaymentStatus] = useState("paid");
     const [qrContent, setQrContent] = useState<qrContent | null>(null);
@@ -182,7 +182,7 @@ const qrContent = () => {
     );
 };
 
-export default qrContent;
+export default QRContent;
 
 const styles = StyleSheet.create({
     cardContainer: {

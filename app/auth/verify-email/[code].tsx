@@ -1,6 +1,6 @@
 import { StyleSheet, View, Animated, Easing } from "react-native";
 import React, { useEffect } from "react";
-import { useLocalSearchParams, Redirect, router } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import { Svg, Circle, Path } from "react-native-svg";
 import TextComponent from "@/components/TextComponent";
 import { verifyEmail } from "@/lib/api/auth";
@@ -10,9 +10,6 @@ const AnimatedSvg = Animated.createAnimatedComponent(Svg);
 const VerifyEmail = () => {
     const { code } = useLocalSearchParams() as { code: string };
     const spinValue = new Animated.Value(0);
-    if (!code || code.length !== 6) {
-        return <Redirect href="/" />;
-    }
     useEffect(() => {
         Animated.loop(
             Animated.timing(spinValue, {
@@ -29,7 +26,7 @@ const VerifyEmail = () => {
         setTimeout(() => {
             router.replace("/auth/login");
         });
-    }, []);
+    });
 
     const spin = spinValue.interpolate({
         inputRange: [0, 1],

@@ -74,7 +74,7 @@ const TransactionDetails = () => {
             : "";
     const distanceKm =
         transactionDetails?.slot_info?.slot_status === "reserved"
-            ? calculateDistance(establishmentLatitude, establishmentLongitude, userLatitude, userLongitude).toFixed(1)
+            ? calculateDistance(establishmentLatitude!, establishmentLongitude!, userLatitude, userLongitude).toFixed(1)
             : null;
     return (
         <ResponsiveContainer>

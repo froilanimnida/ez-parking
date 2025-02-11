@@ -1,12 +1,11 @@
 import axiosInstance from "../axiosInstance";
-import type { ParkingSlot } from "../models/parking-slot";
 import type {
     ParkingAddressData,
     ParkingEstablishmentData,
-    ParkinOperatingHoursData,
     ParkingCompanyProfile,
     ParkingOwnerInformation,
     ParkingPaymentMethodData,
+    ParkingOperatingHoursData,
 } from "../models/parkingManagerSignUpTypes";
 
 const root = "/parking-manager" as const;
@@ -58,7 +57,7 @@ export const parkingManagerSignUp = async (
     companyProfile: ParkingCompanyProfile,
     addressData: ParkingAddressData,
     parkingEstablishmentData: ParkingEstablishmentData,
-    operatingHours: { [key: string]: ParkinOperatingHoursData },
+    operatingHours: { [key: string]: ParkingOperatingHoursData },
     paymentMethodData: ParkingPaymentMethodData
 ) => {
     const result = await axiosInstance.post(`${root}/signup`, {
