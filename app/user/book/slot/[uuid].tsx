@@ -106,6 +106,7 @@ const SlotInfo = () => {
             scheduled_entry_time: new Date().toISOString(),
             scheduled_exit_time: new Date().toISOString(),
             amount_due: getCurrentRate() * duration,
+            slot_uuid: uuid,
         });
         setIsSubmitting(false);
         if (!transactionCheckoutInfo?.has_ongoing_transaction) {
