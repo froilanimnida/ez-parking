@@ -1,8 +1,8 @@
 import { StyleSheet, View } from "react-native";
 import React, { useState } from "react";
 import ButtonComponent from "@/components/ButtonComponent";
-import LinkComponent from "@/components/LinkComponent";
-import * as DocumentPicker from "expo-document-picker";
+// import LinkComponent from "@/components/LinkComponent";
+// import * as DocumentPicker from "expo-document-picker";
 import TextInputComponent from "@/components/TextInputComponent";
 import CardComponent from "@/components/CardComponent";
 import SelectComponent from "@/components/SelectComponent";
@@ -21,7 +21,7 @@ import {
 import OperatingHoursForm from "@/components/auth/parking-manager/OperatingHoursForm";
 import { parkingManagerSignUp } from "@/lib/api/parkingManager";
 import { METRO_MANILA_CITIES } from "@/lib/models/cities";
-import PaymentMethods from "@/components/auth/parking-manager/PAymentMethods";
+import PaymentMethods from "@/components/auth/parking-manager/PaymentMethods";
 import ParkingOwnerInfoCard from "@/components/auth/parking-manager/ParkingOwnerInfoCard";
 import FacilitiesAndAmenitiesCard from "@/components/auth/parking-manager/FacilitiesAndAmenitiesCard";
 interface OperatingHours {
@@ -152,7 +152,7 @@ const ParkingManagerSignUp = () => {
             } else {
                 alert("Location not found. Please enter a valid address");
             }
-        } catch (error) {
+        } catch {
             alert("An error occurred while searching for the location");
         }
     };
