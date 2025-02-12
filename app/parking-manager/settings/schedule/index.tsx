@@ -1,8 +1,9 @@
 import { SafeAreaView, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
+import { getEstablishmentSchedules, updateEstablishmentSchedules } from "@/lib/api/parkingManager";
 
 interface OperatingHours {
     enabled: boolean;
@@ -40,6 +41,16 @@ const ParkingEstablishmentSchedule = () => {
             },
         },
     });
+    useEffect(() => {
+        const getSchedules = async () => {
+            const response = await getEstablishmentSchedules();
+            console.log(response);
+        };
+        getSchedules();
+    }, []);
+    const updateSchedule = async () => {
+        const result = await updateEstablishmentSchedules(parkingData.parkingDetails.operatingHours);
+    };
     return (
         <View style={styles.container}>
             <SafeAreaView style={styles.body}>

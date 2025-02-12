@@ -1,4 +1,5 @@
 import axiosInstance from "../axiosInstance";
+import type { OperatingHours } from "../function/validators/scheduleValidator";
 import type {
     ParkingAddressData,
     ParkingEstablishmentData,
@@ -27,12 +28,12 @@ export const getVehicleTypes = async () => {
 export const getTransactions = async () => {
     const result = await axiosInstance.get(`${root}/transactions`);
     return result;
-}
+};
 
 export const getTransaction = async (transactionUuid: string) => {
     const result = await axiosInstance.get(`${root}/transaction?transaction_uuid=${transactionUuid}`);
     return result;
-}
+};
 
 export const addParkingSlot = async (newSlotData: {
     slot_code: string;
@@ -77,6 +78,25 @@ export const parkingManagerSignUp = async (
         parking_establishment: parkingEstablishmentData,
         operating_hour: operatingHours,
         payment_method: paymentMethodData,
+    });
+    return result;
+};
+
+export const getEstablishmentSchedules = () => {
+    const result = axiosInstance.get(`${root}/operating-hours`);
+    return result;
+};
+
+export const updateEstablishmentSchedules = async ({
+    operatingHours,
+    is_24_hours,
+}: {
+    operatingHours: { [key: string]: OperatingHours };
+    is_24_hours: boolean;
+}) => {
+    const result = await axiosInstance.post(`${root}/operating-hours/update`, {
+        operating_hours: operatingHours,
+        is_24_hours,
     });
     return result;
 };
