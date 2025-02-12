@@ -1,5 +1,4 @@
 import axiosInstance from "../axiosInstance";
-import type { User } from "../models/user";
 
 const root = "/admin" as const;
 

@@ -11,18 +11,12 @@ import type { VehicleType } from "@/lib/models/vehicle-types";
 import { FlashList } from "@shopify/flash-list";
 import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
-
-const fetchVehicleTypes = async () => {
-    try {
-        const response = await axiosInstance.get(`${process.env.EXPO_PUBLIC_API_VEHICLE_TYPE_ROOT}/all`);
-        return response.data;
-    } catch (error) {
-        console.log(error);
-    }
-};
+import { getVehicleTypes } from "@/lib/api/admin";
+import LoadingComponent from "@/components/reusable/LoadingComponent";
 
 const VehicleTypes = () => {
     const [vehicleTypes, setVehicleTypes] = useState<VehicleType[]>([]);
+    const [loading, setLoading] = useState(true);
     const [newVehicleType, setNewVehicleType] = useState({
         code: "",
         name: "",
@@ -32,10 +26,12 @@ const VehicleTypes = () => {
     });
 
     useEffect(() => {
-        fetchVehicleTypes().then((data) => {
-            setVehicleTypes(data.vehicle_types);
-            console.log(vehicleTypes);
-        });
+        const fetchVehicleTypes = async () => {
+            const data = await getVehicleTypes();
+            setVehicleTypes(data.data.data);
+            setLoading(false);
+        };
+        fetchVehicleTypes();
     }, []);
 
     const handleInputChange = (field: string, value: string | boolean) => {
@@ -45,35 +41,6 @@ const VehicleTypes = () => {
     const handleAddVehicleType = () => {
         console.log("Hello");
     };
-
-    const renderVehicleTypeItem = ({ item }: { item: VehicleType }) => (
-        <View style={styles.tableRow}>
-            <TextComponent style={styles.tableCell}>{item.code}</TextComponent>
-            <TextComponent style={styles.tableCell}>{item.name}</TextComponent>
-            <TextComponent style={styles.tableCell}>{item.description}</TextComponent>
-            <TextComponent style={styles.tableCell}>
-                <TextComponent
-                    style={[
-                        styles.sizeBadge,
-                        item.size_category === "SMALL" && styles.sizeSmall,
-                        item.size_category === "MEDIUM" && styles.sizeMedium,
-                        item.size_category === "LARGE" && styles.sizeLarge,
-                    ]}
-                >
-                    {item.size_category}
-                </TextComponent>
-            </TextComponent>
-            <TextComponent style={styles.tableCell}>
-                <TextComponent
-                    style={[styles.statusBadge, item.is_active ? styles.statusActive : styles.statusInactive]}
-                >
-                    {item.is_active ? "Active" : "Inactive"}
-                </TextComponent>
-            </TextComponent>
-            <LinkComponent style={styles.editButton} href={`../vehicle-types/${item.uuid}`} label="Edit" />
-        </View>
-    );
-
     return (
         <ResponsiveContainer>
             <TextComponent bold variant="h1" style={styles.header}>
@@ -81,12 +48,36 @@ const VehicleTypes = () => {
             </TextComponent>
 
             <View style={styles.tableContainer}>
-                <FlashList
-                    data={vehicleTypes}
-                    renderItem={renderVehicleTypeItem}
-                    keyExtractor={(item) => item.uuid}
-                    estimatedItemSize={100}
-                />
+                {loading ? (
+                    <LoadingComponent text="Loading vehicle types..." />
+                ) : vehicleTypes.length > 0 ? (
+                    <>
+                        {vehicleTypes.map((item) => (
+                            <CardComponent
+                                customStyles={{ gap: 16, marginBottom: 16 }}
+                                header="Vehicle Type Information"
+                                subHeader="Review and manage this vehicle type"
+                            >
+                                <View style={{ gap: 16 }}>
+                                    <View>
+                                        <TextComponent>Code</TextComponent>
+                                        <TextComponent>{item.code}</TextComponent>
+                                    </View>
+                                    <View>
+                                        <TextComponent>Name</TextComponent>
+                                        <TextComponent>{item.name}</TextComponent>
+                                    </View>
+                                    <View>
+                                        <TextComponent>Description</TextComponent>
+                                        <TextComponent>{item.description}</TextComponent>
+                                    </View>
+                                </View>
+                            </CardComponent>
+                        ))}
+                    </>
+                ) : (
+                    <></>
+                )}
             </View>
 
             <CardComponent
@@ -246,8 +237,12 @@ const styles = StyleSheet.create({
     },
     addButton: {
         backgroundColor: "#4F46E5",
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 8,
+    },
+    label: {
+        color: "#374151",
+        fontWeight: "bold",
+    },
+    value: {
+        color: "#374151",
     },
 });
