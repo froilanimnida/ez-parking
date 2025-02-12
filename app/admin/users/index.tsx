@@ -8,6 +8,7 @@ import TextInputComponent from "@/components/TextInputComponent";
 import SelectComponent from "@/components/SelectComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { getAllUsers } from "@/lib/api/admin";
+import LoadingComponent from "@/components/reusable/LoadingComponent";
 
 const Users = () => {
     const [users, setUsers] = useState<User[]>([]);
@@ -15,11 +16,13 @@ const Users = () => {
     const [roleFilter, setRoleFilter] = useState("all");
     const [verificationFilter, setVerificationFilter] = useState("all");
     const [isBanModalOpen, setIsBanModalOpen] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
             const data = await getAllUsers();
-            setUsers(data.data.users);
+            setUsers(data.data.data);
+            setLoading(false);
         };
         fetchData();
     }, []);
@@ -89,8 +92,9 @@ const Users = () => {
                     selectedValue={verificationFilter}
                 />
             </View>
+            {loading && <LoadingComponent text="Fetching all users" />}
 
-            {filteredUsers.length === 0 ? (
+            {filteredUsers.length === 0 && !loading ? (
                 <CardComponent customStyles={styles.noUsersCard} header="No Users Found">
                     <TextComponent style={styles.noUsersText}>No users found</TextComponent>
                 </CardComponent>

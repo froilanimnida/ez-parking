@@ -14,6 +14,9 @@ import CardComponent from "@/components/CardComponent";
 import TextComponent from "@/components/TextComponent";
 import { useLocalSearchParams } from "expo-router";
 import axiosInstance from "@/lib/axiosInstance";
+import { getEstablishment } from "@/lib/api/admin";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
+import LinkComponent from "@/components/LinkComponent";
 
 interface Establishment {
     company_profile: CompanyProfile;
@@ -27,17 +30,27 @@ interface Establishment {
 }
 
 const EstablishmentDetails = () => {
-    const { uuid } = useLocalSearchParams();
-    const [showAddSlotModal, setShowAddSlotModal] = useState(false);
-    let establishment;
+    const { uuid } = useLocalSearchParams() as { uuid: string };
+    const [establishment, setEstablishment] = useState<Establishment | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        axiosInstance.get(`establishment_uuid=${uuid}`);
+        const fetchEstablishment = async () => {
+            const response = await getEstablishment(uuid);
+            setEstablishment(response.data.data);
+            setIsLoading(false);
+        };
+        fetchEstablishment();
     });
 
     return (
-        <ScrollView style={styles.container}>
+        <ResponsiveContainer>
             {/* Header Section */}
+            <LinkComponent
+                label="← Back to Dashboard"
+                style={{ width: "auto", marginBottom: 16 }}
+                href="../../admin/establishments"
+            />
             <View style={styles.header}>
                 <TextComponent style={styles.title}>Establishment Name</TextComponent>
                 <TextComponent style={styles.subtitle}>Review and manage this parking establishment</TextComponent>
@@ -92,7 +105,7 @@ const EstablishmentDetails = () => {
 
                 {/* Add other sections similarly */}
             </View>
-        </ScrollView>
+        </ResponsiveContainer>
     );
 };
 

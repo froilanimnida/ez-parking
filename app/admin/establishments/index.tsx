@@ -1,6 +1,6 @@
 import { StyleSheet, View, SafeAreaView, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
-import { Link } from "expo-router";
+import { Link, type RelativePathString } from "expo-router";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -8,8 +8,10 @@ import axiosInstance from "@/lib/axiosInstance";
 import { getAuthHeaders } from "@/lib/credentialsManager";
 import SelectComponent from "@/components/SelectComponent";
 import TextInputComponent from "@/components/TextInputComponent";
-import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
+import { getEstablishments } from "@/lib/api/admin";
+import LoadingComponent from "@/components/reusable/LoadingComponent";
+import LinkComponent from "@/components/LinkComponent";
 
 interface Establishment {
     company_profile: {
@@ -30,28 +32,18 @@ interface Establishment {
     };
 }
 
-const fetchEstablishments = async () => {
-    const cookiesObject = await getAuthHeaders();
-
-    const res = await axiosInstance.get(`${process.env.EXPO_PUBLIC_API_ADMIN_ROOT}/establishments`, {
-        headers: {
-            ...cookiesObject,
-        },
-    });
-    return res;
-};
-
 const Establishments = () => {
     const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved" | "rejected" | string>("all");
     const [searchQuery, setSearchQuery] = useState("");
-    let establishments: Establishment[] = [];
+    const [loading, setLoading] = useState(true);
+    const [establishments, setEstablishments] = useState<Establishment[]>([]);
     useEffect(() => {
-        const res = fetchEstablishments();
-        res.then((data) => {
-            establishments = data.data as Establishment[];
-        }).catch((error) => {
-            console.error(error);
-        });
+        const getEstablishmentData = async () => {
+            const res = await getEstablishments();
+            setEstablishments(res.data.data as Establishment[]);
+            setLoading(false);
+        };
+        getEstablishmentData();
     }, []);
     return (
         <ResponsiveContainer>
@@ -87,7 +79,6 @@ const Establishments = () => {
                     />
                 </View>
                 <TextInputComponent
-                    customStyles={styles.searchInput}
                     placeholder="Search establishments..."
                     value={searchQuery}
                     onChangeText={setSearchQuery}
@@ -95,6 +86,7 @@ const Establishments = () => {
             </View>
 
             <View style={styles.grid}>
+                {loading && establishments.length === 0 && <LoadingComponent text="Fetching establishments..." />}
                 {establishments.map((establishment, index) => (
                     <CardComponent key={index} customStyles={styles.card} header="Establishment Details">
                         <View style={styles.cardHeader}>
@@ -131,7 +123,10 @@ const Establishments = () => {
                                 </View>
                             </View>
 
-                            <Link href={`/admin/establishments/${establishment.establishment.uuid}`}>View Details</Link>
+                            <LinkComponent
+                                label="View Details"
+                                href={`/admin/establishments/${establishment.establishment.uuid}` as RelativePathString}
+                            />
                         </View>
                     </CardComponent>
                 ))}
