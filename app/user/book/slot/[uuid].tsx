@@ -17,6 +17,7 @@ import CheckboxComponent from "@/components/CheckboxComponent";
 import { checkoutTransaction, createTransaction } from "@/lib/api/transaction";
 import ButtonComponent from "@/components/ButtonComponent";
 import { calculatePrice } from "@/lib/helper/calculatePrice";
+import { calculateDuration } from "@/lib/helper/calculateDuration";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;
@@ -28,8 +29,8 @@ interface Slot extends ParkingSlot {
 interface TransactionCheckoutData {
     address: Address;
     establishment_info: ParkingEstablishment;
-    operating_hours: OperatingHour[]; // Can be empty array
-    payment_methods: PaymentMethod[] | []; // Changed to array type that can be empty
+    operating_hours: OperatingHour[];
+    payment_methods: PaymentMethod[] | [];
     slot_info: Slot;
     has_ongoing_transaction: boolean;
 }
@@ -37,6 +38,9 @@ interface TransactionCheckoutData {
 const SlotInfo = () => {
     const { uuid, establishment_uuid } = useLocalSearchParams() as { uuid: string; establishment_uuid: string };
     const [transactionCheckoutInfo, setTransactionCheckoutInfo] = useState<TransactionCheckoutData | null>(null);
+    const [month, setMonth] = useState(0);
+    const [day, setDay] = useState(0);
+    const [year, setYear] = useState(0);
     const [pricingType, setPricingType] = useState<"hourly" | "daily" | "monthly">("hourly");
 
     const getAvailablePricingPlans = () => {
@@ -114,8 +118,12 @@ const SlotInfo = () => {
         const result = await createTransaction({
             duration: duration,
             duration_type: pricingType,
-            scheduled_entry_time: new Date().toISOString(),
-            scheduled_exit_time: new Date().toISOString(),
+            scheduled_entry_time: new Date(year, month - 1, day).toISOString(),
+            scheduled_exit_time: calculateDuration(
+                String(new Date(year, month - 1, day)),
+                duration,
+                pricingType
+            ).toISOString(),
             amount_due: getCurrentRate() * duration,
             slot_uuid: uuid,
         });
@@ -174,9 +182,7 @@ const SlotInfo = () => {
                         </View>
                     </CardComponent>
 
-                    {/* Booking Form */}
                     <CardComponent header="Booking Details">
-                        {/* Duration */}
                         <View style={styles.formRow}>
                             <TextComponent style={styles.formLabel}>
                                 Parking Duration{" "}
@@ -193,6 +199,32 @@ const SlotInfo = () => {
                                 onChangeText={(val) => setDuration(Number(val))}
                                 placeholder="0"
                             />
+                        </View>
+                        <View style={styles.formRow}>
+                            <TextComponent style={styles.formLabel}>Schedule Entry Time </TextComponent>
+                            <View style={{ flexDirection: "row", gap: 8 }}>
+                                <TextInputComponent
+                                    customStyles={styles.input}
+                                    keyboardType="number-pad"
+                                    value={String(duration)}
+                                    onChangeText={(val) => setDay(Number(val))}
+                                    placeholder="0"
+                                />
+                                <TextInputComponent
+                                    customStyles={styles.input}
+                                    keyboardType="number-pad"
+                                    value={String(duration)}
+                                    onChangeText={(val) => setMonth(Number(val))}
+                                    placeholder="0"
+                                />
+                                <TextInputComponent
+                                    customStyles={styles.input}
+                                    keyboardType="number-pad"
+                                    value={String(duration)}
+                                    onChangeText={(val) => setYear(Number(val))}
+                                    placeholder="0"
+                                />
+                            </View>
                         </View>
 
                         <View style={styles.formRow}>

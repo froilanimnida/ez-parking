@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import { ParkingSlot } from "@/lib/models/parking-slot";
-import { Transaction } from "@/lib/models/transaction";
 import TextInputComponent from "@/components/TextInputComponent";
 import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";

@@ -11,10 +11,8 @@ import { router, useLocalSearchParams } from "expo-router";
 import type { TransactionDetailsType } from "@/lib/models/userRoleTypes";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
-
-function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    return Math.random() * 10;
-}
+import calculateDistance from "@/lib/helper/calculateDistance";
+import { threeDimensionalMapURL, normalMapURL, satelliteMapURL } from "@/lib/helper/mapViewFunction";
 
 const TransactionDetails = () => {
     const [transactionDetails, setTransactionDetails] = useState<TransactionDetailsType | null>(null);
@@ -23,10 +21,16 @@ const TransactionDetails = () => {
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
     const [userLatitude, setUserLatitude] = useState(0);
     const [userLongitude, setUserLongitude] = useState(0);
+    const [establishmentLatitude, setEstablishmentLatitude] = useState(0);
+    const [establishmentLongitude, setEstablishmentLongitude] = useState(0);
     const [loadingLocation, setLoadingLocation] = useState(true);
     const { uuid } = useLocalSearchParams<{ uuid: string }>();
 
     useEffect(() => {
+        setTransactionDetails(null);
+        setIsFetching(true);
+        setLoadingLocation(true);
+
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 setUserLatitude(position.coords.latitude);
@@ -39,39 +43,58 @@ const TransactionDetails = () => {
             },
             { enableHighAccuracy: true }
         );
-        const getTransactionDetails = async () => {
-            viewTransaction(uuid).then((response) => {
-                console.log(response);
-                setIsFetching(false);
+
+        const fetchTransactionDetails = async () => {
+            try {
+                const response = await viewTransaction(uuid);
                 setTransactionDetails(response.data.transaction);
-                if (!transactionDetails) {
-                    router.replace("../transactions");
-                }
-            });
+                setEstablishmentLatitude(response.data.transaction?.establishment_info?.latitude);
+                setEstablishmentLongitude(response.data.transaction?.establishment_info?.longitude);
+            } catch (error) {
+                console.error("Error fetching transaction:", error);
+                alert("Error loading transaction details");
+            } finally {
+                setIsFetching(false);
+            }
         };
-        getTransactionDetails();
-    }, []);
+
+        fetchTransactionDetails();
+
+        return () => {
+            setTransactionDetails(null);
+            setIsFetching(true);
+            setLoadingLocation(true);
+        };
+    }, [uuid]);
 
     const handleCancelTransaction = async () => {
         setIsCancelModalOpen(false);
         try {
             const result = await cancelTransaction(uuid);
-            Alert.alert("Transaction cancelled.");
-            router.replace("/user/transactions");
+            if (result.status === 200) {
+                alert("Transaction cancelled.");
+                router.reload();
+            } else {
+                alert("Error cancelling transaction.");
+            }
         } catch {
-            Alert.alert("Error cancelling transaction.");
+            alert("Error cancelling transaction.");
         }
     };
 
-    const establishmentLatitude = transactionDetails?.establishment_info?.latitude;
-    const establishmentLongitude = transactionDetails?.establishment_info?.longitude;
-
-    const mapUrl =
-        establishmentLatitude && establishmentLongitude
-            ? `https://maps.google.com/maps?width=100%25&height=600&hl=en&q=${establishmentLatitude},${establishmentLongitude}+(${encodeURIComponent(
-                  transactionDetails.establishment_info.name
-              )})&t=&z=14&ie=UTF8&iwloc=B&output=embed`
-            : "";
+    const threeDimensionMap = transactionDetails?.establishment_info.name
+        ? threeDimensionalMapURL(
+              establishmentLatitude!,
+              establishmentLongitude!,
+              transactionDetails.establishment_info.name
+          )
+        : "";
+    const birdsEyeMapUrl = transactionDetails?.establishment_info.name
+        ? satelliteMapURL(establishmentLatitude!, establishmentLongitude!, transactionDetails.establishment_info.name)
+        : "";
+    const normalMapUrl = transactionDetails?.establishment_info.name
+        ? normalMapURL(establishmentLatitude!, establishmentLongitude!, transactionDetails.establishment_info.name)
+        : "";
     const distanceKm =
         transactionDetails?.slot_info?.slot_status === "reserved"
             ? calculateDistance(establishmentLatitude!, establishmentLongitude!, userLatitude, userLongitude).toFixed(1)
@@ -200,7 +223,7 @@ const TransactionDetails = () => {
                                 >
                                     Waze
                                 </LinkComponent>
-                                <LinkComponent href="./">Our Map</LinkComponent>
+                                {/* <LinkComponent href="./">Our Map</LinkComponent> */}
                             </View>
                         </View>
                     </CardComponent>
@@ -266,12 +289,8 @@ const TransactionDetails = () => {
                             <CardComponent header="QR Code">
                                 <View style={{ alignItems: "center", marginTop: 16 }}>
                                     <Image
-                                        source={{ uri: `data:image/png;base64,${transactionDetails.qr_code}` }}
-                                        style={{ width: "100&", height: 100, marginBottom: 16 }}
-                                    />
-                                    <Image
                                         source={require("@/assets/images/mock_qr.png")}
-                                        style={{ width: "25%", marginBottom: 16, aspectRatio: 1, height: "auto" }}
+                                        style={{ width: "50%", marginBottom: 16, aspectRatio: 1, height: "auto" }}
                                     />
                                     <Pressable style={styles.qrButton} onPress={() => setIsModalOpen(true)}>
                                         <TextComponent style={styles.qrButtonText}>View Larger</TextComponent>
@@ -284,13 +303,25 @@ const TransactionDetails = () => {
                         )}
 
                     <CardComponent header="Location Details">
-                        <View style={styles.mapContainer}>
-                            {PlatformType() === "web" ? (
-                                <iframe src={mapUrl} style={{ width: "100%", height: "100%" }} />
-                            ) : (
-                                <WebView source={{ uri: mapUrl }} style={{ flex: 1 }} />
-                            )}
-                        </View>
+                        {PlatformType() === "web" ? (
+                            <iframe src={normalMapUrl} style={{ width: "100%", height: "100%" }} />
+                        ) : (
+                            <WebView source={{ uri: normalMapUrl }} style={{ flex: 1 }} />
+                        )}
+                    </CardComponent>
+                    <CardComponent header="Location Details (Satellite)">
+                        {PlatformType() === "web" ? (
+                            <iframe src={birdsEyeMapUrl} style={{ width: "100%", height: "100%" }} />
+                        ) : (
+                            <WebView source={{ uri: birdsEyeMapUrl }} style={{ flex: 1 }} />
+                        )}
+                    </CardComponent>
+                    <CardComponent header="Location Details (3D)">
+                        {PlatformType() === "web" ? (
+                            <iframe src={threeDimensionMap} style={{ width: "100%", height: "100%" }} />
+                        ) : (
+                            <WebView source={{ uri: threeDimensionMap }} style={{ flex: 1 }} />
+                        )}
                     </CardComponent>
 
                     <View style={styles.footer}>
@@ -300,10 +331,7 @@ const TransactionDetails = () => {
                                     ? "Transaction Cancelled"
                                     : "Cancel Transaction"
                             }
-                            style={[
-                                transactionDetails.transaction_data.status === "cancelled" &&
-                                    styles.cancelButtonDisabled,
-                            ]}
+                            disabled={transactionDetails.transaction_data.status === "cancelled"}
                             onPress={
                                 transactionDetails.transaction_data.status === "cancelled"
                                     ? () => {}
@@ -454,7 +482,6 @@ const styles = StyleSheet.create({
     },
     mapContainer: {
         marginTop: 16,
-        height: 300,
         borderRadius: 8,
         overflow: "hidden",
     },
