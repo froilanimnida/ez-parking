@@ -3,6 +3,8 @@ import * as SecureStore from "expo-secure-store";
 import PlatformType from "./platform";
 import { router, type RelativePathString } from "expo-router";
 import { getAuthHeaders } from "./credentialsManager";
+import type ApiValidationError from "./models/validationError";
+import type { SimplifiedValidationError } from "./models/validationError";
 export type UserRole = "user" | "parking_manager" | "admin";
 
 async function verifyAndGetRole(
@@ -121,7 +123,30 @@ axiosInstance.interceptors.response.use(
         if (error.status === 401) {
             router.replace("/auth/login");
         }
-        Promise.reject(error);
+        if (error.response?.status === 422) {
+            const apiError = error.response.data as ApiValidationError;
+            const messages: string[] = [];
+
+            if (apiError.errors?.json) {
+                Object.entries(apiError.errors.json).forEach(([category, categoryErrors]) => {
+                    Object.entries(categoryErrors).forEach(([field, fieldMessages]) => {
+                        fieldMessages.forEach((message) => {
+                            messages.push(message);
+                        });
+                    });
+                });
+            }
+
+            const simplifiedError: SimplifiedValidationError = {
+                name: "ValidationError",
+                status: 422,
+                messages,
+                code: apiError.code,
+            };
+
+            return Promise.reject(simplifiedError);
+        }
+        return Promise.reject(error);
     }
 );
 

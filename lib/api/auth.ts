@@ -5,8 +5,6 @@ export const loginUser = async (email: string) => {
     const result = await axiosInstance.post(`${root}/login`, {
         email: email,
     });
-    if (result.status >= 400) return Promise.reject(result.data);
-    console.log(result);
     return result;
 };
 

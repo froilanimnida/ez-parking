@@ -52,15 +52,15 @@ const LoginForm = () => {
     const handleLogin = async () => {
         setLoggingIn(true);
         try {
-            await loginUser(email);
-            alert("OTP sent successfully.");
+            await loginUser(email.toLowerCase());
             setTimeout(() => {
                 setShowOtpForm(true);
                 setLoggingIn(false);
                 startTimer();
             }, 1500);
-        } catch (error) {
-            const errorBody = error as { code: string; message: string };
+        } catch (error: unknown) {
+            const err = error as AxiosError;
+            const errorBody = err.response!.data as { code: string; message: string };
             alert(errorBody?.message || "An error occurred");
             setLoggingIn(false);
         }
