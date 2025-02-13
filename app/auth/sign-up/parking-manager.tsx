@@ -24,11 +24,7 @@ import { METRO_MANILA_CITIES } from "@/lib/models/cities";
 import PaymentMethods from "@/components/auth/parking-manager/PaymentMethods";
 import ParkingOwnerInfoCard from "@/components/auth/parking-manager/ParkingOwnerInfoCard";
 import FacilitiesAndAmenitiesCard from "@/components/auth/parking-manager/FacilitiesAndAmenitiesCard";
-interface OperatingHours {
-    enabled: boolean;
-    open: string;
-    close: string;
-}
+import { ParkingOperatingHoursData } from "@/lib/models/parkingManagerSignUpTypes";
 
 const ParkingManagerSignUp = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -115,7 +111,7 @@ const ParkingManagerSignUp = () => {
         setParkingEstablishmentData({ ...parkingEstablishmentData, [key]: value });
     };
 
-    const handleOperatingHoursData = (day: string, field: keyof OperatingHours, value: string | boolean) => {
+    const handleOperatingHoursData = (day: string, field: keyof ParkingOperatingHoursData, value: string | boolean) => {
         setOperatingHours((prev) => ({
             ...prev,
             [day]: {
@@ -363,7 +359,7 @@ const ParkingManagerSignUp = () => {
                                         <ButtonComponent
                                             title="Choose File"
                                             onPress={() => {
-                                                // Implement file picker logic here
+                                                alert("Not yet working");
                                             }}
                                             style={styles.uploadButton}
                                         />

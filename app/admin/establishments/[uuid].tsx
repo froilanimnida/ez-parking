@@ -17,6 +17,8 @@ import axiosInstance from "@/lib/axiosInstance";
 import { getEstablishment } from "@/lib/api/admin";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import LinkComponent from "@/components/LinkComponent";
+import type { AxiosError } from "axios";
+import LoadingComponent from "@/components/reusable/LoadingComponent";
 
 interface Establishment {
     company_profile: CompanyProfile;
@@ -36,16 +38,20 @@ const EstablishmentDetails = () => {
 
     useEffect(() => {
         const fetchEstablishment = async () => {
-            const response = await getEstablishment(uuid);
-            setEstablishment(response.data.data);
-            setIsLoading(false);
+            try {
+                const response = await getEstablishment(uuid);
+                setEstablishment(response.data.data);
+                setIsLoading(false);
+            } catch (error: unknown) {
+                const axiosError = error as AxiosError;
+                alert(axiosError.response?.data?.message || "An error occurred");
+            }
         };
         fetchEstablishment();
     });
 
     return (
         <ResponsiveContainer>
-            {/* Header Section */}
             <LinkComponent
                 label="← Back to Dashboard"
                 style={{ width: "auto", marginBottom: 16 }}
@@ -55,6 +61,7 @@ const EstablishmentDetails = () => {
                 <TextComponent style={styles.title}>Establishment Name</TextComponent>
                 <TextComponent style={styles.subtitle}>Review and manage this parking establishment</TextComponent>
             </View>
+            {isLoading && <LoadingComponent text="Loading establishment details..." />}
 
             <View style={styles.grid}>
                 {/* Applicant Information */}

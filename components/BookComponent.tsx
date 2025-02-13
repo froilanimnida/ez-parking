@@ -13,7 +13,8 @@ import { getNearbyEstablishments } from "@/lib/api/establishment";
 import { askLocationPermission, getIPBasedLocation } from "@/lib/location";
 import LoadingComponent from "./reusable/LoadingComponent";
 import SelectComponent from "./SelectComponent";
-import { city, METRO_MANILA_CITIES } from "@/lib/models/cities";
+import { METRO_MANILA_CITIES } from "@/lib/models/cities";
+import type { CITY } from "@/lib/types/models/common/constants";
 export interface EstablishmentQuery extends ParkingEstablishment {
     open_slots: number;
     total_slots: number;
@@ -28,7 +29,7 @@ const getNearestEstablishments = async (latitude: number, longitude: number) =>
 const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
     const [establishments, setEstablishments] = useState<EstablishmentQuery[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
-    const [searchTerm, setSearchTerm] = useState<city>("");
+    const [searchTerm, setSearchTerm] = useState<CITY>("");
     const [selectedCity, setSelectedCity] = useState("");
     const [recentSearches, setRecentSearches] = useState([]);
     const [loading, setLoading] = useState(true);

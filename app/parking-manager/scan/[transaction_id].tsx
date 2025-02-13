@@ -5,12 +5,13 @@ import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import ButtonComponent from "@/components/ButtonComponent";
-import { useLocalSearchParams } from "expo-router";
-import { qrContentOverview } from "@/lib/api/parkingManager";
+import { router, useLocalSearchParams } from "expo-router";
+import { allowTransaction, qrContentOverview } from "@/lib/api/parkingManager";
 import type { ParkingSlot } from "@/lib/models/parking-slot";
 import type { Transaction } from "@/lib/models/transaction";
 import type { User } from "@/lib/models/user";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
+import type { AxiosError } from "axios";
 
 interface qrContent {
     parking_slot_info: ParkingSlot;
@@ -20,7 +21,7 @@ interface qrContent {
 
 const QRContent = () => {
     const [isLoading, setIsLoading] = useState(false);
-    const [paymentStatus, setPaymentStatus] = useState("paid");
+    const [paymentStatus, setPaymentStatus] = useState<"paid" | "pending">("paid");
     const [qrContent, setQrContent] = useState<qrContent | null>(null);
     const { transaction_id } = useLocalSearchParams() as { transaction_id: string };
     const [isFetching, setIsFetching] = useState(true);
@@ -32,18 +33,28 @@ const QRContent = () => {
                 setIsFetching(false);
             } catch (error) {
                 console.log(error);
-                Alert.alert("Error fetching transaction details");
+                alert("Error fetching transaction details");
+            } finally {
+                router.replace("/parking-manager/scan");
             }
         };
         fetchqrContent();
-    });
+    }, [transaction_id]);
 
-    const handleUpdateStatus = () => {
+    const handleUpdateStatus = async () => {
         setIsLoading(true);
-        setTimeout(() => {
-            setIsLoading(false);
-            alert("Payment status updated successfully");
-        }, 1500);
+        try {
+            const result = await allowTransaction(transaction_id, paymentStatus);
+            if (result.status === 200) {
+                alert("Transaction status updated successfully");
+            }
+        } catch (error: unknown) {
+            const err = error as AxiosError;
+            console.log(error);
+            alert(err.response!.data?.message || "An error occurred while updating the transaction status");
+        } finally {
+            router.replace("/parking-manager/scan");
+        }
     };
 
     return (
@@ -74,7 +85,17 @@ const QRContent = () => {
                         <View style={styles.cardItem}>
                             <TextComponent variant="label">Entry Time</TextComponent>
                             <TextComponent variant="body">
-                                {new Date(qrContent.transaction_data.entry_time).toLocaleString()}
+                                {qrContent.transaction_data.entry_time != null
+                                    ? new Date(qrContent.transaction_data.entry_time).toLocaleString()
+                                    : "Not yet available"}
+                            </TextComponent>
+                        </View>
+                        <View style={styles.cardItem}>
+                            <TextComponent variant="label">Exit Time</TextComponent>
+                            <TextComponent variant="body">
+                                {qrContent.transaction_data.exit_time != null
+                                    ? new Date(qrContent.transaction_data.exit_time).toLocaleString()
+                                    : "Not yet available"}
                             </TextComponent>
                         </View>
                     </CardComponent>

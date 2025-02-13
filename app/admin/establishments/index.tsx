@@ -1,35 +1,22 @@
-import { StyleSheet, View, SafeAreaView, ScrollView } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React, { useEffect, useState } from "react";
-import { Link, type RelativePathString } from "expo-router";
+import { type RelativePathString } from "expo-router";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import axiosInstance from "@/lib/axiosInstance";
-import { getAuthHeaders } from "@/lib/credentialsManager";
 import SelectComponent from "@/components/SelectComponent";
 import TextInputComponent from "@/components/TextInputComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { getEstablishments } from "@/lib/api/admin";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import LinkComponent from "@/components/LinkComponent";
+import type { ParkingEstablishment } from "@/lib/models/parking-establishment";
+import type { CompanyProfile } from "@/lib/models/company-profile";
+import { ADMIN_ESTABLISHMENT_FILTERS } from "@/lib/types/models/common/constants";
 
 interface Establishment {
-    company_profile: {
-        company_name: string;
-        company_reg_number: string;
-    };
-    establishment: {
-        name: string;
-        verified: boolean;
-        latitude: number;
-        longitude: number;
-        space_type: string;
-        space_layout: string;
-        is24_7: boolean;
-        nearby_landmarks: string;
-        created_at: string;
-        uuid: string;
-    };
+    company_profile: CompanyProfile;
+    establishment: ParkingEstablishment;
 }
 
 const Establishments = () => {
@@ -47,6 +34,7 @@ const Establishments = () => {
     }, []);
     return (
         <ResponsiveContainer>
+            <LinkComponent label="← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="../" />
             <View style={styles.header}>
                 <TextComponent bold variant="h1">
                     Parking Establishments
@@ -56,24 +44,9 @@ const Establishments = () => {
             <View style={styles.filters}>
                 <View style={styles.filterContainer}>
                     <SelectComponent
-                        items={[
-                            {
-                                label: "All Status",
-                                value: "all",
-                            },
-                            {
-                                label: "Pending",
-                                value: "pending",
-                            },
-                            {
-                                label: "Approved",
-                                value: "approved",
-                            },
-                            {
-                                label: "Rejected",
-                                value: "rejected",
-                            },
-                        ]}
+                        items={ADMIN_ESTABLISHMENT_FILTERS.map((filter) => {
+                            return { label: filter.toUpperCase(), value: filter };
+                        })}
                         onValueChange={setStatusFilter}
                         selectedValue={statusFilter}
                     />

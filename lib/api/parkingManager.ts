@@ -11,29 +11,23 @@ import type {
 
 const root = "/parking-manager" as const;
 export const qrContentOverview = async (qrContent: string) => {
-    const result = await axiosInstance.get(`${root}/qr-content/overview?qr_content=${qrContent}`);
-    return result;
+    return await axiosInstance.get(`${root}/qr-content/overview?qr_content=${qrContent}`);
 };
 
-export const getParkingSlotsParkingManager = async () => {
-    const result = await axiosInstance.get(`${root}/slots`);
-    return result;
-};
+export const allowTransaction = async (qrContent: string, paymentStatus: "pending" | "paid") =>
+    await axiosInstance.patch(`${root}/validate/entry`, {
+        qr_content: qrContent,
+        payment_status: paymentStatus,
+    });
 
-export const getVehicleTypes = async () => {
-    const result = await axiosInstance.get(`${root}/vehicle-types`);
-    return result;
-};
+export const getParkingSlotsParkingManager = async () => await axiosInstance.get(`${root}/slots`);
 
-export const getTransactions = async () => {
-    const result = await axiosInstance.get(`${root}/transactions`);
-    return result;
-};
+export const getVehicleTypes = async () => await axiosInstance.get(`${root}/vehicle-types`);
 
-export const getTransaction = async (transactionUuid: string) => {
-    const result = await axiosInstance.get(`${root}/transaction?transaction_uuid=${transactionUuid}`);
-    return result;
-};
+export const getTransactions = async () => await axiosInstance.get(`${root}/transactions`);
+
+export const getTransaction = async (transactionUuid: string) =>
+    await axiosInstance.get(`${root}/transaction?transaction_uuid=${transactionUuid}`);
 
 export const addParkingSlot = async (newSlotData: {
     slot_code: string;
@@ -47,8 +41,8 @@ export const addParkingSlot = async (newSlotData: {
     base_price_per_day: string;
     base_price_per_month: string;
     price_multiplier: string;
-}) => {
-    const result = await axiosInstance.post(`${root}/slot/create`, {
+}) =>
+    await axiosInstance.post(`${root}/slot/create`, {
         slot_code: newSlotData.slot_code,
         is_premium: newSlotData.is_premium,
         vehicle_type_id: newSlotData.vehicle_type_id,
@@ -60,8 +54,6 @@ export const addParkingSlot = async (newSlotData: {
         price_multiplier: newSlotData.price_multiplier,
         is_active: newSlotData.is_active,
     });
-    return result;
-};
 
 export const parkingManagerSignUp = async (
     userInformation: ParkingOwnerInformation,
@@ -70,8 +62,8 @@ export const parkingManagerSignUp = async (
     parkingEstablishmentData: ParkingEstablishmentData,
     operatingHours: { [key: string]: ParkingOperatingHoursData },
     paymentMethodData: ParkingPaymentMethodData
-) => {
-    const result = await axiosInstance.post(`${root}/signup`, {
+) =>
+    await axiosInstance.post(`${root}/signup`, {
         user: userInformation,
         company_profile: companyProfile,
         address: addressData,
@@ -79,13 +71,8 @@ export const parkingManagerSignUp = async (
         operating_hour: operatingHours,
         payment_method: paymentMethodData,
     });
-    return result;
-};
 
-export const getEstablishmentSchedules = () => {
-    const result = axiosInstance.get(`${root}/operating-hours`);
-    return result;
-};
+export const getEstablishmentSchedules = () => axiosInstance.get(`${root}/operating-hours`);
 
 export const updateEstablishmentSchedules = async ({
     operatingHours,
@@ -93,10 +80,8 @@ export const updateEstablishmentSchedules = async ({
 }: {
     operatingHours: { [key: string]: OperatingHours };
     is_24_hours: boolean;
-}) => {
-    const result = await axiosInstance.post(`${root}/operating-hours/update`, {
+}) =>
+    await axiosInstance.post(`${root}/operating-hours/update`, {
         operating_hours: operatingHours,
         is_24_hours,
     });
-    return result;
-};

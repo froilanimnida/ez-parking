@@ -42,6 +42,7 @@ const LoginForm = () => {
             }
         };
         checkAuthStatus();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleOtpOnChange = (otp: string) => {

@@ -1,4 +1,3 @@
-import { StyleSheet } from "react-native";
 import React from "react";
 import EstablishmentSearch from "@/components/BookComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
@@ -12,5 +11,3 @@ const EstablishmentSearchPage = () => {
 };
 
 export default EstablishmentSearchPage;
-
-const styles = StyleSheet.create({});
