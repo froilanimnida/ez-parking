@@ -38,9 +38,10 @@ interface TransactionCheckoutData {
 const SlotInfo = () => {
     const { uuid, establishment_uuid } = useLocalSearchParams() as { uuid: string; establishment_uuid: string };
     const [transactionCheckoutInfo, setTransactionCheckoutInfo] = useState<TransactionCheckoutData | null>(null);
-    const [month, setMonth] = useState(0);
-    const [day, setDay] = useState(0);
-    const [year, setYear] = useState(0);
+    const today = new Date();
+    const [month, setMonth] = useState(today.getMonth() + 1); // months are 0-based
+    const [day, setDay] = useState(today.getDate());
+    const [year, setYear] = useState(today.getFullYear());
     const [pricingType, setPricingType] = useState<"hourly" | "daily" | "monthly">("hourly");
 
     const getAvailablePricingPlans = () => {
@@ -92,8 +93,9 @@ const SlotInfo = () => {
             try {
                 const result = await checkoutTransaction(establishment_uuid, uuid);
                 setTransactionCheckoutInfo(result.data.transaction);
-            } catch (error) {
-                console.error("Error checking out transaction:", error);
+            } catch {
+                alert("An error occurred while fetching transaction details.");
+                router.reload();
             }
         };
         checkoutInfo();
@@ -114,9 +116,18 @@ const SlotInfo = () => {
     }, [duration, pricingType, transactionCheckoutInfo?.slot_info]);
 
     const handleConfirmBooking = async () => {
+        const selectedDate = new Date(year, month - 1, day);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
         setIsSubmitting(true);
-        if (day <= 0 || month <= 0 || year <= 0 || day > 31 || month > 12 || year < new Date().getFullYear()) {
-            alert("Please enter a valid date.");
+        if (!day || !month || !year) {
+            alert("Please select a complete date.");
+            setIsSubmitting(false);
+            return;
+        }
+
+        if (selectedDate < today) {
+            alert("Please select a future date.");
             setIsSubmitting(false);
             return;
         }

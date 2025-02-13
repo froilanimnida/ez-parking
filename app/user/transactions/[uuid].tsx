@@ -179,10 +179,8 @@ const TransactionDetails = () => {
                         <View style={styles.lineRow}>
                             <TextComponent style={styles.lineLabel}>Address</TextComponent>
                             <TextComponent style={styles.lineValue}>
-                                {transactionDetails.address_info.street}
-                                {transactionDetails.address_info.city}
-                                {transactionDetails.address_info.province}
-                                {transactionDetails.address_info.postal_code}
+                                {transactionDetails.address_info.street} {transactionDetails.address_info.city}{" "}
+                                {transactionDetails.address_info.province} {transactionDetails.address_info.postal_code}
                             </TextComponent>
                         </View>
                         <View style={styles.lineRow}>
@@ -214,15 +212,13 @@ const TransactionDetails = () => {
                                     },${transactionDetails.establishment_info.longitude}+(${encodeURIComponent(
                                         transactionDetails.establishment_info.name
                                     )})&t=&z=14&ie=UTF8&iwloc=B&output=embed`}
-                                >
-                                    Google Maps
-                                </LinkComponent>
+                                    label="Google Maps"
+                                />
                                 <LinkComponent
                                     style={{ marginRight: 16 }}
                                     href={`https://www.waze.com/ul?ll=${transactionDetails.establishment_info.latitude},${transactionDetails.establishment_info.longitude}&navigate=yes`}
-                                >
-                                    Waze
-                                </LinkComponent>
+                                    label="Waze"
+                                />
                                 {/* <LinkComponent href="./">Our Map</LinkComponent> */}
                             </View>
                         </View>
@@ -232,8 +228,24 @@ const TransactionDetails = () => {
                         <View style={styles.lineRow}>
                             <TextComponent style={styles.lineLabel}>Entry Time</TextComponent>
                             <TextComponent style={styles.lineValue}>
-                                {transactionDetails.transaction_data.entry_time !== "Not Available"
-                                    ? new Date(transactionDetails.transaction_data.entry_time).toLocaleString()
+                                {transactionDetails.transaction_data.entry_time || "Not Available"}
+                            </TextComponent>
+                        </View>
+                        <View style={styles.lineRow}>
+                            <TextComponent style={styles.lineLabel}>Scheduled Entry Time</TextComponent>
+                            <TextComponent style={styles.lineValue}>
+                                {transactionDetails.transaction_data.scheduled_entry_time
+                                    ? new Date(
+                                          transactionDetails.transaction_data.scheduled_entry_time
+                                      ).toLocaleString()
+                                    : "Not Available"}
+                            </TextComponent>
+                        </View>
+                        <View style={styles.lineRow}>
+                            <TextComponent style={styles.lineLabel}>Scheduled Exit Time</TextComponent>
+                            <TextComponent style={styles.lineValue}>
+                                {transactionDetails.transaction_data.scheduled_exit_time
+                                    ? new Date(transactionDetails.transaction_data.scheduled_exit_time).toLocaleString()
                                     : "Not Available"}
                             </TextComponent>
                         </View>
