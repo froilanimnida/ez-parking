@@ -115,6 +115,11 @@ const SlotInfo = () => {
 
     const handleConfirmBooking = async () => {
         setIsSubmitting(true);
+        if (day <= 0 || month <= 0 || year <= 0 || day > 31 || month > 12 || year < new Date().getFullYear()) {
+            alert("Please enter a valid date.");
+            setIsSubmitting(false);
+            return;
+        }
         const result = await createTransaction({
             duration: duration,
             duration_type: pricingType,
@@ -203,27 +208,42 @@ const SlotInfo = () => {
                         <View style={styles.formRow}>
                             <TextComponent style={styles.formLabel}>Schedule Entry Time </TextComponent>
                             <View style={{ flexDirection: "row", gap: 8 }}>
-                                <TextInputComponent
-                                    customStyles={styles.input}
-                                    keyboardType="number-pad"
-                                    value={String(duration)}
-                                    onChangeText={(val) => setDay(Number(val))}
-                                    placeholder="0"
-                                />
-                                <TextInputComponent
-                                    customStyles={styles.input}
-                                    keyboardType="number-pad"
-                                    value={String(duration)}
-                                    onChangeText={(val) => setMonth(Number(val))}
-                                    placeholder="0"
-                                />
-                                <TextInputComponent
-                                    customStyles={styles.input}
-                                    keyboardType="number-pad"
-                                    value={String(duration)}
-                                    onChangeText={(val) => setYear(Number(val))}
-                                    placeholder="0"
-                                />
+                                <View style={{ flex: 1 }}>
+                                    <TextComponent style={styles.formLabelSmall}>Day</TextComponent>
+                                    <SelectComponent
+                                        items={Array.from({ length: 31 }, (_, i) => ({
+                                            label: String(i + 1),
+                                            value: String(i + 1),
+                                        }))}
+                                        onValueChange={(val) => setDay(Number(val))}
+                                        selectedValue={String(day)}
+                                        placeholder="Select Day"
+                                    />
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <TextComponent style={styles.formLabelSmall}>Month</TextComponent>
+                                    <SelectComponent
+                                        items={Array.from({ length: 12 }, (_, i) => ({
+                                            label: String(i + 1),
+                                            value: String(i + 1),
+                                        }))}
+                                        onValueChange={(val) => setMonth(Number(val))}
+                                        selectedValue={String(month)}
+                                        placeholder="Select Month"
+                                    />
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <TextComponent style={styles.formLabelSmall}>Year</TextComponent>
+                                    <SelectComponent
+                                        items={Array.from({ length: 10 }, (_, i) => ({
+                                            label: String(new Date().getFullYear() + i),
+                                            value: String(new Date().getFullYear() + i),
+                                        }))}
+                                        onValueChange={(val) => setYear(Number(val))}
+                                        selectedValue={String(year)}
+                                        placeholder="Select Year"
+                                    />
+                                </View>
                             </View>
                         </View>
 
