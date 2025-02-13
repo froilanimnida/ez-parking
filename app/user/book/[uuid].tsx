@@ -11,7 +11,7 @@ import TextComponent from "@/components/TextComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import { useLocalSearchParams } from "expo-router";
 import PlatformType from "@/lib/platform";
-import { fetchEstablishmentData, fetchSlots } from "@/lib/api/fetchSlots";
+import { fetchEstablishmentData } from "@/lib/api/fetchSlots";
 import SlotCard from "@/components/SlotCard";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 
@@ -144,7 +144,6 @@ const EstablishmentView = () => {
                         </View>
                     </CardComponent>
 
-                    {/* Map with Navigation Links */}
                     <View style={[styles.card, { height: 400 }]}>
                         <View style={styles.mapHeader}>
                             <TextComponent style={styles.sectionTitle}>Location</TextComponent>

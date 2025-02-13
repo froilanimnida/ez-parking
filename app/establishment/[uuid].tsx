@@ -18,6 +18,7 @@ import { useLocalSearchParams } from "expo-router";
 import { fetchEstablishmentInfo } from "@/lib/api/establishment";
 import LinkComponent from "@/components/LinkComponent";
 import ButtonComponent from "@/components/ButtonComponent";
+import { normalMapURL, satelliteMapURL, threeDimensionalMapURL } from "@/lib/helper/mapViewFunction";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;
@@ -66,14 +67,31 @@ const EstablishmentOverview = () => {
         );
     }
 
-    const mapUrl = `https://maps.google.com/maps?width=100%25&height=600&hl=en&q=${
-        establishment.establishment.latitude
-    },${establishment.establishment.longitude}+(${encodeURIComponent(
+    const mapUrl = normalMapURL(
+        establishment.establishment.latitude,
+        establishment.establishment.longitude,
         establishment.establishment.name
-    )})&t=&z=14&ie=UTF8&iwloc=B&output=embed`;
+    );
+
+    const mapUrlSat = satelliteMapURL(
+        establishment.establishment.latitude,
+        establishment.establishment.longitude,
+        establishment.establishment.name
+    );
+
+    const mapUrl3D = threeDimensionalMapURL(
+        establishment.establishment.latitude,
+        establishment.establishment.longitude,
+        establishment.establishment.name
+    );
 
     return (
         <ResponsiveContainer>
+            <LinkComponent
+                style={{ width: "auto", marginBottom: 16 }}
+                href="../establishment"
+                label="← Back to Search"
+            />
             <CardComponent customStyles={styles.card} header={establishment.establishment.name}>
                 <View style={styles.header}>
                     <View>
@@ -128,7 +146,7 @@ const EstablishmentOverview = () => {
                 </View>
             </CardComponent>
 
-            <CardComponent customStyles={[styles.card, styles.mapCard]} header="Location">
+            <CardComponent customStyles={styles.card} header="Location">
                 <View style={styles.mapHeader}>
                     <View style={styles.mapLinks}>
                         <ButtonComponent
@@ -151,16 +169,27 @@ const EstablishmentOverview = () => {
                 </View>
                 <View style={styles.mapContainer}>
                     {PlatformType() !== "web" ? (
-                        <WebView source={{ uri: mapUrl }} style={styles.map} />
+                        <WebView source={{ uri: mapUrl }} />
                     ) : (
-                        <iframe
-                            frameBorder="0"
-                            marginHeight={0}
-                            marginWidth={0}
-                            title={establishment.establishment.name}
-                            src={mapUrl}
-                            style={styles.map}
-                        />
+                        <iframe title={establishment.establishment.name} src={mapUrl} height={500} />
+                    )}
+                </View>
+            </CardComponent>
+            <CardComponent customStyles={styles.card} header="Location | Birds Eye View">
+                <View style={styles.mapContainer}>
+                    {PlatformType() !== "web" ? (
+                        <WebView source={{ uri: mapUrlSat }} />
+                    ) : (
+                        <iframe title={establishment.establishment.name} src={mapUrlSat} height={500} />
+                    )}
+                </View>
+            </CardComponent>
+            <CardComponent customStyles={styles.card} header="Location | 3D View">
+                <View style={styles.mapContainer}>
+                    {PlatformType() !== "web" ? (
+                        <WebView source={{ uri: mapUrl3D }} />
+                    ) : (
+                        <iframe title={establishment.establishment.name} src={mapUrl3D} height={500} />
                     )}
                 </View>
             </CardComponent>
@@ -257,9 +286,6 @@ const styles = StyleSheet.create({
         color: "#6B7280",
         fontSize: 12,
     },
-    mapCard: {
-        height: 400,
-    },
     mapHeader: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -274,10 +300,6 @@ const styles = StyleSheet.create({
     },
     mapContainer: {
         flex: 1,
-    },
-    map: {
-        width: "100%",
-        height: "100%",
     },
     operatingHours: {
         color: "#6B7280",

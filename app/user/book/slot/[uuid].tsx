@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Pressable } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Address } from "@/lib/models/address";
 import { ParkingEstablishment } from "@/lib/models/parking-establishment";
 import { OperatingHour } from "@/lib/models/operating-hour";
 import { PaymentMethod } from "@/lib/models/payment-method";
-import { PricingPlan } from "@/lib/models/pricing-plan";
 import { ParkingSlot } from "@/lib/models/parking-slot";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import LinkComponent from "@/components/LinkComponent";
 import CardComponent from "@/components/CardComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
@@ -17,6 +16,7 @@ import SelectComponent from "@/components/SelectComponent";
 import CheckboxComponent from "@/components/CheckboxComponent";
 import { checkoutTransaction, createTransaction } from "@/lib/api/transaction";
 import ButtonComponent from "@/components/ButtonComponent";
+import { calculatePrice } from "@/lib/helper/calculatePrice";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;
@@ -58,7 +58,6 @@ const SlotInfo = () => {
 
         return plans;
     };
-    const createNewTransaction = () => {};
     const getCurrentRate = () => {
         if (!transactionCheckoutInfo?.slot_info) return 0;
 
@@ -95,12 +94,24 @@ const SlotInfo = () => {
         };
         checkoutInfo();
         setLoading(false);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [uuid, establishment_uuid]);
+    useEffect(() => {
+        if (transactionCheckoutInfo?.slot_info) {
+            const price = calculatePrice({
+                base_price_per_hour: transactionCheckoutInfo.slot_info.base_price_per_hour,
+                base_price_per_day: transactionCheckoutInfo.slot_info.base_price_per_day,
+                base_price_per_month: transactionCheckoutInfo.slot_info.base_price_per_month,
+                is_premium: transactionCheckoutInfo.slot_info.is_premium,
+                duration: duration,
+                duration_type: pricingType,
+            });
+            setTotalPrice(price);
+        }
+    }, [duration, pricingType, transactionCheckoutInfo?.slot_info]);
 
-    const handleConfirmBooking = () => {
+    const handleConfirmBooking = async () => {
         setIsSubmitting(true);
-        const result = createTransaction({
+        const result = await createTransaction({
             duration: duration,
             duration_type: pricingType,
             scheduled_entry_time: new Date().toISOString(),
@@ -109,8 +120,9 @@ const SlotInfo = () => {
             slot_uuid: uuid,
         });
         setIsSubmitting(false);
-        if (!transactionCheckoutInfo?.has_ongoing_transaction) {
+        if (!transactionCheckoutInfo?.has_ongoing_transaction && result.status === 201) {
             alert("Booking confirmed!");
+            router.replace("/user");
         } else {
             alert("You have an ongoing transaction already.");
         }
@@ -133,11 +145,7 @@ const SlotInfo = () => {
                         subHeader="Please review your booking details below"
                     ></CardComponent>
 
-                    <CardComponent
-                        customStyles={styles.card}
-                        header="Slot Information"
-                        subHeader={transactionCheckoutInfo?.slot_info.slot_code}
-                    >
+                    <CardComponent customStyles={styles.card} header="Slot Information">
                         <View style={styles.infoGrid}>
                             <View style={styles.infoBlock}>
                                 <TextComponent style={styles.subheading}>Establishment Details</TextComponent>
@@ -167,7 +175,7 @@ const SlotInfo = () => {
                     </CardComponent>
 
                     {/* Booking Form */}
-                    <View style={styles.card}>
+                    <CardComponent header="Booking Details">
                         {/* Duration */}
                         <View style={styles.formRow}>
                             <TextComponent style={styles.formLabel}>
@@ -187,12 +195,10 @@ const SlotInfo = () => {
                             />
                         </View>
 
-                        {/* Pricing Type */}
                         <View style={styles.formRow}>
-                            <TextComponent style={styles.formLabel}>Pricing Type</TextComponent>
-                            <View style={styles.selectBox}>
+                            <View>
                                 <TextComponent style={styles.formLabel}>
-                                    Current: {pricingType.charAt(0).toUpperCase() + pricingType.slice(1)}
+                                    Current Pricing Type: {pricingType.charAt(0).toUpperCase() + pricingType.slice(1)}
                                 </TextComponent>
                                 <View style={{ marginTop: 8 }}>
                                     <SelectComponent
@@ -205,7 +211,6 @@ const SlotInfo = () => {
                             </View>
                         </View>
 
-                        {/* Pricing Summary */}
                         <View>
                             <TextComponent style={styles.summaryText}>
                                 Base Rate: ₱{getCurrentRate().toFixed(2)}/
@@ -221,14 +226,11 @@ const SlotInfo = () => {
                                     {pricingType === "hourly" ? "hours" : pricingType === "daily" ? "days" : "months"}
                                 </TextComponent>
                             </View>
-                            <View style={styles.divider} />
                             <View style={styles.summaryRow}>
-                                <TextComponent style={[styles.summaryLabel, { fontWeight: "600" }]}>
+                                <TextComponent bold variant="h6">
                                     Total Amount:
                                 </TextComponent>
-                                <TextComponent style={[styles.summaryValue, { fontWeight: "600" }]}>
-                                    ₱{(getCurrentRate() * duration).toFixed(2)}
-                                </TextComponent>
+                                <TextComponent>₱{totalPrice.toFixed(2)}</TextComponent>
                             </View>
                         </View>
 
@@ -245,9 +247,8 @@ const SlotInfo = () => {
                         incurred during my stay if the establishment can prove that I am responsible."
                         />
 
-                        {/* Confirm Booking Button */}
-
                         <ButtonComponent
+                            style={styles.confirmButton}
                             title={
                                 transactionCheckoutInfo?.has_ongoing_transaction
                                     ? "You have an ongoing transaction"
@@ -255,12 +256,18 @@ const SlotInfo = () => {
                                     ? "Confirming..."
                                     : "Confirm Booking"
                             }
-                            disabled={transactionCheckoutInfo?.has_ongoing_transaction || isSubmitting}
+                            disabled={
+                                transactionCheckoutInfo?.has_ongoing_transaction ||
+                                isSubmitting ||
+                                !agreed ||
+                                !terms ||
+                                duration <= 0
+                            }
                             onPress={() => {
                                 handleConfirmBooking();
                             }}
                         />
-                    </View>
+                    </CardComponent>
                 </>
             )}
         </ResponsiveContainer>
@@ -329,19 +336,12 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     input: {
-        backgroundColor: "#ffffff",
         borderWidth: 1,
         borderRadius: 4,
         paddingHorizontal: 12,
         paddingVertical: 8,
         fontSize: 14,
         color: "#374151",
-    },
-    selectBox: {
-        backgroundColor: "#f9fafb",
-        borderColor: "#d1d5db",
-        borderWidth: 1,
-        borderRadius: 4,
     },
     planOption: {
         backgroundColor: "#ffffff",
@@ -378,11 +378,6 @@ const styles = StyleSheet.create({
         color: "#374151",
         fontSize: 14,
     },
-    divider: {
-        borderBottomWidth: 1,
-        borderBottomColor: "#e5e7eb",
-        marginVertical: 8,
-    },
     checkboxRow: {
         flexDirection: "row",
         alignItems: "flex-start",
@@ -410,12 +405,7 @@ const styles = StyleSheet.create({
         color: "#6b7280",
     },
     confirmButton: {
-        flexDirection: "row",
-        backgroundColor: "#4f46e5",
-        borderRadius: 4,
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 12,
+        marginVertical: 16,
     },
     confirmButtonText: {
         color: "#ffffff",

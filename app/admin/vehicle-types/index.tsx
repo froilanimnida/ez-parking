@@ -1,6 +1,5 @@
 import { StyleSheet, View } from "react-native";
 import React, { useEffect, useState } from "react";
-import axiosInstance from "@/lib/axiosInstance";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import ButtonComponent from "@/components/ButtonComponent";
@@ -8,7 +7,6 @@ import TextInputComponent from "@/components/TextInputComponent";
 import SelectComponent from "@/components/SelectComponent";
 import CheckboxComponent from "@/components/CheckboxComponent";
 import type { VehicleType } from "@/lib/models/vehicle-types";
-import { FlashList } from "@shopify/flash-list";
 import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { getVehicleTypes } from "@/lib/api/admin";
@@ -43,6 +41,7 @@ const VehicleTypes = () => {
     };
     return (
         <ResponsiveContainer>
+            <LinkComponent style={{ width: "auto", marginBottom: 16 }} href="../admin" label="← Back to Dashboard" />
             <TextComponent bold variant="h1" style={styles.header}>
                 Vehicle Types
             </TextComponent>
