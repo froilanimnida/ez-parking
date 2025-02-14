@@ -13,9 +13,11 @@ interface ParkingOwnerInfoCardStateProps {
     suffix: string;
     email: string;
     phone_number: string;
+    name: string;
     company_reg_number: string;
     tin: string;
     handleParkingOwnerInfo: (key: string, value: any) => void;
+    handleParkingEstablishmentDataChange: (key: string, value: any) => void;
     handleCompanyInfoChange: (key: string, value: any) => void;
 }
 
@@ -30,7 +32,9 @@ const ParkingOwnerInfoCard = ({
     email,
     phone_number,
     tin,
+    name,
     handleParkingOwnerInfo,
+    handleParkingEstablishmentDataChange,
     handleCompanyInfoChange,
 }: ParkingOwnerInfoCardStateProps) => {
     return (
@@ -110,8 +114,8 @@ const ParkingOwnerInfoCard = ({
 
                 <TextInputComponent
                     placeholder="Parking Establishment Name"
-                    value={company_name}
-                    onChangeText={(value) => handleCompanyInfoChange("name", value)}
+                    value={name}
+                    onChangeText={(value) => handleParkingEstablishmentDataChange("name", value)}
                 />
             </View>
         </CardComponent>

@@ -18,11 +18,18 @@ interface OperatingSchedule {
 interface Props {
     is24_7: boolean;
     operatingHours: OperatingSchedule;
-    onIs24_7Change: (value: boolean) => void;
+    onIs24_7Change: (key: string, value: any) => void;
     onOperatingHoursChange: (day: string, field: keyof OperatingHours, value: string | boolean) => void;
+    onParkingDataChange: (key: string, value: any) => void;
 }
 
-const OperatingHoursForm: React.FC<Props> = ({ is24_7, operatingHours, onIs24_7Change, onOperatingHoursChange }) => {
+const OperatingHoursForm: React.FC<Props> = ({
+    is24_7,
+    operatingHours,
+    onIs24_7Change,
+    onOperatingHoursChange,
+    onParkingDataChange,
+}) => {
     const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
     const formatDayName = (day: string) => {
@@ -33,7 +40,14 @@ const OperatingHoursForm: React.FC<Props> = ({ is24_7, operatingHours, onIs24_7C
         <CardComponent header="Operating Hours" subHeader="Set your business hours" customStyles={{ width: "95%" }}>
             <View style={styles.container}>
                 <View style={styles.is24_7Container}>
-                    <CheckboxComponent placeholder="Open 24/7" value={is24_7} onValueChange={onIs24_7Change} />
+                    <CheckboxComponent
+                        placeholder="Open 24/7"
+                        value={is24_7}
+                        onValueChange={() => {
+                            onParkingDataChange("is24_7", !is24_7);
+                            onIs24_7Change("operating_hours", { ...operatingHours, enabled: true });
+                        }}
+                    />
                 </View>
 
                 {!is24_7 && (

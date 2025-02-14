@@ -1,5 +1,5 @@
 import { StyleSheet, View } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ButtonComponent from "@/components/ButtonComponent";
 import * as DocumentPicker from "expo-document-picker";
 import TextInputComponent from "@/components/TextInputComponent";
@@ -25,6 +25,7 @@ import ParkingOwnerInfoCard from "@/components/auth/parking-manager/ParkingOwner
 import FacilitiesAndAmenitiesCard from "@/components/auth/parking-manager/FacilitiesAndAmenitiesCard";
 import { ParkingOperatingHoursData } from "@/lib/models/parkingManagerSignUpTypes";
 import type { DocumentInfo, Documents } from "@/lib/types/documents";
+import { Image } from "react-native";
 import InfoContainer from "@/components/auth/parking-manager/InfoContainer";
 
 const ParkingManagerSignUp = () => {
@@ -69,7 +70,6 @@ const ParkingManagerSignUp = () => {
         nearby_landmarks: "",
     });
 
-    const [is24_7, setIs24_7] = useState(false);
     const [operatingHours, setOperatingHours] = useState({
         monday: { enabled: false, open: "", close: "" },
         tuesday: { enabled: false, open: "", close: "" },
@@ -108,8 +108,11 @@ const ParkingManagerSignUp = () => {
         setAddressData({ ...addressData, [key]: value });
     };
 
-    const handleParkingEstablishmentData = (key: string, value: string) => {
-        setParkingEstablishmentData({ ...parkingEstablishmentData, [key]: value });
+    const handleParkingEstablishmentData = (key: string, value: string | boolean) => {
+        setParkingEstablishmentData((prev) => ({
+            ...prev,
+            [key]: value,
+        }));
     };
 
     const handleOperatingHoursData = (day: string, field: keyof ParkingOperatingHoursData, value: string | boolean) => {
@@ -157,39 +160,37 @@ const ParkingManagerSignUp = () => {
             let result;
 
             if (type === "parkingPhotos") {
-                // Allow multiple image selection for parking photos
+                // Handle multiple photo selection
                 result = await DocumentPicker.getDocumentAsync({
                     type: ["image/*"],
                     multiple: true,
                     copyToCacheDirectory: true,
                 });
-            } else {
-                // Single file selection for other documents
-                result = await DocumentPicker.getDocumentAsync({
-                    type: ["application/pdf", "image/*"],
-                    copyToCacheDirectory: true,
-                });
+
+                if (!result.canceled) {
+                    const newPhotos = result.assets.map((asset) => ({
+                        name: asset.name,
+                        uri: asset.uri,
+                        type: asset.mimeType || "application/octet-stream",
+                        size: asset.size || 0,
+                    }));
+
+                    // Single update for photos
+                    setDocuments((prev) => ({
+                        ...prev,
+                        parkingPhotos: [...(prev.parkingPhotos || []), ...newPhotos],
+                    }));
+                }
+                return; // Early return after handling photos
             }
 
-            if (result.canceled) {
-                return;
-            }
+            // Handle single file selection for other documents
+            result = await DocumentPicker.getDocumentAsync({
+                type: ["application/pdf", "image/*"],
+                copyToCacheDirectory: true,
+            });
 
-            if (type === "parkingPhotos") {
-                // Handle multiple files for parking photos
-                const newPhotos = result.assets.map((asset) => ({
-                    name: asset.name,
-                    uri: asset.uri,
-                    type: asset.mimeType || "application/octet-stream",
-                    size: asset.size || 0,
-                }));
-
-                setDocuments((prev) => ({
-                    ...prev,
-                    [type]: [...prev.parkingPhotos, ...newPhotos],
-                }));
-            } else {
-                // Handle single file for other document types
+            if (!result.canceled) {
                 const file = result.assets[0];
                 const documentInfo: DocumentInfo = {
                     name: file.name,
@@ -198,7 +199,6 @@ const ParkingManagerSignUp = () => {
                     size: file.size || 0,
                 };
 
-                // Validate file size (10MB limit)
                 if (documentInfo.size > 10 * 1024 * 1024) {
                     alert("File size must be less than 10MB");
                     return;
@@ -231,6 +231,41 @@ const ParkingManagerSignUp = () => {
     };
 
     const [agreed, setAgreed] = useState(false);
+    useEffect(() => {
+        const timestamp = new Date().toLocaleTimeString();
+        console.group(`Form Update [${timestamp}]`);
+
+        console.log("Changed Fields:", {
+            userInfo: userInformation !== undefined,
+            company: companyProfile !== undefined,
+            address: addressData !== undefined,
+            establishment: parkingEstablishmentData !== undefined,
+            hours: operatingHours !== undefined,
+            payment: paymentMethodData !== undefined,
+            docs: documents !== undefined,
+        });
+
+        // Log detailed state
+        console.log("Current Form State:", {
+            userInformation,
+            companyProfile,
+            addressData,
+            parkingEstablishmentData,
+            operatingHours,
+            paymentMethodData,
+            documents,
+        });
+
+        console.groupEnd();
+    }, [
+        userInformation,
+        companyProfile,
+        addressData,
+        parkingEstablishmentData,
+        operatingHours,
+        paymentMethodData,
+        documents,
+    ]);
     const handleSubmit = async () => {
         setIsSubmitting(true);
         try {
@@ -274,6 +309,8 @@ const ParkingManagerSignUp = () => {
                     tin={companyProfile.tin}
                     handleCompanyInfoChange={handleCompanyInfoChange}
                     handleParkingOwnerInfo={handleParkingOwnerInfo}
+                    handleParkingEstablishmentDataChange={handleParkingEstablishmentData}
+                    name={parkingEstablishmentData.name}
                 />
 
                 <CardComponent
@@ -357,7 +394,7 @@ const ParkingManagerSignUp = () => {
                             placeholder="Landmarks: e.g., near a mall, beside a church"
                             value={parkingEstablishmentData.nearby_landmarks}
                             onChangeText={(value) =>
-                                setParkingEstablishmentData((prev) => ({ ...prev, landmarks: value }))
+                                setParkingEstablishmentData((prev) => ({ ...prev, nearby_landmarks: value }))
                             }
                             multiline
                             numberOfLines={3}
@@ -378,10 +415,11 @@ const ParkingManagerSignUp = () => {
                 />
 
                 <OperatingHoursForm
-                    is24_7={is24_7}
+                    is24_7={parkingEstablishmentData.is24_7}
                     operatingHours={operatingHours}
-                    onIs24_7Change={setIs24_7}
+                    onIs24_7Change={handleParkingEstablishmentData}
                     onOperatingHoursChange={handleOperatingHoursData}
+                    onParkingDataChange={handleParkingEstablishmentData}
                 />
 
                 <PaymentMethods
@@ -408,25 +446,48 @@ const ParkingManagerSignUp = () => {
                                 </TextComponent>
 
                                 {file ? (
-                                    <View style={styles.filePreview}>
-                                        <View style={styles.fileInfo}>
-                                            <MaterialCommunityIcons
-                                                name={file.type?.includes("image") ? "image" : "file-document"}
-                                                size={24}
-                                                color="#4B5563"
-                                            />
-                                            <TextComponent>
-                                                {type === "parkingPhotos"
-                                                    ? `${(file as DocumentInfo[]).length} photos selected`
-                                                    : (file as DocumentInfo).name}
-                                            </TextComponent>
+                                    type === "parkingPhotos" ? (
+                                        <View style={styles.photoSection}>
+                                            <View style={styles.photoGrid}>
+                                                {(file as DocumentInfo[]).map((photo, index) => (
+                                                    <View key={index} style={styles.photoPreview}>
+                                                        <Image
+                                                            source={{ uri: photo.uri }}
+                                                            style={styles.photoThumbnail}
+                                                        />
+                                                    </View>
+                                                ))}
+                                            </View>
+                                            <View style={styles.photoActions}>
+                                                <ButtonComponent
+                                                    title="Add More Photos"
+                                                    onPress={() => handleDocumentPick("parkingPhotos")}
+                                                    variant="primary"
+                                                />
+                                                <ButtonComponent
+                                                    title="Remove All"
+                                                    variant="destructive"
+                                                    onPress={() => handleRemoveDocument("parkingPhotos")}
+                                                />
+                                            </View>
                                         </View>
-                                        <ButtonComponent
-                                            title="Remove"
-                                            onPress={() => handleRemoveDocument(type as keyof Documents)}
-                                            style={styles.removeButton}
-                                        />
-                                    </View>
+                                    ) : (
+                                        <View style={styles.filePreview}>
+                                            <View style={styles.fileInfo}>
+                                                <MaterialCommunityIcons
+                                                    name={file.type?.includes("image") ? "image" : "file-document"}
+                                                    size={24}
+                                                    color="#4B5563"
+                                                />
+                                                <TextComponent>{(file as DocumentInfo).name}</TextComponent>
+                                            </View>
+                                            <ButtonComponent
+                                                title="Remove"
+                                                onPress={() => handleRemoveDocument(type as keyof Documents)}
+                                                style={styles.removeButton}
+                                            />
+                                        </View>
+                                    )
                                 ) : (
                                     <View style={styles.uploadArea}>
                                         <MaterialCommunityIcons name="upload" size={24} color="#6B7280" />
@@ -480,6 +541,36 @@ const styles = StyleSheet.create({
         width: "100%",
         paddingBottom: 16,
         alignItems: "center",
+    },
+    photoSection: {
+        width: "100%",
+        gap: 12,
+    },
+    photoGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 8,
+        marginTop: 8,
+    },
+    photoPreview: {
+        width: 80,
+        height: 80,
+        borderRadius: 4,
+        overflow: "hidden",
+        backgroundColor: "#F3F4F6",
+    },
+    photoThumbnail: {
+        width: "100%",
+        height: "100%",
+        resizeMode: "cover",
+    },
+    photoActions: {
+        flexDirection: "row",
+        gap: 8,
+        marginTop: 8,
+    },
+    addMoreButton: {
+        flex: 1,
     },
     submitContainer: {
         width: "95%",
