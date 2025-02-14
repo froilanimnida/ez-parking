@@ -26,18 +26,37 @@ export async function getAuthHeaders() {
 }
 
 export async function isAuthenticated(): Promise<{ loggedIn: boolean; role: string }> {
-    if (authState !== null) {
-        return authState;
-    }
-
     try {
+        authState = null;
+
+        if (PlatformType() === "web") {
+            try {
+                const response = await axiosInstance.post("/auth/verify-token");
+                if (response.data?.role) {
+                    authState = { loggedIn: true, role: response.data.role as string };
+                    return authState;
+                }
+            } catch (error) {
+                authState = { loggedIn: false, role: "" };
+                return authState;
+            }
+        }
+
+        // Mobile platform handling
         const authHeaders = await getAuthHeaders();
         if (!authHeaders?.access_token_cookie) {
             authState = { loggedIn: false, role: "" };
             return authState;
         }
 
-        const response = await axiosInstance.post("/auth/verify-token", {}, { headers: authHeaders });
+        const response = await axiosInstance.post(
+            "/auth/verify-token",
+            {},
+            {
+                headers: authHeaders,
+            }
+        );
+
         if (response.data?.role) {
             authState = { loggedIn: true, role: response.data.role as string };
             return authState;
@@ -46,6 +65,7 @@ export async function isAuthenticated(): Promise<{ loggedIn: boolean; role: stri
         authState = { loggedIn: false, role: "" };
         return authState;
     } catch (error) {
+        console.error("Auth check error:", error);
         authState = { loggedIn: false, role: "" };
         return authState;
     }

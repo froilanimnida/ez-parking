@@ -6,11 +6,9 @@ import CardComponent from "@/components/CardComponent";
 import calculateDistance from "@/lib/function/calculateDistance";
 import LinkComponent from "./LinkComponent";
 import type { ParkingEstablishment } from "@/lib/models/parking-establishment";
-import type { PricingPlan } from "@/lib/models/pricing-plan";
 
 interface EstablishmentItem {
     establishment: ParkingEstablishment;
-    // pricing_plans: PricingPlan[];
 }
 
 interface EstablishmentItemProps extends EstablishmentItem {

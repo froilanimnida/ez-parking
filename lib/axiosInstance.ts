@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type AxiosError } from "axios";
 import * as SecureStore from "expo-secure-store";
 import PlatformType from "./platform";
 import { router, type RelativePathString } from "expo-router";
@@ -78,9 +78,6 @@ axiosInstance.interceptors.request.use(
         return value;
     },
     async (error) => {
-        if (error.response?.status === 401) {
-            router.replace("/auth/login");
-        }
         return Promise.reject(error);
     }
 );
@@ -119,10 +116,12 @@ axiosInstance.interceptors.response.use(
         }
         return response;
     },
-    (error) => {
-        if (error.status === 401) {
-            router.replace("/auth/login");
-        }
+    (error: AxiosError) => {
+        // console.log("Current route:", currentPath);
+        // console.log("Requesting route:", error.config?.url);
+        // if (error.status === 401 &&) {
+        //     router.replace("/auth/login");
+        // }
         if (error.response?.status === 422) {
             const apiError = error.response.data as ApiValidationError;
             const messages: string[] = [];

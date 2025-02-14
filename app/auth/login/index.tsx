@@ -11,6 +11,7 @@ import { router, useLocalSearchParams, type ExternalPathString, type RelativePat
 import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { loginUser, verifyOTP } from "@/lib/api/auth";
+import LoadingComponent from "@/components/reusable/LoadingComponent";
 
 const LoginForm = () => {
     const [showOtpForm, setShowOtpForm] = useState(false);
@@ -33,17 +34,31 @@ const LoginForm = () => {
     }, [timer]);
 
     const nextParams = local.next as RelativePathString | ExternalPathString;
+    const [isChecking, setIsChecking] = useState(true);
     useEffect(() => {
         const checkAuthStatus = async () => {
-            const loggedIn = await isAuthenticated();
-            if (nextParams && loggedIn && loggedIn.role === "user") {
-                console.log("Redirecting to:", nextParams);
-                router.replace(nextParams);
+            try {
+                const auth = await isAuthenticated();
+
+                if (auth.loggedIn && auth.role) {
+                    if (nextParams && auth.role === "user") {
+                        router.replace(nextParams);
+                        return;
+                    }
+                    router.replace(auth.role.replace("_", "-") as ExternalPathString);
+                }
+            } catch (error) {
+                console.error("Auth check failed:", error);
+            } finally {
+                setIsChecking(false);
             }
         };
+
         checkAuthStatus();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        return () => {
+            setIsChecking(false);
+        };
+    }, [nextParams]);
 
     const handleOtpOnChange = (otp: string) => {
         if (otp.length === 6) {
@@ -71,13 +86,15 @@ const LoginForm = () => {
         try {
             const result = await verifyOTP(email, otp, rememberMe);
             const role = result.data.role as string;
-            const nextParams = local.next as RelativePathString | ExternalPathString;
+
             alert("Logged in successfully.");
+
             if (nextParams && role === "user") {
                 router.replace(nextParams);
+                return;
             }
+
             router.replace(role.replace("_", "-") as ExternalPathString);
-            setLoggingIn(false);
         } catch (error) {
             console.error("Login error:", error);
             if (error instanceof AxiosError) {
@@ -86,73 +103,77 @@ const LoginForm = () => {
             } else {
                 alert("An unexpected error occurred");
             }
+        } finally {
             setLoggingIn(false);
         }
     };
 
     return (
         <ResponsiveContainer>
-            <View style={styles.body}>
-                {!showOtpForm ? (
-                    <View style={styles.loginForm}>
-                        <CardComponent
-                            header="Welcome back"
-                            subHeader="Please enter your registered email address"
-                            customStyles={{ gap: 16 }}
-                        >
-                            <TextInputComponent
-                                customStyles={styles.input}
-                                placeholder="Email address"
-                                keyboardType="email-address"
-                                value={email}
-                                onChangeText={setEmail}
-                                autoCapitalize="none"
-                            />
-                            <View style={styles.checkbox}>
-                                <Checkbox onValueChange={setRememberMe} value={rememberMe} color="#4F46E5" />
-                                <TextComponent>Remember me</TextComponent>
-                            </View>
-                            <ButtonComponent
-                                title="Continue"
-                                onPress={handleLogin}
-                                variant="primary"
-                                loading={loggingIn}
-                                disabled={!isEmailValid(email) || loggingIn}
-                            />
-                            <LinkComponent href="./sign-up" label="Create user account" variant="text" />
-                        </CardComponent>
-                    </View>
-                ) : (
-                    <View style={styles.loginForm}>
-                        <CardComponent
-                            header="Verify your email"
-                            subHeader={`Enter the 6-digit code sent to ${email}`}
-                            children={
-                                <>
-                                    <View style={styles.otpContainer}>
-                                        <TextInputComponent
-                                            customStyles={styles.otpInput}
-                                            maxLength={6}
-                                            keyboardType="number-pad"
-                                            onChangeText={handleOtpOnChange}
-                                        />
-                                    </View>
+            {isChecking && <LoadingComponent text="Checking authentication status..." />}
+            {!isChecking && (
+                <View style={styles.body}>
+                    {!showOtpForm ? (
+                        <View style={styles.loginForm}>
+                            <CardComponent
+                                header="Welcome back"
+                                subHeader="Please enter your registered email address"
+                                customStyles={{ gap: 16 }}
+                            >
+                                <TextInputComponent
+                                    customStyles={styles.input}
+                                    placeholder="Email address"
+                                    keyboardType="email-address"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    autoCapitalize="none"
+                                />
+                                <View style={styles.checkbox}>
+                                    <Checkbox onValueChange={setRememberMe} value={rememberMe} color="#4F46E5" />
+                                    <TextComponent>Remember me</TextComponent>
+                                </View>
+                                <ButtonComponent
+                                    title="Continue"
+                                    onPress={handleLogin}
+                                    variant="primary"
+                                    loading={loggingIn}
+                                    disabled={!isEmailValid(email) || loggingIn}
+                                />
+                                <LinkComponent href="./sign-up" label="Create user account" variant="text" />
+                            </CardComponent>
+                        </View>
+                    ) : (
+                        <View style={styles.loginForm}>
+                            <CardComponent
+                                header="Verify your email"
+                                subHeader={`Enter the 6-digit code sent to ${email}`}
+                                children={
+                                    <>
+                                        <View style={styles.otpContainer}>
+                                            <TextInputComponent
+                                                customStyles={styles.otpInput}
+                                                maxLength={6}
+                                                keyboardType="number-pad"
+                                                onChangeText={handleOtpOnChange}
+                                            />
+                                        </View>
 
-                                    <TextComponent style={styles.timerText}>
-                                        Get new code in {timer} seconds
-                                    </TextComponent>
-                                    <ButtonComponent
-                                        title="Resend Code"
-                                        onPress={startTimer}
-                                        variant="primary"
-                                        disabled={timer > 0}
-                                    />
-                                </>
-                            }
-                        />
-                    </View>
-                )}
-            </View>
+                                        <TextComponent style={styles.timerText}>
+                                            Get new code in {timer} seconds
+                                        </TextComponent>
+                                        <ButtonComponent
+                                            title="Resend Code"
+                                            onPress={startTimer}
+                                            variant="primary"
+                                            disabled={timer > 0}
+                                        />
+                                    </>
+                                }
+                            />
+                        </View>
+                    )}
+                </View>
+            )}
         </ResponsiveContainer>
     );
 };

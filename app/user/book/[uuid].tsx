@@ -47,6 +47,15 @@ const EstablishmentView = () => {
     const [establishmentData, setEstablishmentData] = useState<EstablishmentData | null>(null);
     const [loading, setLoading] = useState(true);
 
+    const pollSlotStatus = async () => {
+        try {
+            const response = await fetchEstablishmentData(uuid);
+            setEstablishmentData(response.data.establishment);
+        } catch (error) {
+            console.error("Error fetching establishment data:", error);
+        }
+    };
+
     useEffect(() => {
         const fetchEstablishment = async () => {
             try {

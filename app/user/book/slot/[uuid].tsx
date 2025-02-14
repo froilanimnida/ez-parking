@@ -43,6 +43,15 @@ const SlotInfo = () => {
     const [day, setDay] = useState(today.getDate());
     const [year, setYear] = useState(today.getFullYear());
     const [pricingType, setPricingType] = useState<"hourly" | "daily" | "monthly">("hourly");
+    const pollSlotStatus = async () => {
+        try {
+            const result = await checkoutTransaction(establishment_uuid, uuid);
+            setTransactionCheckoutInfo(result.data.transaction);
+        } catch {
+            alert("An error occurred while fetching transaction details.");
+            router.reload();
+        }
+    };
 
     const getAvailablePricingPlans = () => {
         if (!transactionCheckoutInfo?.slot_info) return [];
@@ -88,18 +97,36 @@ const SlotInfo = () => {
     const [totalPrice, setTotalPrice] = useState(0);
 
     useEffect(() => {
-        setLoading(true);
+        let timeoutId: NodeJS.Timeout;
+        let mounted = true;
+
         const checkoutInfo = async () => {
             try {
                 const result = await checkoutTransaction(establishment_uuid, uuid);
-                setTransactionCheckoutInfo(result.data.transaction);
+                if (mounted) {
+                    setTransactionCheckoutInfo(result.data.transaction);
+                    setLoading(false);
+                    timeoutId = setTimeout(() => {
+                        pollSlotStatus();
+                    }, 5000);
+                }
             } catch {
-                alert("An error occurred while fetching transaction details.");
-                router.reload();
+                if (mounted) {
+                    alert("An error occurred while fetching transaction details.");
+                    router.reload();
+                }
             }
         };
+
         checkoutInfo();
-        setLoading(false);
+
+        return () => {
+            mounted = false;
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+            setLoading(true);
+        };
     }, [uuid, establishment_uuid]);
     useEffect(() => {
         if (transactionCheckoutInfo?.slot_info) {
@@ -128,6 +155,26 @@ const SlotInfo = () => {
 
         if (selectedDate < today) {
             alert("Please select a future date.");
+            setIsSubmitting(false);
+            return;
+        }
+        if (!agreed) {
+            alert("Please agree to the terms and conditions.");
+            setIsSubmitting(false);
+            return;
+        }
+        if (!terms) {
+            alert("Please agree to the establishment's right to charge for damages.");
+            setIsSubmitting(false);
+            return;
+        }
+        if (duration <= 0) {
+            alert("Please enter a valid duration.");
+            setIsSubmitting(false);
+            return;
+        }
+        if (transactionCheckoutInfo?.slot_info.slot_status !== "open") {
+            alert("The slot is not available for booking.");
             setIsSubmitting(false);
             return;
         }
@@ -324,7 +371,8 @@ const SlotInfo = () => {
                                 isSubmitting ||
                                 !agreed ||
                                 !terms ||
-                                duration <= 0
+                                duration <= 0 ||
+                                transactionCheckoutInfo?.slot_info.slot_status !== "reserved"
                             }
                             onPress={() => {
                                 handleConfirmBooking();

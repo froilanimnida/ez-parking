@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import SlotCard from "@/components/SlotCard";
-import calculateDistance from "@/lib/function/calculateDistance";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import type { OperatingHour } from "@/lib/models/operating-hour";
@@ -39,24 +38,41 @@ const EstablishmentOverview = () => {
     const { uuid } = useLocalSearchParams<{ uuid: string }>();
     const [establishment, setEstablishment] = useState<EstablishmentOverviewResponse | null>(null);
     const [fetching, setIsFetching] = useState(true);
-
     useEffect(() => {
-        (async () => {
-            const fetchEstablishment = async () => {
-                try {
-                    const result = await getEstablishmentInfo(uuid);
+        let mounted = true;
+        let pollInterval: NodeJS.Timeout;
+
+        const fetchEstablishment = async () => {
+            try {
+                const result = await getEstablishmentInfo(uuid);
+                if (mounted) {
                     setEstablishment(result.data.establishment);
-                } catch (error) {
-                    console.error("Error fetching establishment info:", error);
-                } finally {
                     setIsFetching(false);
                 }
-            };
-
-            if (uuid) {
-                fetchEstablishment();
+            } catch (error) {
+                console.error("Error fetching establishment info:", error);
+                if (mounted) {
+                    setIsFetching(false);
+                }
             }
-        })();
+        };
+
+        const startPolling = () => {
+            fetchEstablishment();
+            pollInterval = setInterval(fetchEstablishment, 10000);
+        };
+
+        if (uuid) {
+            startPolling();
+        }
+
+        // Cleanup function
+        return () => {
+            mounted = false;
+            if (pollInterval) {
+                clearInterval(pollInterval);
+            }
+        };
     }, [uuid]);
 
     if (fetching || !establishment) {
