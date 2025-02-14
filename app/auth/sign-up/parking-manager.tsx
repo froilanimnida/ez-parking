@@ -1,8 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import React, { useState } from "react";
 import ButtonComponent from "@/components/ButtonComponent";
-// import LinkComponent from "@/components/LinkComponent";
-// import * as DocumentPicker from "expo-document-picker";
+import * as DocumentPicker from "expo-document-picker";
 import TextInputComponent from "@/components/TextInputComponent";
 import CardComponent from "@/components/CardComponent";
 import SelectComponent from "@/components/SelectComponent";
@@ -25,6 +24,8 @@ import PaymentMethods from "@/components/auth/parking-manager/PaymentMethods";
 import ParkingOwnerInfoCard from "@/components/auth/parking-manager/ParkingOwnerInfoCard";
 import FacilitiesAndAmenitiesCard from "@/components/auth/parking-manager/FacilitiesAndAmenitiesCard";
 import { ParkingOperatingHoursData } from "@/lib/models/parkingManagerSignUpTypes";
+import type { DocumentInfo, Documents } from "@/lib/types/documents";
+import InfoContainer from "@/components/auth/parking-manager/InfoContainer";
 
 const ParkingManagerSignUp = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -86,7 +87,7 @@ const ParkingManagerSignUp = () => {
         other_methods: "",
     });
 
-    let documents = useState({
+    let [documents, setDocuments] = useState<Documents>({
         govId: null,
         parkingPhotos: [],
         proofOfOwnership: null,
@@ -132,12 +133,10 @@ const ParkingManagerSignUp = () => {
         }
 
         try {
-            // const query = `${addressData.street}, ${addressData.city}, Philippines`;
             const response = await fetch(
                 `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
             );
             const data = await response.json();
-
             if (data.length > 0) {
                 const { lat, lon } = data[0];
                 setParkingEstablishmentData((prev) => ({
@@ -153,26 +152,104 @@ const ParkingManagerSignUp = () => {
         }
     };
 
+    const handleDocumentPick = async (type: keyof Documents) => {
+        try {
+            let result;
+
+            if (type === "parkingPhotos") {
+                // Allow multiple image selection for parking photos
+                result = await DocumentPicker.getDocumentAsync({
+                    type: ["image/*"],
+                    multiple: true,
+                    copyToCacheDirectory: true,
+                });
+            } else {
+                // Single file selection for other documents
+                result = await DocumentPicker.getDocumentAsync({
+                    type: ["application/pdf", "image/*"],
+                    copyToCacheDirectory: true,
+                });
+            }
+
+            if (result.canceled) {
+                return;
+            }
+
+            if (type === "parkingPhotos") {
+                // Handle multiple files for parking photos
+                const newPhotos = result.assets.map((asset) => ({
+                    name: asset.name,
+                    uri: asset.uri,
+                    type: asset.mimeType || "application/octet-stream",
+                    size: asset.size || 0,
+                }));
+
+                setDocuments((prev) => ({
+                    ...prev,
+                    [type]: [...prev.parkingPhotos, ...newPhotos],
+                }));
+            } else {
+                // Handle single file for other document types
+                const file = result.assets[0];
+                const documentInfo: DocumentInfo = {
+                    name: file.name,
+                    uri: file.uri,
+                    type: file.mimeType || "application/octet-stream",
+                    size: file.size || 0,
+                };
+
+                // Validate file size (10MB limit)
+                if (documentInfo.size > 10 * 1024 * 1024) {
+                    alert("File size must be less than 10MB");
+                    return;
+                }
+
+                setDocuments((prev) => ({
+                    ...prev,
+                    [type]: documentInfo,
+                }));
+            }
+        } catch (error) {
+            console.error("Error picking document:", error);
+            alert("Error selecting document. Please try again.");
+        }
+    };
+
+    // Update your remove document handler
+    const handleRemoveDocument = (type: keyof Documents) => {
+        if (type === "parkingPhotos") {
+            setDocuments((prev) => ({
+                ...prev,
+                [type]: [],
+            }));
+        } else {
+            setDocuments((prev) => ({
+                ...prev,
+                [type]: null,
+            }));
+        }
+    };
+
     const [agreed, setAgreed] = useState(false);
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         setIsSubmitting(true);
-        parkingManagerSignUp(
-            userInformation,
-            companyProfile,
-            addressData,
-            parkingEstablishmentData,
-            operatingHours,
-            paymentMethodData
-        )
-            .then(() => {
-                // Show success message
-            })
-            .catch(() => {
-                // Show error message
-            })
-            .finally(() => {
-                setIsSubmitting(false);
-            });
+        try {
+            const result = await parkingManagerSignUp(
+                userInformation,
+                companyProfile,
+                addressData,
+                parkingEstablishmentData,
+                operatingHours,
+                paymentMethodData
+            );
+            if (result.status === 201) {
+                alert("Registration successful. Please wait for approval.");
+            } else {
+                alert("An error occurred while submitting the form. Please try again.");
+            }
+        } catch {
+            alert("An error occurred while submitting the form. Please try again.");
+        }
     };
     const [zoningCompliance, setZoningCompliance] = useState(false);
     return (
@@ -254,7 +331,6 @@ const ParkingManagerSignUp = () => {
                                 initialLatitude={parkingEstablishmentData.latitude}
                                 initialLongitude={parkingEstablishmentData.longitude}
                                 onLocationChange={(latitude: number, longitude: number) => {
-                                    console.log("Running: " + latitude + " " + longitude);
                                     setParkingEstablishmentData((prev) => ({
                                         ...prev,
                                         latitude,
@@ -321,7 +397,7 @@ const ParkingManagerSignUp = () => {
                     customStyles={{ width: "95%" }}
                 >
                     <View style={styles.form}>
-                        {Object.entries(documents[0]).map(([type, file]) => (
+                        {Object.entries(documents).map(([type, file]) => (
                             <View key={type} style={styles.documentSection}>
                                 <TextComponent style={styles.documentLabel}>
                                     {type
@@ -334,16 +410,20 @@ const ParkingManagerSignUp = () => {
                                 {file ? (
                                     <View style={styles.filePreview}>
                                         <View style={styles.fileInfo}>
-                                            <MaterialCommunityIcons name="file-document" size={24} color="#4B5563" />
-                                            <TextComponent>{file.name}</TextComponent>
+                                            <MaterialCommunityIcons
+                                                name={file.type?.includes("image") ? "image" : "file-document"}
+                                                size={24}
+                                                color="#4B5563"
+                                            />
+                                            <TextComponent>
+                                                {type === "parkingPhotos"
+                                                    ? `${(file as DocumentInfo[]).length} photos selected`
+                                                    : (file as DocumentInfo).name}
+                                            </TextComponent>
                                         </View>
                                         <ButtonComponent
                                             title="Remove"
-                                            onPress={() => {
-                                                const updatedDocs = { ...documents[0] };
-                                                updatedDocs[type] = null;
-                                                documents[1](updatedDocs);
-                                            }}
+                                            onPress={() => handleRemoveDocument(type as keyof Documents)}
                                             style={styles.removeButton}
                                         />
                                     </View>
@@ -358,9 +438,7 @@ const ParkingManagerSignUp = () => {
                                         </TextComponent>
                                         <ButtonComponent
                                             title="Choose File"
-                                            onPress={() => {
-                                                alert("Not yet working");
-                                            }}
+                                            onPress={() => handleDocumentPick(type as keyof Documents)}
                                             style={styles.uploadButton}
                                         />
                                     </View>
@@ -369,29 +447,7 @@ const ParkingManagerSignUp = () => {
                         ))}
                     </View>
                 </CardComponent>
-                <View style={styles.infoContainer}>
-                    <View style={styles.infoHeader}>
-                        <MaterialCommunityIcons name="information" size={24} color="#1E40AF" />
-                        <TextComponent style={styles.infoTitle}>Account Verification Process</TextComponent>
-                    </View>
-                    <View style={styles.infoContent}>
-                        <TextComponent style={styles.bulletPoint}>
-                            • Your registration will be reviewed by our admin team
-                        </TextComponent>
-                        <TextComponent style={styles.bulletPoint}>
-                            • Verification typically takes 1-2 business days
-                        </TextComponent>
-                        <TextComponent style={styles.bulletPoint}>
-                            • Your establishment will be visible to customers after approval
-                        </TextComponent>
-                        <TextComponent style={styles.bulletPoint}>
-                            • You'll receive an email notification once approved
-                        </TextComponent>
-                        <TextComponent style={styles.bulletPoint}>
-                            • Make sure all documents are clear and valid to speed up the process
-                        </TextComponent>
-                    </View>
-                </View>
+                <InfoContainer />
                 <View style={styles.submitContainer}>
                     <View style={styles.checkboxContainer}>
                         <CheckboxComponent
@@ -440,30 +496,6 @@ const styles = StyleSheet.create({
         width: "100%",
     },
 
-    infoContainer: {
-        backgroundColor: "#EFF6FF",
-        borderRadius: 8,
-        padding: 16,
-        width: "95%",
-        marginBottom: 40,
-    },
-    infoHeader: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
-    },
-    infoTitle: {
-        color: "#1E40AF",
-        fontWeight: "600",
-    },
-    infoContent: {
-        marginTop: 12,
-        paddingLeft: 8,
-    },
-    bulletPoint: {
-        color: "#1E40AF",
-        marginVertical: 4,
-    },
     formGroup: {
         gap: 16,
     },

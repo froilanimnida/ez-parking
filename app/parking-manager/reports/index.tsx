@@ -78,17 +78,17 @@ const Reports = () => {
                 Reports & Analytics
             </TextComponent>
             {reportCards.map((card, index) => (
-                <LinkComponent key={index} href={`/parking-manager`}>
-                    <CardComponent header={`${card.title}`} customStyles={styles.card}>
-                        <View style={styles.cardContent}>
-                            <MaterialCommunityIcons name={card.icon} size={24} color="#0284c7" style={styles.icon} />
-                            <View style={styles.textContainer}>
-                                <TextComponent style={styles.description}>{card.description}</TextComponent>
-                            </View>
-                            <MaterialCommunityIcons name="chevron-right" size={24} color="#64748b" />
+                <CardComponent header={`${card.title}`} customStyles={styles.card}>
+                    <View style={styles.cardContent}>
+                        <MaterialCommunityIcons name={card.icon} size={24} color="#0284c7" style={styles.icon} />
+                        <View style={styles.textContainer}>
+                            <TextComponent style={styles.description}>{card.description}</TextComponent>
                         </View>
-                    </CardComponent>
-                </LinkComponent>
+                        <LinkComponent key={index} href={`/parking-manager`}>
+                            <MaterialCommunityIcons name="chevron-right" size={24} color="white" />
+                        </LinkComponent>
+                    </View>
+                </CardComponent>
             ))}
         </ResponsiveContainer>
     );
@@ -105,6 +105,7 @@ const styles = StyleSheet.create({
     },
     card: {
         padding: 16,
+        marginVertical: 16,
     },
     cardContent: {
         flexDirection: "row",

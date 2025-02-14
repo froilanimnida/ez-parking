@@ -74,14 +74,18 @@ const Slots = () => {
     >([]);
 
     useEffect(() => {
-        const fetchData = async () => {
-            let slots = await getParkingSlotsParkingManager();
-            let vehicleTypes = await getVehicleTypes();
-            setIsFetching(false);
-            setSlots(slots.data.data);
-            setVehicleTypes(vehicleTypes.data.data);
-        };
-        fetchData();
+        try {
+            const fetchData = async () => {
+                let slots = await getParkingSlotsParkingManager();
+                let vehicleTypes = await getVehicleTypes();
+                setIsFetching(false);
+                setSlots(slots.data.data);
+                setVehicleTypes(vehicleTypes.data.data);
+            };
+            fetchData();
+        } catch (error) {
+            alert("Failed to fetch data");
+        }
     }, []);
 
     const setFormDataValue = (key: string, value: string | boolean) => {
@@ -89,21 +93,25 @@ const Slots = () => {
     };
 
     const addSlot = async () => {
-        const result = await addParkingSlot(formData);
-        setFormData({
-            slot_code: "",
-            is_premium: false,
-            floor_level: "",
-            vehicle_type_id: 0,
-            slot_features: "standard",
-            slot_status: "open",
-            is_active: true,
-            base_price_per_hour: "",
-            base_price_per_day: "",
-            base_price_per_month: "",
-            price_multiplier: "",
-        });
-        Alert.alert("Slot Added");
+        try {
+            const result = await addParkingSlot(formData);
+            setFormData({
+                slot_code: "",
+                is_premium: false,
+                floor_level: "",
+                vehicle_type_id: 0,
+                slot_features: "standard",
+                slot_status: "open",
+                is_active: true,
+                base_price_per_hour: "",
+                base_price_per_day: "",
+                base_price_per_month: "",
+                price_multiplier: "",
+            });
+            alert("Slot Added");
+        } catch {
+            alert("Failed to add slot");
+        }
     };
 
     return (

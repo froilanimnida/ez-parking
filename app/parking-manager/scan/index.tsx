@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Platform, StatusBar } from "react-native";
-import * as ImagePicker from "expo-image-picker";
 import { useCameraPermissions } from "expo-camera";
 import { CameraView } from "expo-camera";
 import TextComponent from "@/components/TextComponent";
@@ -32,31 +31,24 @@ const ScanQRCode = () => {
                 base64: false,
                 format: ImageManipulator.SaveFormat.PNG,
             });
-
             const response = await fetch(manipulatedImage.uri);
             const blob = await response.blob();
             const imageBitmap = await createImageBitmap(blob);
-
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
-
             if (!ctx) return;
-
             canvas.width = imageBitmap.width;
             canvas.height = imageBitmap.height;
             ctx.drawImage(imageBitmap, 0, 0, canvas.width, canvas.height);
-
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const code = jsQR(imageData.data, imageData.width, imageData.height);
-
             if (code) {
                 router.push(`../parking-manager/scan/${code.data}`);
             } else {
-                setQrCodeData("No QR code found.");
+                alert("No QR code found.");
             }
-        } catch (error) {
-            console.error("Error processing image:", error);
-            setQrCodeData("Error scanning QR code.");
+        } catch {
+            alert("Error scanning QR code.");
         }
     };
 
