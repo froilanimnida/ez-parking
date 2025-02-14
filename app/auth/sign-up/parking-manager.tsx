@@ -231,41 +231,6 @@ const ParkingManagerSignUp = () => {
     };
 
     const [agreed, setAgreed] = useState(false);
-    useEffect(() => {
-        const timestamp = new Date().toLocaleTimeString();
-        console.group(`Form Update [${timestamp}]`);
-
-        console.log("Changed Fields:", {
-            userInfo: userInformation !== undefined,
-            company: companyProfile !== undefined,
-            address: addressData !== undefined,
-            establishment: parkingEstablishmentData !== undefined,
-            hours: operatingHours !== undefined,
-            payment: paymentMethodData !== undefined,
-            docs: documents !== undefined,
-        });
-
-        // Log detailed state
-        console.log("Current Form State:", {
-            userInformation,
-            companyProfile,
-            addressData,
-            parkingEstablishmentData,
-            operatingHours,
-            paymentMethodData,
-            documents,
-        });
-
-        console.groupEnd();
-    }, [
-        userInformation,
-        companyProfile,
-        addressData,
-        parkingEstablishmentData,
-        operatingHours,
-        paymentMethodData,
-        documents,
-    ]);
     const handleSubmit = async () => {
         setIsSubmitting(true);
         try {
@@ -275,7 +240,8 @@ const ParkingManagerSignUp = () => {
                 addressData,
                 parkingEstablishmentData,
                 operatingHours,
-                paymentMethodData
+                paymentMethodData,
+                documents
             );
             if (result.status === 201) {
                 alert("Registration successful. Please wait for approval.");

@@ -8,6 +8,7 @@ import type {
     ParkingPaymentMethodData,
     ParkingOperatingHoursData,
 } from "../models/parkingManagerSignUpTypes";
+import type { Documents } from "../types/documents";
 
 const root = "/parking-manager" as const;
 export const qrContentOverview = async (qrContent: string) => {
@@ -61,7 +62,8 @@ export const parkingManagerSignUp = async (
     addressData: ParkingAddressData,
     parkingEstablishmentData: ParkingEstablishmentData,
     operatingHours: { [key: string]: ParkingOperatingHoursData },
-    paymentMethodData: ParkingPaymentMethodData
+    paymentMethodData: ParkingPaymentMethodData,
+    documents: Documents
 ) =>
     await axiosInstance.post(`${root}/signup`, {
         user: userInformation,
@@ -70,6 +72,7 @@ export const parkingManagerSignUp = async (
         parking_establishment: parkingEstablishmentData,
         operating_hour: operatingHours,
         payment_method: paymentMethodData,
+        documents: documents,
     });
 
 export const getEstablishmentSchedules = () => axiosInstance.get(`${root}/operating-hours`);

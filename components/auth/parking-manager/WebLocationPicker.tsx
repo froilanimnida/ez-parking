@@ -57,8 +57,8 @@ const WebLocationPicker: React.FC<WebLocationPickerProps> = ({
     }, [initialLatitude, initialLongitude, onLocationChange]);
 
     return (
-        <View style={{ height: 300, width: "100%" }}>
-            <div ref={mapRef} style={{ height: "100%", width: "100%" }} />
+        <View style={{ height: 500, width: "100%" }}>
+            <div ref={mapRef} style={{ height: 500, width: "100%" }} />
         </View>
     );
 };

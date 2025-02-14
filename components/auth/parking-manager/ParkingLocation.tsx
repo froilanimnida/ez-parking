@@ -128,7 +128,6 @@ const styles = StyleSheet.create({
         gap: 16,
     },
     mapContainer: {
-        height: 300,
         marginVertical: 16,
         borderRadius: 8,
         overflow: "hidden",
