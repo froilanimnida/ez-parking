@@ -1,5 +1,5 @@
 import * as SecureStore from "expo-secure-store";
-import PlatformType from "./platform";
+import PlatformType from "./helper/platform";
 import axiosInstance from "./axiosInstance";
 import { router } from "expo-router";
 

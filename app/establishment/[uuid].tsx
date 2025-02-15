@@ -12,7 +12,7 @@ import type { PricingPlan } from "@/lib/models/pricing-plan";
 import type { ParkingSlot } from "@/lib/models/parking-slot";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import WebView from "react-native-webview";
-import PlatformType from "@/lib/platform";
+import PlatformType from "@lib/helper/platform";
 import { useLocalSearchParams } from "expo-router";
 import { fetchEstablishmentInfo } from "@/lib/api/establishment";
 import LinkComponent from "@/components/LinkComponent";

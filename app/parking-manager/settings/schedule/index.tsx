@@ -8,7 +8,7 @@ import CheckboxComponent from "@/components/CheckboxComponent";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import PlatformType from "@/lib/platform";
+import PlatformType from "@lib/helper/platform";
 import { OperatingHour } from "@lib/models/operating-hour";
 import {DAYS_OF_WEEK} from "@lib/types/models/common/constants";
 import LinkComponent from "@components/LinkComponent";

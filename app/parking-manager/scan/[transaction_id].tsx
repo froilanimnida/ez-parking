@@ -32,8 +32,9 @@ const QRContent = () => {
                 const result = await qrContentOverview(transaction_id);
                 setQrContent(result.data.data);
                 setIsFetching(false);
-            } catch (error) {
-                alert(error.response!.data?.message || "Error fetching transaction details");
+            } catch (e: unknown) {
+                const error = e as AxiosError<ApiErrorResponse>;
+                alert(error.response?.data?.message || "Error fetching transaction details");
                 router.replace("/parking-manager/scan");
             }
         };
@@ -47,10 +48,9 @@ const QRContent = () => {
             if (result.status === 200) {
                 alert("Transaction status updated successfully");
             }
-        } catch (error: unknown) {
-            const err = error as AxiosError;
-            // @ts-ignore
-            alert(err.response!.data?.message || "An error occurred while updating the transaction status");
+        } catch (e: unknown) {
+            const err = e as AxiosError<ApiErrorResponse>;
+            alert(err.response?.data?.message || "An error occurred while updating the transaction status");
         } finally {
             router.replace("/parking-manager/scan");
         }

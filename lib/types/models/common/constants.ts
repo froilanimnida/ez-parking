@@ -23,3 +23,4 @@ export const METRO_MANILA_CITIES = [
 export const DAYS_OF_WEEK = [ 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday' ];
 
 export type CITY = (typeof METRO_MANILA_CITIES)[number];
+export type UserRole = "user" | "parking_manager" | "admin";

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Platform, StatusBar } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useCameraPermissions } from "expo-camera";
 import { CameraView } from "expo-camera";
 import TextComponent from "@/components/TextComponent";
@@ -18,12 +18,8 @@ const ScanQRCode = () => {
     const [permission, requestPermission] = useCameraPermissions();
     const [scanning, setScanning] = useState(true);
     const [scanSuccess, setScanSuccess] = useState(false);
-    const [error, setError] = useState("");
-    const [qrCodeData, setQrCodeData] = useState<string | null>(null);
     useEffect(() => {
-        if (permission === null) {
-            requestPermission();
-        }
+        if (permission === null) requestPermission().then();
     });
 
     const processImage = async (uri: string) => {
@@ -73,7 +69,7 @@ const ScanQRCode = () => {
             });
             if (!result.canceled && result.assets.length > 0) {
                 const image = result.assets[0];
-                processImage(image.uri);
+                await processImage(image.uri);
             }
         }
     };
@@ -121,13 +117,6 @@ const ScanQRCode = () => {
                             </TextComponent>
                         </View>
                     )}
-
-                    {error && (
-                        <View style={styles.errorMessage}>
-                            <MaterialCommunityIcons name="alert-circle" size={24} color="red" />
-                            <TextComponent style={styles.errorText}>{error}</TextComponent>
-                        </View>
-                    )}
                 </CardComponent>
             </View>
         </ResponsiveContainer>
@@ -135,14 +124,6 @@ const ScanQRCode = () => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#F9FAFB",
-        paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-        width: "100%",
-        justifyContent: "center",
-        alignItems: "center",
-    },
     content: {
         padding: 16,
         maxWidth: 1280,

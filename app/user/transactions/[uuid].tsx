@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Pressable, Image, Modal, Alert, ActivityIndicator } from "react-native";
 import WebView from "react-native-webview";
 import CardComponent from "@/components/CardComponent";
-import PlatformType from "@/lib/platform";
+import PlatformType from "@lib/helper/platform";
 import TextComponent from "@/components/TextComponent";
 import LinkComponent from "@/components/LinkComponent";
 import ButtonComponent from "@/components/ButtonComponent";

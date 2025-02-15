@@ -10,7 +10,7 @@ import CardComponent from "@/components/CardComponent";
 import TextComponent from "@/components/TextComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import { useLocalSearchParams } from "expo-router";
-import PlatformType from "@/lib/platform";
+import PlatformType from "@lib/helper/platform";
 import { fetchEstablishmentData } from "@/lib/api/fetchSlots";
 import SlotCard from "@/components/SlotCard";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
@@ -170,10 +170,6 @@ const EstablishmentView = () => {
                                 <iframe
                                     width="100%"
                                     height="100%"
-                                    frameBorder={0}
-                                    scrolling="no"
-                                    marginHeight={0}
-                                    marginWidth={0}
                                     src={mapUrl}
                                 />
                             ) : (

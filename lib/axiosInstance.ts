@@ -1,11 +1,12 @@
-import axios, { type AxiosError } from "axios";
+import axios, {type AxiosError, AxiosRequestHeaders} from "axios";
 import * as SecureStore from "expo-secure-store";
-import PlatformType from "./platform";
-import { router, type RelativePathString } from "expo-router";
+import PlatformType from "./helper/platform";
+import { type RelativePathString } from "expo-router";
 import { getAuthHeaders } from "./credentialsManager";
 import type ApiValidationError from "./models/validationError";
 import type { SimplifiedValidationError } from "./models/validationError";
-export type UserRole = "user" | "parking_manager" | "admin";
+import {UserRole} from "@lib/types/models/common/constants";
+
 
 async function verifyAndGetRole(
     authToken: string | undefined | null,
@@ -86,7 +87,7 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.request.use(
     async (config) => {
         const authHeaders = await getAuthHeaders();
-        config.headers = { ...config.headers, ...authHeaders };
+        config.headers = { ...config.headers, ...authHeaders } as AxiosRequestHeaders;
         if (config.data instanceof FormData) {
             config.headers["Content-Type"] = "multipart/form-data";
         }
@@ -118,15 +119,9 @@ axiosInstance.interceptors.response.use(
         return response;
     },
     (error: AxiosError) => {
-        // console.log("Current route:", currentPath);
-        // console.log("Requesting route:", error.config?.url);
-        // if (error.status === 401 &&) {
-        //     router.replace("/auth/login");
-        // }
         if (error.response?.status === 422) {
             const apiError = error.response.data as ApiValidationError;
             const messages: string[] = [];
-
             if (apiError.errors?.json) {
                 Object.entries(apiError.errors.json).forEach(([category, categoryErrors]) => {
                     Object.entries(categoryErrors).forEach(([field, fieldMessages]) => {

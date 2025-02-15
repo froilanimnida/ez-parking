@@ -1,7 +1,7 @@
 import React from "react";
 import WebLocationPicker from "./WebLocationPicker";
 import NativeLocationPicker from "./NativeLocationPicker";
-import PlatformType from "@/lib/platform";
+import PlatformType from "@lib/helper/platform";
 
 interface LocationPickerProps {
     initialLatitude: number;

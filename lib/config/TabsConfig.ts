@@ -1,5 +1,5 @@
 import type { BottomTabNavigationOptions } from "@react-navigation/bottom-tabs";
-import PlatformType from "../platform";
+import PlatformType from "../helper/platform";
 
 export const tabsConfig: BottomTabNavigationOptions = {
     tabBarActiveTintColor: "blue",

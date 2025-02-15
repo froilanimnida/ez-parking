@@ -1,7 +1,7 @@
 import { ScrollView, View, KeyboardAvoidingView } from 'react-native';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import PlatformType from '@/lib/platform';
+import PlatformType from '@lib/helper/platform';
 import ButtonComponent from '../ButtonComponent';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import TextComponent from '../TextComponent';
