@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { getTransaction } from "@/lib/api/parkingManager";
@@ -9,7 +9,6 @@ import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import TextComponent from "@/components/TextComponent";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import CardComponent from "@/components/CardComponent";
-import { calculateDuration } from "@/lib/helper/calculateDuration";
 
 interface TransactionDetailsType {
     slot_info: ParkingSlot & { vehicle_type_name: string; vehicle_type_size: string };
@@ -21,18 +20,14 @@ const TransactionDetails = () => {
     const { uuid } = useLocalSearchParams() as { uuid: string };
     const [transactionDetails, setTransactionDetails] = useState<TransactionDetailsType | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [duration, setDuration] = useState(0);
     useEffect(() => {
         const transaction = async () => {
-            const res = await getTransaction(uuid);
-            console.log(res);
-            setTransactionDetails(res.data.data);
-            setIsLoading(false);
-
-            if (res.data.data?.transaction) {
-                const { scheduled_entry_time, scheduled_exit_time, duration_type } = res.data.data.transaction;
-                const calculatedDuration = calculateDuration(scheduled_entry_time, scheduled_exit_time, duration_type);
-                setDuration(calculatedDuration);
+            try {
+                const res = await getTransaction(uuid);
+                setTransactionDetails(res.data.data);
+                setIsLoading(false);
+            } catch {
+                alert("Error fetching transaction details.");
             }
         };
         transaction();
@@ -118,9 +113,15 @@ const TransactionDetails = () => {
                                 </TextComponent>
                             </View>
                             <View style={styles.infoBlock}>
-                                <TextComponent style={styles.label}>Duration</TextComponent>
+                                <TextComponent style={styles.label}>Entry Time</TextComponent>
                                 <TextComponent style={styles.value}>
-                                    {duration} {transactionDetails?.transaction.duration_type}
+                                   {transactionDetails?.transaction.entry_time}
+                                </TextComponent>
+                            </View>
+                            <View style={styles.infoBlock}>
+                                <TextComponent style={styles.label}>Exit Time</TextComponent>
+                                <TextComponent style={styles.value}>
+                                    {transactionDetails?.transaction.exit_time ?? "N/A"}
                                 </TextComponent>
                             </View>
                             <View style={styles.infoBlock}>

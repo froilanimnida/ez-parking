@@ -74,6 +74,7 @@ const reportCards: ReportCard[] = [
 const Reports = () => {
     return (
         <ResponsiveContainer>
+            <LinkComponent label="← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="../" />
             <TextComponent bold variant="h1" style={styles.header}>
                 Reports & Analytics
             </TextComponent>

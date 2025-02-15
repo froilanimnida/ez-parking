@@ -225,12 +225,7 @@ const TransactionDetails = () => {
                     </CardComponent>
 
                     <CardComponent header="Timing Details">
-                        <View style={styles.lineRow}>
-                            <TextComponent style={styles.lineLabel}>Entry Time</TextComponent>
-                            <TextComponent style={styles.lineValue}>
-                                {transactionDetails.transaction_data.entry_time || "Not Available"}
-                            </TextComponent>
-                        </View>
+
                         <View style={styles.lineRow}>
                             <TextComponent style={styles.lineLabel}>Scheduled Entry Time</TextComponent>
                             <TextComponent style={styles.lineValue}>
@@ -249,17 +244,23 @@ const TransactionDetails = () => {
                                     : "Not Available"}
                             </TextComponent>
                         </View>
+                        <View style={styles.lineRow}>
+                            <TextComponent style={styles.lineLabel}>Entry Time</TextComponent>
+                            <TextComponent style={styles.lineValue}>
+                                {transactionDetails.transaction_data.entry_time !== "Not Available"
+                                    ? new Date(transactionDetails.transaction_data.entry_time).toLocaleString()
+                                    : "Not Available"}
+                            </TextComponent>
+                        </View>
 
-                        {transactionDetails.transaction_data.exit_time && (
-                            <View style={styles.lineRow}>
-                                <TextComponent style={styles.lineLabel}>Exit Time</TextComponent>
-                                <TextComponent style={styles.lineValue}>
-                                    {transactionDetails.transaction_data.exit_time !== "Not Available"
-                                        ? new Date(transactionDetails.transaction_data.exit_time).toLocaleString()
-                                        : "Not Available"}
-                                </TextComponent>
-                            </View>
-                        )}
+                        <View style={styles.lineRow}>
+                            <TextComponent style={styles.lineLabel}>Exit Time</TextComponent>
+                            <TextComponent style={styles.lineValue}>
+                                {transactionDetails.transaction_data.exit_time !== "Not Available"
+                                    ? new Date(transactionDetails.transaction_data.exit_time).toLocaleString()
+                                    : "Not Available"}
+                            </TextComponent>
+                        </View>
                         <View style={styles.lineRow}>
                             <TextComponent style={styles.lineLabel}>Amount Due</TextComponent>
                             <TextComponent style={styles.lineValue}>
@@ -301,7 +302,7 @@ const TransactionDetails = () => {
                             <CardComponent header="QR Code">
                                 <View style={{ alignItems: "center", marginTop: 16 }}>
                                     <Image
-                                        source={require("@/assets/images/mock_qr.png")}
+                                        source={{ uri: `data:image/png;base64,${transactionDetails.qr_code}` }}
                                         style={{ width: "50%", marginBottom: 16, aspectRatio: 1, height: "auto" }}
                                     />
                                     <Pressable style={styles.qrButton} onPress={() => setIsModalOpen(true)}>

@@ -3,8 +3,7 @@ import axiosInstance from "../axiosInstance";
 const root = "/user" as const;
 
 export const fetchUsers = async () => {
-    const result = await axiosInstance.get(`/admin/users`);
-    return result;
+    return await axiosInstance.get(`/admin/users`);
 };
 
 export const createAccount = async (
@@ -17,7 +16,7 @@ export const createAccount = async (
     plateNumber: string,
     suffix: string
 ) => {
-    const result = await axiosInstance.post(`${root}/create-new-account`, {
+    return await axiosInstance.post(`${root}/create-new-account`, {
         user: {
             email: email,
             first_name: firstName,
@@ -29,5 +28,8 @@ export const createAccount = async (
             suffix: suffix,
         },
     });
-    return result;
 };
+
+export const fetchProfile = async () => {
+    return await axiosInstance.get(`${root}/profile`);
+}

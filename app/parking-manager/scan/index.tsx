@@ -12,6 +12,7 @@ import LoadingComponent from "@/components/reusable/LoadingComponent";
 import * as ImageManipulator from "expo-image-manipulator";
 import jsQR from "jsqr";
 import { router } from "expo-router";
+import LinkComponent from "@components/LinkComponent";
 
 const ScanQRCode = () => {
     const [permission, requestPermission] = useCameraPermissions();
@@ -91,6 +92,7 @@ const ScanQRCode = () => {
 
     return (
         <ResponsiveContainer>
+            <LinkComponent label="← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="../" />
             <View style={styles.content}>
                 <CardComponent header="Scan QR Code" subHeader="Scan the QR code">
                     <View style={{ height: 600, width: "100%" }}>

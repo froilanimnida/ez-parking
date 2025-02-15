@@ -6,6 +6,7 @@ import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { getTransactions } from "@/lib/api/parkingManager";
 import { type Transaction } from "@/lib/models/transaction";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
+import LinkComponent from "@components/LinkComponent";
 
 const TransactionItem = ({ item }: { item: Transaction }) => (
     <TouchableOpacity style={styles.row} onPress={() => router.push(`/parking-manager/transactions/${item.uuid}`)}>
@@ -48,6 +49,7 @@ const Transactions = () => {
     const [isLoading, setIsLoading] = useState(true);
     return (
         <ResponsiveContainer>
+            <LinkComponent label="← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="../" />
             <TextComponent bold variant="h1" style={styles.title}>
                 Transactions
             </TextComponent>

@@ -1,4 +1,4 @@
-import { Alert, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import SelectComponent from "@/components/SelectComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
@@ -6,12 +6,13 @@ import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import { router, useLocalSearchParams } from "expo-router";
-import { allowTransaction, qrContentOverview } from "@/lib/api/parkingManager";
+import { allowExit, allowTransaction, qrContentOverview } from "@/lib/api/parkingManager";
 import type { ParkingSlot } from "@/lib/models/parking-slot";
 import type { Transaction } from "@/lib/models/transaction";
 import type { User } from "@/lib/models/user";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import type { AxiosError } from "axios";
+import {calculateExceededTime, calculateTotalBill} from "@/lib/function/calculateGrandTotal";
 
 interface qrContent {
     parking_slot_info: ParkingSlot;
@@ -26,19 +27,17 @@ const QRContent = () => {
     const { transaction_id } = useLocalSearchParams() as { transaction_id: string };
     const [isFetching, setIsFetching] = useState(true);
     useEffect(() => {
-        const fetchqrContent = async () => {
+        const fetchQrContent = async () => {
             try {
                 const result = await qrContentOverview(transaction_id);
                 setQrContent(result.data.data);
                 setIsFetching(false);
             } catch (error) {
-                console.log(error);
-                alert("Error fetching transaction details");
-            } finally {
+                alert(error.response!.data?.message || "Error fetching transaction details");
                 router.replace("/parking-manager/scan");
             }
         };
-        fetchqrContent();
+        fetchQrContent();
     }, [transaction_id]);
 
     const handleUpdateStatus = async () => {
@@ -50,12 +49,46 @@ const QRContent = () => {
             }
         } catch (error: unknown) {
             const err = error as AxiosError;
-            console.log(error);
+            // @ts-ignore
             alert(err.response!.data?.message || "An error occurred while updating the transaction status");
         } finally {
             router.replace("/parking-manager/scan");
         }
     };
+
+    const calculateAndAllowExit = async (
+        transactionId: string,
+        actualEntryTime: Date,
+        rates: { hourly: number; daily: number; monthly: number },
+        paymentStatus: "pending" | "paid"
+    ) => {
+
+        const calculation = calculateTotalBill(
+            actualEntryTime,
+            rates
+        );
+        alert("The user will be charged ₱" + calculation.totalAmount + " for the parking fee.");
+        alert("Please make sure the user has paid before allowing exit.");
+        try {
+            const nowUTC = new Date();
+            const nowPHT = new Date(nowUTC.getTime() + (8 * 60 * 60 * 1000));
+            const result = await allowExit(
+                transactionId,
+                paymentStatus,
+                nowPHT.toISOString(),
+                calculation.totalAmount,
+                qrContent?.parking_slot_info.slot_id!
+            );
+            if (result.status === 200) {
+                alert("Exit allowed successfully.");
+            } else {
+                alert("Error allowing exit.");
+            }
+        } catch {
+            alert("Error allowing exit.");
+        }
+
+    }
 
     return (
         <ResponsiveContainer>
@@ -68,10 +101,12 @@ const QRContent = () => {
                     <CardComponent header="Transaction Details" subHeader="All details about the transaction">
                         <View style={styles.cardItem}>
                             <TextComponent variant="label">Transaction ID</TextComponent>
-                            <TextComponent variant="body">{qrContent.transaction_data.transaction_id}</TextComponent>
+                            <TextComponent variant="body">{qrContent.transaction_data.uuid}</TextComponent>
                         </View>
                         <View style={styles.cardItem}>
-                            <TextComponent variant="label">Amount Due</TextComponent>
+                            <TextComponent variant="label">
+                                Amount Due {" (This is estimated amount, actual amount may vary)"}
+                            </TextComponent>
                             <TextComponent variant="body">₱{qrContent.transaction_data.amount_due}</TextComponent>
                         </View>
                         <View style={styles.cardItem}>
@@ -178,25 +213,129 @@ const QRContent = () => {
 
                     <CardComponent header="Update Payment Status">
                         <View style={styles.formGroup}>
+                            {qrContent.transaction_data.payment_status === "paid" && (
+                                <TextComponent variant="body">
+                                    This transaction has already been paid. No further action is required. Any overstay charges will be indicated in the box below.
+                                </TextComponent>
+                            )}
+                            {qrContent.transaction_data.payment_status === "pending" && (
+                                <>
                             <TextComponent style={styles.label}>Payment Status</TextComponent>
                             <SelectComponent
                                 selectedValue={paymentStatus}
-                                onValueChange={(itemValue) => setPaymentStatus(itemValue)}
+                                onValueChange={(itemValue) => setPaymentStatus(itemValue as "paid" | "pending")}
                                 customStyles={styles.picker}
                                 items={[
                                     { label: "Paid", value: "paid" },
                                     { label: "Pending", value: "pending" },
                                 ]}
-                            />
+                            /></>
+                            )}
                         </View>
                         <View style={styles.buttonRow}>
                             <ButtonComponent
-                                onPress={handleUpdateStatus}
+                                onPress={() => {
+                                    if (qrContent.transaction_data.status === "reserved") {
+                                        handleUpdateStatus();
+                                    } else if (qrContent.transaction_data.status === "active") {
+                                        calculateAndAllowExit(
+                                            transaction_id,
+                                            new Date(qrContent.transaction_data.entry_time),
+                                            {
+                                                hourly: Number(qrContent.parking_slot_info.base_price_per_hour),
+                                                daily: Number(qrContent.parking_slot_info.base_price_per_day),
+                                                monthly: Number(qrContent.parking_slot_info.base_price_per_month)
+                                            },
+                                            paymentStatus
+                                        );
+                                    }
+                                }}
                                 disabled={isLoading}
-                                title={isLoading ? "Updating..." : "Update Status and Allow Entry"}
+                                title={
+                                    isLoading
+                                        ? "Updating..."
+                                        : qrContent.transaction_data.status === "reserved"
+                                        ? "Allow Entry"
+                                        : "Allow Exit"
+                                }
                             />
                         </View>
                     </CardComponent>
+                    {qrContent.transaction_data.status === "active"  && (
+                        <CardComponent header="Total Bill">
+                            <View style={styles.cardItem}>
+                                {(() => {
+                                    // Calculate booking duration from scheduled times
+                                    const scheduledEntry = new Date(qrContent.transaction_data.scheduled_entry_time);
+                                    const scheduledExit = new Date(qrContent.transaction_data.scheduled_exit_time);
+                                    const bookingDuration = Math.ceil((scheduledExit.getTime() - scheduledEntry.getTime()) / (1000 * 60 * 60));
+
+                                    const bill = calculateTotalBill(
+                                        new Date(qrContent.transaction_data.entry_time),
+                                        {
+                                            hourly: Number(qrContent.parking_slot_info.base_price_per_hour),
+                                            daily: Number(qrContent.parking_slot_info.base_price_per_day),
+                                            monthly: Number(qrContent.parking_slot_info.base_price_per_month)
+                                        }
+                                    );
+
+                                    const exceededTime = calculateExceededTime(
+                                        new Date(qrContent.transaction_data.entry_time),
+                                        bookingDuration, // Using actual booking duration from scheduled times
+                                        {
+                                            hourly: Number(qrContent.parking_slot_info.base_price_per_hour),
+                                            daily: Number(qrContent.parking_slot_info.base_price_per_day),
+                                            monthly: Number(qrContent.parking_slot_info.base_price_per_month)
+                                        }
+                                    );
+
+                                    return (
+                                        <View>
+                                            <TextComponent variant="label" style={{ marginBottom: 8 }}>Regular Charges</TextComponent>
+                                            {bill.breakdown.months.count > 0 && (
+                                                <TextComponent variant="body">
+                                                    Months: {bill.breakdown.months.count} × ₱{bill.breakdown.months.rate} = ₱{bill.breakdown.months.total}
+                                                </TextComponent>
+                                            )}
+                                            {bill.breakdown.days.count > 0 && (
+                                                <TextComponent variant="body">
+                                                    Days: {bill.breakdown.days.count} × ₱{bill.breakdown.days.rate} = ₱{bill.breakdown.days.total}
+                                                </TextComponent>
+                                            )}
+                                            {bill.breakdown.hours.count > 0 && (
+                                                <TextComponent variant="body">
+                                                    Hours: {bill.breakdown.hours.count} × ₱{bill.breakdown.hours.rate} = ₱{bill.breakdown.hours.total}
+                                                </TextComponent>
+                                            )}
+
+                                            {exceededTime.isOvertime && (
+                                                <>
+                                                    <TextComponent variant="label" style={{ marginTop: 16, marginBottom: 8, color: 'red' }}>
+                                                        Overtime Charges
+                                                    </TextComponent>
+                                                    <TextComponent variant="body" style={{ color: 'red' }}>
+                                                        Exceeded: {exceededTime.exceededDuration.hours}h {exceededTime.exceededDuration.minutes}m
+                                                    </TextComponent>
+                                                    <TextComponent variant="body" style={{ color: 'red' }}>
+                                                        Rate: ₱{exceededTime.overtimeCharges.breakdown.hours.rate}/hour
+                                                    </TextComponent>
+                                                    <TextComponent variant="body" style={{ color: 'red' }}>
+                                                        Overtime Fee: ₱{exceededTime.overtimeCharges.amount}
+                                                    </TextComponent>
+                                                </>
+                                            )}
+
+                                            <TextComponent variant="body" bold style={{ marginTop: 16, fontSize: 16 }}>
+                                                Total Amount: ₱{bill.totalAmount + (exceededTime.isOvertime ? exceededTime.overtimeCharges.amount : 0)}
+                                            </TextComponent>
+                                        </View>
+                                    );
+                                })()}
+                            </View>
+                        </CardComponent>
+                    )}
+                {/*    If the parking is beyond the reserved time, calculate the total bill and display it here.*/}
+
                 </View>
             )}
         </ResponsiveContainer>

@@ -9,6 +9,8 @@ import type {
     ParkingOperatingHoursData,
 } from "../models/parkingManagerSignUpTypes";
 import type { Documents } from "../types/documents";
+import {OperatingHour} from "@lib/models/operating-hour";
+import {DAYS_OF_WEEK} from "@lib/types/models/common/constants";
 
 const root = "/parking-manager" as const;
 export const qrContentOverview = async (qrContent: string) => {
@@ -20,6 +22,22 @@ export const allowTransaction = async (qrContent: string, paymentStatus: "pendin
         qr_content: qrContent,
         payment_status: paymentStatus,
     });
+
+export const allowExit = async (
+    transactionId: string,
+    paymentStatus: "pending" | "paid",
+    exitTime: string,
+    amount_due: number,
+    slotId: number
+) => {
+    return await axiosInstance.patch(`${root}/validate/exit`, {
+        qr_content: transactionId,
+        payment_status: paymentStatus,
+        exit_time: exitTime,
+        amount_due: amount_due,
+        slot_id: slotId,
+    });
+};
 
 export const getParkingSlotsParkingManager = async () => await axiosInstance.get(`${root}/slots`);
 
@@ -79,12 +97,38 @@ export const getEstablishmentSchedules = () => axiosInstance.get(`${root}/operat
 
 export const updateEstablishmentSchedules = async ({
     operatingHours,
-    is_24_hours,
+    is24_7,
 }: {
-    operatingHours: { [key: string]: OperatingHours };
-    is_24_hours: boolean;
-}) =>
-    await axiosInstance.post(`${root}/operating-hours/update`, {
-        operating_hours: operatingHours,
-        is_24_hours,
+    operatingHours: OperatingHour[];
+    is24_7: boolean;
+}) => {
+    const transformedHours = DAYS_OF_WEEK.reduce((acc, day) => {
+        const daySchedule = operatingHours.find(h => h.day_of_week === day);
+        acc[day.toLowerCase()] = {
+            enabled: daySchedule?.is_enabled ?? false,
+            open: daySchedule?.opening_time ?? "09:00",
+            close: daySchedule?.closing_time ?? "17:00"
+        };
+        return acc;
+    }, {} as Record<string, { enabled: boolean; open: string; close: string }>);
+
+    if (!is24_7 && !Object.values(transformedHours).some(day => day.enabled)) {
+        throw new Error("At least one day must be enabled");
+    }
+
+    Object.entries(transformedHours).forEach(([day, schedule]) => {
+        if (schedule.enabled) {
+            if (!schedule.open || !schedule.close) {
+                throw new Error(`Operating hours are required for ${day}`);
+            }
+            if (schedule.open >= schedule.close) {
+                throw new Error(`Opening time must be before closing time for ${day}`);
+            }
+        }
     });
+
+    return await axiosInstance.patch(`${root}/operating-hours/update`, {
+        is24_7: is24_7,
+        operating_hour: transformedHours
+    });
+};
