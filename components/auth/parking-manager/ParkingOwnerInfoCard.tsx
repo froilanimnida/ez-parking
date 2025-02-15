@@ -76,7 +76,7 @@ const ParkingOwnerInfoCard = ({
                         <TextInputComponent
                             placeholder="Middle Name (optional)"
                             value={middle_name}
-                            onChangeText={(value) => handleParkingOwnerInfo("last_name", value)}
+                            onChangeText={(value) => handleParkingOwnerInfo("middle_name", value)}
                         />
                         <TextInputComponent
                             placeholder="Last Name"

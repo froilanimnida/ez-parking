@@ -2,7 +2,7 @@ import axios, {type AxiosError, AxiosRequestHeaders} from "axios";
 import * as SecureStore from "expo-secure-store";
 import PlatformType from "./helper/platform";
 import { type RelativePathString } from "expo-router";
-import { getAuthHeaders } from "./credentialsManager";
+import getAuthHeaders from "@lib/helper/getAuthHeaders";
 import type ApiValidationError from "./models/validationError";
 import type { SimplifiedValidationError } from "./models/validationError";
 import {UserRole} from "@lib/types/models/common/constants";
@@ -123,8 +123,8 @@ axiosInstance.interceptors.response.use(
             const apiError = error.response.data as ApiValidationError;
             const messages: string[] = [];
             if (apiError.errors?.json) {
-                Object.entries(apiError.errors.json).forEach(([category, categoryErrors]) => {
-                    Object.entries(categoryErrors).forEach(([field, fieldMessages]) => {
+                Object.entries(apiError.errors.json).forEach(([, categoryErrors]) => {
+                    Object.entries(categoryErrors).forEach(([, fieldMessages]) => {
                         fieldMessages.forEach((message) => {
                             messages.push(message);
                         });

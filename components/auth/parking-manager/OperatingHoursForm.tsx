@@ -4,6 +4,8 @@ import CheckboxComponent from "@/components/CheckboxComponent";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import TextInputComponent from "@/components/TextInputComponent";
+import {TimePicker} from "@/app/parking-manager/settings/schedule";
+import {DAYS_OF_WEEK} from "@lib/types/models/common/constants";
 
 interface OperatingHours {
     enabled: boolean;
@@ -30,7 +32,6 @@ const OperatingHoursForm: React.FC<Props> = ({
     onOperatingHoursChange,
     onParkingDataChange,
 }) => {
-    const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
     const formatDayName = (day: string) => {
         return day.charAt(0).toUpperCase() + day.slice(1);
@@ -52,7 +53,7 @@ const OperatingHoursForm: React.FC<Props> = ({
 
                 {!is24_7 && (
                     <>
-                        {days.map((day) => (
+                        {DAYS_OF_WEEK.map((day) => (
                             <View key={day} style={styles.dayContainer}>
                                 <View style={styles.dayHeader}>
                                     <CheckboxComponent

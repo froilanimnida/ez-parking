@@ -5,6 +5,7 @@ import PlatformType from '@lib/helper/platform';
 import ButtonComponent from '../ButtonComponent';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import TextComponent from '../TextComponent';
+import LinkComponent from "@components/LinkComponent";
 
 const AppBanner = () => {
 	const [isVisible, setIsVisible] = useState(true);
@@ -38,17 +39,13 @@ const AppBanner = () => {
 
 			<View
 				style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-				<ButtonComponent
-					onPress={() => {
-						window.open(
-							'https://pub-ef0b2653960949e0964eb3f879f4d5e7.r2.dev/app-release.apk',
-						);
-					}}
-					title='Download'
+				<LinkComponent
+                    href={'https://pub-ef0b2653960949e0964eb3f879f4d5e7.r2.dev/app-release.apk'}
+					label='Download'
 					variant='secondary'
 					size='sm'
+                    target="_blank"
 				/>
-
 				<ButtonComponent onPress={() => setIsVisible(false)}>
 					<MaterialCommunityIcons
 						name='close'

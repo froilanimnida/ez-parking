@@ -2,28 +2,9 @@ import * as SecureStore from "expo-secure-store";
 import PlatformType from "./helper/platform";
 import axiosInstance from "./axiosInstance";
 import { router } from "expo-router";
+import getAuthHeaders from "@lib/helper/getAuthHeaders";
 
 let authState: { loggedIn: boolean; role: string } | null = null;
-
-export async function getAuthHeaders() {
-    try {
-        if (PlatformType() === "web") return;
-        const access_token_cookie = await SecureStore.getItemAsync("access_token_cookie");
-        const csrf_access_token = await SecureStore.getItemAsync("csrf_access_token");
-        const csrf_refresh_token = await SecureStore.getItemAsync("csrf_refresh_token");
-        const refresh_token_cookie = await SecureStore.getItemAsync("refresh_token_cookie");
-
-        return {
-            access_token_cookie: access_token_cookie ? `Bearer ${access_token_cookie}` : "",
-            csrf_access_token: csrf_access_token || "",
-            csrf_refresh_token: csrf_refresh_token || "",
-            refresh_token_cookie: refresh_token_cookie || "",
-        };
-    } catch (error) {
-        console.error("Error fetching auth headers:", error);
-        return {};
-    }
-}
 
 export async function isAuthenticated(): Promise<{ loggedIn: boolean; role: string }> {
     try {
@@ -42,7 +23,6 @@ export async function isAuthenticated(): Promise<{ loggedIn: boolean; role: stri
             }
         }
 
-        // Mobile platform handling
         const authHeaders = await getAuthHeaders();
         if (!authHeaders?.access_token_cookie) {
             authState = { loggedIn: false, role: "" };

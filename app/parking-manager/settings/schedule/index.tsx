@@ -18,7 +18,7 @@ interface ParkingSchedule {
     operating_hours: OperatingHour[];
 }
 
-const TimePicker = ({
+export const TimePicker = ({
                         value,
                         onChange,
                         label,
@@ -80,7 +80,7 @@ const TimePicker = ({
     );
 };
 
-const DayScheduleRow = ({
+export const DayScheduleRow = ({
                             day,
                             hours,
                             onUpdate,

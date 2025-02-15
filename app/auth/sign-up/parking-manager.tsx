@@ -175,7 +175,6 @@ const ParkingManagerSignUp = () => {
                         size: asset.size || 0,
                     }));
 
-                    // Single update for photos
                     setDocuments((prev) => ({
                         ...prev,
                         parkingPhotos: [...(prev.parkingPhotos || []), ...newPhotos],
