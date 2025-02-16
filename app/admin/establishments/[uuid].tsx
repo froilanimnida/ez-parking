@@ -48,6 +48,7 @@ const EstablishmentDetails = () => {
             }
         };
         fetchEstablishment().then();
+        fetchEstablishment();
     });
 
     return (

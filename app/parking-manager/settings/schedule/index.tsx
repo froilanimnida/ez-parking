@@ -16,7 +16,6 @@ interface ParkingSchedule {
     is_24_7: boolean;
     operating_hours: OperatingHour[];
 }
-
 export const DayScheduleRow = ({
     day,
     hours,
@@ -119,7 +118,6 @@ const ParkingEstablishmentSchedule = () => {
                 operatingHours: parkingData.operating_hours.filter((h) => h.is_enabled),
                 is24_7: parkingData.is_24_7,
             });
-
             if (result.status === 200) {
                 setHasChanges(false);
                 alert("Schedules updated successfully.");
