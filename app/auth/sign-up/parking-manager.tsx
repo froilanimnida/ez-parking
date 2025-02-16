@@ -1,5 +1,5 @@
 import { StyleSheet, View } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ButtonComponent from "@/components/ButtonComponent";
 import * as DocumentPicker from "expo-document-picker";
 import TextInputComponent from "@/components/TextInputComponent";
@@ -19,7 +19,7 @@ import {
 } from "@/lib/models/parkingManagerSignUpTypes";
 import OperatingHoursForm from "@/components/auth/parking-manager/OperatingHoursForm";
 import { parkingManagerSignUp } from "@/lib/api/parkingManager";
-import { METRO_MANILA_CITIES } from "@/lib/models/cities";
+import { METRO_MANILA_CITIES } from "@lib/types/models/common/constants";
 import PaymentMethods from "@/components/auth/parking-manager/PaymentMethods";
 import ParkingOwnerInfoCard from "@/components/auth/parking-manager/ParkingOwnerInfoCard";
 import FacilitiesAndAmenitiesCard from "@/components/auth/parking-manager/FacilitiesAndAmenitiesCard";
@@ -56,11 +56,11 @@ const ParkingManagerSignUp = () => {
 
     const [parkingEstablishmentData, setParkingEstablishmentData] = useState<ParkingEstablishmentData>({
         space_type: "",
-        space_layout: "",
+        space_layout: "parallel",
         custom_layout: "",
         dimensions: "",
         is24_7: false,
-        access_info: "no_specific_access",
+        access_info: "no_special_access",
         custom_access: "",
         name: "",
         lighting: "",
@@ -89,12 +89,12 @@ const ParkingManagerSignUp = () => {
     });
 
     let [documents, setDocuments] = useState<Documents>({
-        govId: null,
-        parkingPhotos: [],
-        proofOfOwnership: null,
-        businessCert: null,
-        birCert: null,
-        liabilityInsurance: null,
+        gov_id: null,
+        parking_photos: [],
+        proof_of_ownership: null,
+        business_cert: null,
+        bir_cert: null,
+        liability_insurance: null,
     });
 
     const handleParkingOwnerInfo = (key: string, value: string) => {
@@ -129,24 +129,6 @@ const ParkingManagerSignUp = () => {
     const handlePaymentDataChange = (key: string, value: boolean | string) => {
         setPaymentMethodData({ ...paymentMethodData, [key]: value });
     };
-    useEffect(() => {
-        console.log("Form Data updated:");
-        console.log("User Information: ", userInformation);
-        console.log("Company Profile: ", companyProfile);
-        console.log("Address Data: ", addressData);
-        console.log("Parking Establishment Data: ", parkingEstablishmentData);
-        console.log("Operating Hours: ", operatingHours);
-        console.log("Payment Method Data: ", paymentMethodData);
-        console.log("Documents: ", documents);
-    }, [
-        userInformation,
-        companyProfile,
-        addressData,
-        parkingEstablishmentData,
-        operatingHours,
-        paymentMethodData,
-        documents,
-    ]);
 
     const searchLocation = async () => {
         if (!query) {
@@ -178,7 +160,7 @@ const ParkingManagerSignUp = () => {
         try {
             let result;
 
-            if (type === "parkingPhotos") {
+            if (type === "parking_photos") {
                 // Handle multiple photo selection
                 result = await DocumentPicker.getDocumentAsync({
                     type: ["image/*"],
@@ -196,7 +178,7 @@ const ParkingManagerSignUp = () => {
 
                     setDocuments((prev) => ({
                         ...prev,
-                        parkingPhotos: [...(prev.parkingPhotos || []), ...newPhotos],
+                        parking_photos: [...(prev.parking_photos || []), ...newPhotos],
                     }));
                 }
                 return;
@@ -234,7 +216,7 @@ const ParkingManagerSignUp = () => {
 
     // Update your remove document handler
     const handleRemoveDocument = (type: keyof Documents) => {
-        if (type === "parkingPhotos") {
+        if (type === "parking_photos") {
             setDocuments((prev) => ({
                 ...prev,
                 [type]: [],
@@ -249,7 +231,6 @@ const ParkingManagerSignUp = () => {
 
     const [agreed, setAgreed] = useState(false);
     const handleSubmit = async () => {
-        setIsSubmitting(true);
         try {
             const result = await parkingManagerSignUp(
                 userInformation,
@@ -265,8 +246,11 @@ const ParkingManagerSignUp = () => {
             } else {
                 alert("An error occurred while submitting the form. Please try again.");
             }
-        } catch {
+        } catch (e) {
+            console.log(e);
             alert("An error occurred while submitting the form. Please try again.");
+        } finally {
+            setIsSubmitting(false);
         }
     };
     const [zoningCompliance, setZoningCompliance] = useState(false);
@@ -425,11 +409,11 @@ const ParkingManagerSignUp = () => {
                                         .split(/(?=[A-Z])/)
                                         .join(" ")
                                         .toUpperCase()}
-                                    {type !== "parkingPhotos" ? " (PDF or Image)" : " (Images)"}
+                                    {type !== "parking_photos" ? " (PDF or Image)" : " (Images)"}
                                 </TextComponent>
 
                                 {file ? (
-                                    type === "parkingPhotos" ? (
+                                    type === "parking_photos" ? (
                                         <View style={styles.photoSection}>
                                             <View style={styles.photoGrid}>
                                                 {(file as DocumentInfo[]).map((photo, index) => (
@@ -444,13 +428,13 @@ const ParkingManagerSignUp = () => {
                                             <View style={styles.photoActions}>
                                                 <ButtonComponent
                                                     title="Add More Photos"
-                                                    onPress={() => handleDocumentPick("parkingPhotos")}
+                                                    onPress={() => handleDocumentPick("parking_photos")}
                                                     variant="primary"
                                                 />
                                                 <ButtonComponent
                                                     title="Remove All"
                                                     variant="destructive"
-                                                    onPress={() => handleRemoveDocument("parkingPhotos")}
+                                                    onPress={() => handleRemoveDocument("parking_photos")}
                                                 />
                                             </View>
                                         </View>
@@ -584,7 +568,7 @@ const styles = StyleSheet.create({
         gap: 20,
     },
     mapContainer: {
-        height: 300,
+        height: 700,
         marginVertical: 16,
         borderRadius: 8,
         overflow: "hidden",

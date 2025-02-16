@@ -1,12 +1,11 @@
 import { StyleSheet, View } from "react-native";
 import React, { useEffect, useState } from "react";
-import type { CompanyProfile } from "@/lib/models/company-profile";
+import type { CompanyProfile } from "@lib/models/companyProfile";
 import type { OperatingHour } from "@lib/models/operatingHour";
-import type { ParkingEstablishment } from "@/lib/models/parking-establishment";
-import type { ParkingSlot } from "@/lib/models/parking-slot";
-import type { PricingPlan } from "@/lib/models/pricing-plan";
-import type { PaymentMethod } from "@/lib/models/payment-method";
-import type { EstablishmentDocument } from "@/lib/models/establishment-document";
+import type { ParkingEstablishment } from "@lib/models/parkingEstablishment";
+import type { ParkingSlot } from "@lib/models/parkingSlot";
+import type { PaymentMethod } from "@lib/models/paymentMethod";
+import type { EstablishmentDocument } from "@lib/models/establishmentDocument";
 import type { User } from "@/lib/models/user";
 import CardComponent from "@/components/CardComponent";
 import TextComponent from "@/components/TextComponent";
@@ -23,7 +22,6 @@ interface Establishment {
     operating_hours: OperatingHour[];
     parking_establishment: ParkingEstablishment;
     payment_methods: PaymentMethod[];
-    pricing_plans: PricingPlan[];
     slots: ParkingSlot[];
     user: User;
 }

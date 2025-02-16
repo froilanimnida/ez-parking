@@ -1,5 +1,5 @@
 import axiosInstance from "../axiosInstance";
-import type { VehicleType } from "../models/vehicle-types";
+import type { VehicleType } from "../models/vehicleTypes";
 
 const vehicleTypeRoot = "/vehicle_type" as const;
 

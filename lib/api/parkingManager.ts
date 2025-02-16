@@ -1,16 +1,15 @@
 import axiosInstance from "../axiosInstance";
-import type { OperatingHours } from "../function/validators/scheduleValidator";
 import type {
     ParkingAddressData,
     ParkingEstablishmentData,
     ParkingCompanyProfile,
     ParkingOwnerInformation,
     ParkingPaymentMethodData,
-    ParkingOperatingHoursData,
 } from "../models/parkingManagerSignUpTypes";
 import type { Documents } from "../types/documents";
 import { OperatingHour, OperatingSchedule } from "@lib/models/operatingHour";
 import { DAYS_OF_WEEK } from "@lib/types/models/common/constants";
+import { dataURLtoBlob } from "@lib/helper/dataURLtoBlob";
 
 const root = "/parking-manager" as const;
 export const qrContentOverview = async (qrContent: string) => {
@@ -82,17 +81,76 @@ export const parkingManagerSignUp = async (
     operatingHours: OperatingSchedule,
     paymentMethodData: ParkingPaymentMethodData,
     documents: Documents,
-) =>
-    await axiosInstance.post(`${root}/signup`, {
+) => {
+    if (!parkingEstablishmentData.is24_7 && !Object.values(operatingHours).some((day) => day.enabled)) {
+        throw new Error("At least one day must be enabled");
+    }
+
+    if (
+        !Object.values(operatingHours).every((day) => !day.enabled || (day.open && day.close && day.open < day.close))
+    ) {
+        throw new Error("Opening time must be before closing time");
+    }
+
+    const finalOperatingHours = parkingEstablishmentData.is24_7
+        ? {
+              monday: { enabled: true, open: "00:00", close: "23:59" },
+              tuesday: { enabled: true, open: "00:00", close: "23:59" },
+              wednesday: { enabled: true, open: "00:00", close: "23:59" },
+              thursday: { enabled: true, open: "00:00", close: "23:59" },
+              friday: { enabled: true, open: "00:00", close: "23:59" },
+              saturday: { enabled: true, open: "00:00", close: "23:59" },
+              sunday: { enabled: true, open: "00:00", close: "23:59" },
+          }
+        : operatingHours;
+
+    const filesFormData = new FormData();
+    const documentMapping = [
+        { key: "gov_id", name: "gov_id" },
+        { key: "parking_photos", name: "parking_photos", multiple: true },
+        { key: "proof_of_ownership", name: "proof_of_ownership" },
+        { key: "bir_cert", name: "bir_cert" },
+        { key: "liability_insurance", name: "liability_insurance" },
+        { key: "business_cert", name: "business_cert" },
+    ];
+
+    Object.entries(documents).forEach(([key, file]) => {
+        const doc = documentMapping.find((d) => d.key === key);
+        if (!doc) return;
+        console.log(file);
+
+        if (doc.multiple && Array.isArray(file)) {
+            file.forEach((f, index) => {
+                const blob = dataURLtoBlob(f.uri);
+                const fileWithBlob = new File([blob], f.name, { type: blob.type });
+                filesFormData.append(`${doc.name}[${index}]`, fileWithBlob);
+            });
+        } else if (!doc.multiple && !Array.isArray(file)) {
+            const blob = dataURLtoBlob(file.uri);
+            const fileWithBlob = new File([blob], file.name, { type: blob.type });
+            filesFormData.append(doc.name, fileWithBlob);
+        }
+    });
+
+    const signUpData = {
         user: userInformation,
         company_profile: companyProfile,
         address: addressData,
-        parking_establishment: parkingEstablishmentData,
-        operating_hour: operatingHours,
+        parking_establishment: { ...parkingEstablishmentData, operating_hours: undefined },
+        operating_hour: finalOperatingHours,
         payment_method: paymentMethodData,
-        documents: documents,
+    };
+
+    Object.entries(signUpData).forEach(([key, value]) => {
+        filesFormData.append(key, JSON.stringify(value));
     });
 
+    return await axiosInstance.post(`${root}/account/create`, filesFormData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+};
 export const getEstablishmentSchedules = () => axiosInstance.get(`${root}/operating-hours`);
 
 export const updateEstablishmentSchedules = async ({

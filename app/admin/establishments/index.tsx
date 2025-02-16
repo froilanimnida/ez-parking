@@ -10,8 +10,8 @@ import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { getEstablishments } from "@/lib/api/admin";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import LinkComponent from "@/components/LinkComponent";
-import type { ParkingEstablishment } from "@/lib/models/parking-establishment";
-import type { CompanyProfile } from "@/lib/models/company-profile";
+import type { ParkingEstablishment } from "@lib/models/parkingEstablishment";
+import type { CompanyProfile } from "@lib/models/companyProfile";
 import { ADMIN_ESTABLISHMENT_FILTERS } from "@/lib/types/models/common/constants";
 
 interface Establishment {

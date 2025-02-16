@@ -2,7 +2,7 @@ import { StyleSheet, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { getTransaction } from "@/lib/api/parkingManager";
-import type { ParkingSlot } from "@/lib/models/parking-slot";
+import type { ParkingSlot } from "@lib/models/parkingSlot";
 import type { Transaction } from "@/lib/models/transaction";
 import type { User } from "@/lib/models/user";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
@@ -102,20 +102,20 @@ const TransactionDetails = () => {
                                 <TextComponent style={styles.value}>
                                     Entry:{" "}
                                     {new Date(
-                                        transactionDetails?.transaction.scheduled_entry_time ?? ""
+                                        transactionDetails?.transaction.scheduled_entry_time ?? "",
                                     ).toLocaleString()}
                                 </TextComponent>
                                 <TextComponent style={styles.value}>
                                     Exit:{" "}
                                     {new Date(
-                                        transactionDetails?.transaction.scheduled_exit_time ?? ""
+                                        transactionDetails?.transaction.scheduled_exit_time ?? "",
                                     ).toLocaleString()}
                                 </TextComponent>
                             </View>
                             <View style={styles.infoBlock}>
                                 <TextComponent style={styles.label}>Entry Time</TextComponent>
                                 <TextComponent style={styles.value}>
-                                   {transactionDetails?.transaction.entry_time}
+                                    {transactionDetails?.transaction.entry_time}
                                 </TextComponent>
                             </View>
                             <View style={styles.infoBlock}>

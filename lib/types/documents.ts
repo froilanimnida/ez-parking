@@ -1,10 +1,10 @@
 export interface Documents {
-    govId: File | null;
-    parkingPhotos: File[] | null;
-    proofOfOwnership: File | null;
-    businessCert: File | null;
-    birCert: File | null;
-    liabilityInsurance: File | null;
+    gov_id: File | null;
+    parking_photos: File[] | null;
+    proof_of_ownership: File | null;
+    business_cert: File | null;
+    bir_cert: File | null;
+    liability_insurance: File | null;
 }
 
 export interface DocumentInfo {

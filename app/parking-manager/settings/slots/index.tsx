@@ -1,4 +1,4 @@
-import { StyleSheet, View, TextInput, Alert } from "react-native";
+import { StyleSheet, View, TextInput } from "react-native";
 import React, { useEffect, useState } from "react";
 import TextComponent from "@/components/TextComponent";
 import ButtonComponent from "@/components/ButtonComponent";
@@ -8,8 +8,8 @@ import LoadingComponent from "@/components/reusable/LoadingComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import TextInputComponent from "@/components/TextInputComponent";
 import { addParkingSlot, getParkingSlotsParkingManager, getVehicleTypes } from "@/lib/api/parkingManager";
-import { ParkingSlot } from "@/lib/models/parking-slot";
-import { VehicleType } from "@/lib/models/vehicle-types";
+import { ParkingSlot } from "@lib/models/parkingSlot";
+import { VehicleType } from "@lib/models/vehicleTypes";
 import CheckboxComponent from "@/components/CheckboxComponent";
 
 const slotFeatures = [
@@ -108,7 +108,12 @@ const Slots = () => {
                 base_price_per_month: "",
                 price_multiplier: "",
             });
-            alert("Slot Added");
+
+            if (result.status === 201) {
+                alert("Slot added successfully");
+            } else {
+                alert("Failed to add slot");
+            }
         } catch {
             alert("Failed to add slot");
         }

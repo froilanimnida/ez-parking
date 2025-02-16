@@ -6,7 +6,7 @@ import ButtonComponent from "@/components/ButtonComponent";
 import TextInputComponent from "@/components/TextInputComponent";
 import SelectComponent from "@/components/SelectComponent";
 import CheckboxComponent from "@/components/CheckboxComponent";
-import type { VehicleType } from "@/lib/models/vehicle-types";
+import type { VehicleType } from "@lib/models/vehicleTypes";
 import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { getVehicleTypes } from "@/lib/api/admin";

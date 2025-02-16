@@ -6,10 +6,9 @@ import SlotCard from "@/components/SlotCard";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import type { OperatingHour } from "@lib/models/operatingHour";
-import type { ParkingEstablishment } from "@/lib/models/parking-establishment";
-import type { PaymentMethod } from "@/lib/models/payment-method";
-import type { PricingPlan } from "@/lib/models/pricing-plan";
-import type { ParkingSlot } from "@/lib/models/parking-slot";
+import type { ParkingEstablishment } from "@lib/models/parkingEstablishment";
+import type { PaymentMethod } from "@lib/models/paymentMethod";
+import type { ParkingSlot } from "@lib/models/parkingSlot";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import PlatformType from "@lib/helper/platform";
 import { useLocalSearchParams } from "expo-router";
@@ -31,7 +30,6 @@ interface EstablishmentOverviewResponse {
     establishment: ParkingEstablishment;
     operating_hours: OperatingHour[];
     payment_methods: PaymentMethod[];
-    pricing_plans: PricingPlan[];
     slots: Slot[];
 }
 

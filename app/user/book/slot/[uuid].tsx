@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import { Address } from "@/lib/models/address";
-import { ParkingEstablishment } from "@/lib/models/parking-establishment";
+import { ParkingEstablishment } from "@lib/models/parkingEstablishment";
 import { OperatingHour } from "@lib/models/operatingHour";
-import { PaymentMethod } from "@/lib/models/payment-method";
-import { ParkingSlot } from "@/lib/models/parking-slot";
+import { PaymentMethod } from "@lib/models/paymentMethod";
+import { ParkingSlot } from "@lib/models/parkingSlot";
 import { router, useLocalSearchParams } from "expo-router";
 import LinkComponent from "@/components/LinkComponent";
 import CardComponent from "@/components/CardComponent";

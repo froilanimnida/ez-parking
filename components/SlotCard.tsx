@@ -1,10 +1,10 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { ParkingSlot } from "@/lib/models/parking-slot";
+import { ParkingSlot } from "@lib/models/parkingSlot";
 import CardComponent from "./CardComponent";
 import TextComponent from "./TextComponent";
 import LinkComponent from "./LinkComponent";
-import { usePathname, type RelativePathString } from "expo-router";
+import { type RelativePathString } from "expo-router";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;
@@ -77,7 +77,7 @@ const SlotCard = ({ slotInfo, slotUuid, isGuest, establishmentUuid }: SlotCardPr
                             href={
                                 isGuest
                                     ? (`../auth/login?next=${encodeURIComponent(
-                                          `/user/book/slot/${slotUuid}?establishment_uuid=${establishmentUuid}`
+                                          `/user/book/slot/${slotUuid}?establishment_uuid=${establishmentUuid}`,
                                       )}` as RelativePathString)
                                     : (`/user/book/slot/${slotUuid}?establishment_uuid=${establishmentUuid}` as RelativePathString)
                             }

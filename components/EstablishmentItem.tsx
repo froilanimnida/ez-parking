@@ -5,7 +5,7 @@ import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import calculateDistance from "@/lib/function/calculateDistance";
 import LinkComponent from "./LinkComponent";
-import type { ParkingEstablishment } from "@/lib/models/parking-establishment";
+import type { ParkingEstablishment } from "@lib/models/parkingEstablishment";
 
 interface EstablishmentItem {
     establishment: ParkingEstablishment & {

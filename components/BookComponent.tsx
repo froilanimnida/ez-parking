@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, ScrollView, StyleSheet, Animated, Modal, Pressable } from "react-native";
 import EstablishmentItem from "@/components/EstablishmentItem";
 import TextComponent from "@/components/TextComponent";
-import type { ParkingEstablishment } from "@/lib/models/parking-establishment";
-import type { PricingPlan } from "@/lib/models/pricing-plan";
+import type { ParkingEstablishment } from "@lib/models/parkingEstablishment";
 import TextInputComponent from "@/components/TextInputComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import PlatformType from "@lib/helper/platform";
@@ -11,7 +10,7 @@ import { getNearbyEstablishments } from "@/lib/api/establishment";
 import { askLocationPermission, getIPBasedLocation, getUserLocation } from "@lib/helper/location";
 import LoadingComponent from "./reusable/LoadingComponent";
 import SelectComponent from "./SelectComponent";
-import { METRO_MANILA_CITIES } from "@/lib/models/cities";
+import { METRO_MANILA_CITIES } from "@/lib/types/models/common/constants";
 import type { CITY } from "@/lib/types/models/common/constants";
 
 export interface EstablishmentQuery extends ParkingEstablishment {
@@ -19,7 +18,6 @@ export interface EstablishmentQuery extends ParkingEstablishment {
     total_slots: number;
     reserved_slot: number;
     occupied_slots: number;
-    pricing_plans: PricingPlan[];
 }
 
 const EstablishmentSearch = ({ guest }: { guest: boolean }) => {

@@ -7,12 +7,12 @@ import CardComponent from "@/components/CardComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import { router, useLocalSearchParams } from "expo-router";
 import { allowExit, allowTransaction, qrContentOverview } from "@/lib/api/parkingManager";
-import type { ParkingSlot } from "@/lib/models/parking-slot";
+import type { ParkingSlot } from "@lib/models/parkingSlot";
 import type { Transaction } from "@/lib/models/transaction";
 import type { User } from "@/lib/models/user";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import type { AxiosError } from "axios";
-import {calculateExceededTime, calculateTotalBill} from "@/lib/function/calculateGrandTotal";
+import { calculateExceededTime, calculateTotalBill } from "@/lib/function/calculateGrandTotal";
 
 interface qrContent {
     parking_slot_info: ParkingSlot;
@@ -60,24 +60,20 @@ const QRContent = () => {
         transactionId: string,
         actualEntryTime: Date,
         rates: { hourly: number; daily: number; monthly: number },
-        paymentStatus: "pending" | "paid"
+        paymentStatus: "pending" | "paid",
     ) => {
-
-        const calculation = calculateTotalBill(
-            actualEntryTime,
-            rates
-        );
+        const calculation = calculateTotalBill(actualEntryTime, rates);
         alert("The user will be charged ₱" + calculation.totalAmount + " for the parking fee.");
         alert("Please make sure the user has paid before allowing exit.");
         try {
             const nowUTC = new Date();
-            const nowPHT = new Date(nowUTC.getTime() + (8 * 60 * 60 * 1000));
+            const nowPHT = new Date(nowUTC.getTime() + 8 * 60 * 60 * 1000);
             const result = await allowExit(
                 transactionId,
                 paymentStatus,
                 nowPHT.toISOString(),
                 calculation.totalAmount,
-                qrContent?.parking_slot_info.slot_id!
+                qrContent?.parking_slot_info.slot_id!,
             );
             if (result.status === 200) {
                 alert("Exit allowed successfully.");
@@ -87,8 +83,7 @@ const QRContent = () => {
         } catch {
             alert("Error allowing exit.");
         }
-
-    }
+    };
 
     return (
         <ResponsiveContainer>
@@ -215,21 +210,23 @@ const QRContent = () => {
                         <View style={styles.formGroup}>
                             {qrContent.transaction_data.payment_status === "paid" && (
                                 <TextComponent variant="body">
-                                    This transaction has already been paid. No further action is required. Any overstay charges will be indicated in the box below.
+                                    This transaction has already been paid. No further action is required. Any overstay
+                                    charges will be indicated in the box below.
                                 </TextComponent>
                             )}
                             {qrContent.transaction_data.payment_status === "pending" && (
                                 <>
-                            <TextComponent style={styles.label}>Payment Status</TextComponent>
-                            <SelectComponent
-                                selectedValue={paymentStatus}
-                                onValueChange={(itemValue) => setPaymentStatus(itemValue as "paid" | "pending")}
-                                customStyles={styles.picker}
-                                items={[
-                                    { label: "Paid", value: "paid" },
-                                    { label: "Pending", value: "pending" },
-                                ]}
-                            /></>
+                                    <TextComponent style={styles.label}>Payment Status</TextComponent>
+                                    <SelectComponent
+                                        selectedValue={paymentStatus}
+                                        onValueChange={(itemValue) => setPaymentStatus(itemValue as "paid" | "pending")}
+                                        customStyles={styles.picker}
+                                        items={[
+                                            { label: "Paid", value: "paid" },
+                                            { label: "Pending", value: "pending" },
+                                        ]}
+                                    />
+                                </>
                             )}
                         </View>
                         <View style={styles.buttonRow}>
@@ -244,9 +241,9 @@ const QRContent = () => {
                                             {
                                                 hourly: Number(qrContent.parking_slot_info.base_price_per_hour),
                                                 daily: Number(qrContent.parking_slot_info.base_price_per_day),
-                                                monthly: Number(qrContent.parking_slot_info.base_price_per_month)
+                                                monthly: Number(qrContent.parking_slot_info.base_price_per_month),
                                             },
-                                            paymentStatus
+                                            paymentStatus,
                                         );
                                     }
                                 }}
@@ -255,29 +252,28 @@ const QRContent = () => {
                                     isLoading
                                         ? "Updating..."
                                         : qrContent.transaction_data.status === "reserved"
-                                        ? "Allow Entry"
-                                        : "Allow Exit"
+                                          ? "Allow Entry"
+                                          : "Allow Exit"
                                 }
                             />
                         </View>
                     </CardComponent>
-                    {qrContent.transaction_data.status === "active"  && (
+                    {qrContent.transaction_data.status === "active" && (
                         <CardComponent header="Total Bill">
                             <View style={styles.cardItem}>
                                 {(() => {
                                     // Calculate booking duration from scheduled times
                                     const scheduledEntry = new Date(qrContent.transaction_data.scheduled_entry_time);
                                     const scheduledExit = new Date(qrContent.transaction_data.scheduled_exit_time);
-                                    const bookingDuration = Math.ceil((scheduledExit.getTime() - scheduledEntry.getTime()) / (1000 * 60 * 60));
-
-                                    const bill = calculateTotalBill(
-                                        new Date(qrContent.transaction_data.entry_time),
-                                        {
-                                            hourly: Number(qrContent.parking_slot_info.base_price_per_hour),
-                                            daily: Number(qrContent.parking_slot_info.base_price_per_day),
-                                            monthly: Number(qrContent.parking_slot_info.base_price_per_month)
-                                        }
+                                    const bookingDuration = Math.ceil(
+                                        (scheduledExit.getTime() - scheduledEntry.getTime()) / (1000 * 60 * 60),
                                     );
+
+                                    const bill = calculateTotalBill(new Date(qrContent.transaction_data.entry_time), {
+                                        hourly: Number(qrContent.parking_slot_info.base_price_per_hour),
+                                        daily: Number(qrContent.parking_slot_info.base_price_per_day),
+                                        monthly: Number(qrContent.parking_slot_info.base_price_per_month),
+                                    });
 
                                     const exceededTime = calculateExceededTime(
                                         new Date(qrContent.transaction_data.entry_time),
@@ -285,48 +281,63 @@ const QRContent = () => {
                                         {
                                             hourly: Number(qrContent.parking_slot_info.base_price_per_hour),
                                             daily: Number(qrContent.parking_slot_info.base_price_per_day),
-                                            monthly: Number(qrContent.parking_slot_info.base_price_per_month)
-                                        }
+                                            monthly: Number(qrContent.parking_slot_info.base_price_per_month),
+                                        },
                                     );
 
                                     return (
                                         <View>
-                                            <TextComponent variant="label" style={{ marginBottom: 8 }}>Regular Charges</TextComponent>
+                                            <TextComponent variant="label" style={{ marginBottom: 8 }}>
+                                                Regular Charges
+                                            </TextComponent>
                                             {bill.breakdown.months.count > 0 && (
                                                 <TextComponent variant="body">
-                                                    Months: {bill.breakdown.months.count} × ₱{bill.breakdown.months.rate} = ₱{bill.breakdown.months.total}
+                                                    Months: {bill.breakdown.months.count} × ₱
+                                                    {bill.breakdown.months.rate} = ₱{bill.breakdown.months.total}
                                                 </TextComponent>
                                             )}
                                             {bill.breakdown.days.count > 0 && (
                                                 <TextComponent variant="body">
-                                                    Days: {bill.breakdown.days.count} × ₱{bill.breakdown.days.rate} = ₱{bill.breakdown.days.total}
+                                                    Days: {bill.breakdown.days.count} × ₱{bill.breakdown.days.rate} = ₱
+                                                    {bill.breakdown.days.total}
                                                 </TextComponent>
                                             )}
                                             {bill.breakdown.hours.count > 0 && (
                                                 <TextComponent variant="body">
-                                                    Hours: {bill.breakdown.hours.count} × ₱{bill.breakdown.hours.rate} = ₱{bill.breakdown.hours.total}
+                                                    Hours: {bill.breakdown.hours.count} × ₱{bill.breakdown.hours.rate} =
+                                                    ₱{bill.breakdown.hours.total}
                                                 </TextComponent>
                                             )}
 
                                             {exceededTime.isOvertime && (
                                                 <>
-                                                    <TextComponent variant="label" style={{ marginTop: 16, marginBottom: 8, color: 'red' }}>
+                                                    <TextComponent
+                                                        variant="label"
+                                                        style={{
+                                                            marginTop: 16,
+                                                            marginBottom: 8,
+                                                            color: "red",
+                                                        }}
+                                                    >
                                                         Overtime Charges
                                                     </TextComponent>
-                                                    <TextComponent variant="body" style={{ color: 'red' }}>
-                                                        Exceeded: {exceededTime.exceededDuration.hours}h {exceededTime.exceededDuration.minutes}m
+                                                    <TextComponent variant="body" style={{ color: "red" }}>
+                                                        Exceeded: {exceededTime.exceededDuration.hours}h{" "}
+                                                        {exceededTime.exceededDuration.minutes}m
                                                     </TextComponent>
-                                                    <TextComponent variant="body" style={{ color: 'red' }}>
+                                                    <TextComponent variant="body" style={{ color: "red" }}>
                                                         Rate: ₱{exceededTime.overtimeCharges.breakdown.hours.rate}/hour
                                                     </TextComponent>
-                                                    <TextComponent variant="body" style={{ color: 'red' }}>
+                                                    <TextComponent variant="body" style={{ color: "red" }}>
                                                         Overtime Fee: ₱{exceededTime.overtimeCharges.amount}
                                                     </TextComponent>
                                                 </>
                                             )}
 
                                             <TextComponent variant="body" bold style={{ marginTop: 16, fontSize: 16 }}>
-                                                Total Amount: ₱{bill.totalAmount + (exceededTime.isOvertime ? exceededTime.overtimeCharges.amount : 0)}
+                                                Total Amount: ₱
+                                                {bill.totalAmount +
+                                                    (exceededTime.isOvertime ? exceededTime.overtimeCharges.amount : 0)}
                                             </TextComponent>
                                         </View>
                                     );
@@ -334,8 +345,7 @@ const QRContent = () => {
                             </View>
                         </CardComponent>
                     )}
-                {/*    If the parking is beyond the reserved time, calculate the total bill and display it here.*/}
-
+                    {/*    If the parking is beyond the reserved time, calculate the total bill and display it here.*/}
                 </View>
             )}
         </ResponsiveContainer>

@@ -8,11 +8,29 @@ import LinkComponent from "@/components/LinkComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import { cancelTransaction, viewTransaction } from "@/lib/api/transaction";
 import { router, useLocalSearchParams } from "expo-router";
-import type { TransactionDetailsType } from "@/lib/models/userRoleTypes";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import calculateDistance from "@/lib/helper/calculateDistance";
 import { threeDimensionalMapURL, normalMapURL, satelliteMapURL } from "@/lib/helper/mapViewFunction";
+import type { Address } from "@lib/models/address";
+import type { ParkingEstablishment } from "@lib/models/parkingEstablishment";
+import type { ParkingSlot } from "@lib/models/parkingSlot";
+import type { Transaction } from "@lib/models/transaction";
+
+interface TransactionDetailsType {
+    address_info: Address;
+    contact_number: string;
+    establishment_info: ParkingEstablishment;
+    qr_code: string;
+    slot_info: ParkingSlot & {
+        vehicle_type_code: string;
+        vehicle_type_id: number;
+        vehicle_type_name: string;
+        vehicle_type_size: string;
+    };
+    transaction_data: Transaction;
+    user_plate_number: string;
+}
 
 const TransactionDetails = () => {
     const [transactionDetails, setTransactionDetails] = useState<TransactionDetailsType | null>(null);
@@ -41,7 +59,7 @@ const TransactionDetails = () => {
                 Alert.alert("Error getting user location");
                 setLoadingLocation(false);
             },
-            { enableHighAccuracy: true }
+            { enableHighAccuracy: true },
         );
 
         const fetchTransactionDetails = async () => {
@@ -86,7 +104,7 @@ const TransactionDetails = () => {
         ? threeDimensionalMapURL(
               establishmentLatitude!,
               establishmentLongitude!,
-              transactionDetails.establishment_info.name
+              transactionDetails.establishment_info.name,
           )
         : "";
     const birdsEyeMapUrl = transactionDetails?.establishment_info.name
@@ -118,10 +136,10 @@ const TransactionDetails = () => {
                                         transactionDetails.transaction_data?.payment_status === "PAID"
                                             ? styles.badgeSuccess
                                             : transactionDetails.transaction_data.payment_status === "PARTIALLY_PAID"
-                                            ? styles.badgeWarning
-                                            : transactionDetails.transaction_data.payment_status === "OVERDUE"
-                                            ? styles.badgeError
-                                            : styles.badgeGray,
+                                              ? styles.badgeWarning
+                                              : transactionDetails.transaction_data.payment_status === "OVERDUE"
+                                                ? styles.badgeError
+                                                : styles.badgeGray,
                                     ]}
                                 >
                                     <TextComponent style={styles.badgeText}>
@@ -135,10 +153,10 @@ const TransactionDetails = () => {
                                     transactionDetails.transaction_data.status === "active"
                                         ? styles.badgeInfo
                                         : transactionDetails.transaction_data.status === "completed"
-                                        ? styles.badgeSuccess
-                                        : transactionDetails.transaction_data.status === "cancelled"
-                                        ? styles.badgeError
-                                        : styles.badgeWarning,
+                                          ? styles.badgeSuccess
+                                          : transactionDetails.transaction_data.status === "cancelled"
+                                            ? styles.badgeError
+                                            : styles.badgeWarning,
                                 ]}
                             >
                                 <TextComponent style={styles.badgeText}>
@@ -210,7 +228,7 @@ const TransactionDetails = () => {
                                     href={`https://maps.google.com/maps?width=100%25&height=600&hl=en&q=${
                                         transactionDetails.establishment_info.latitude
                                     },${transactionDetails.establishment_info.longitude}+(${encodeURIComponent(
-                                        transactionDetails.establishment_info.name
+                                        transactionDetails.establishment_info.name,
                                     )})&t=&z=14&ie=UTF8&iwloc=B&output=embed`}
                                     label="Google Maps"
                                 />
@@ -225,13 +243,12 @@ const TransactionDetails = () => {
                     </CardComponent>
 
                     <CardComponent header="Timing Details">
-
                         <View style={styles.lineRow}>
                             <TextComponent style={styles.lineLabel}>Scheduled Entry Time</TextComponent>
                             <TextComponent style={styles.lineValue}>
                                 {transactionDetails.transaction_data.scheduled_entry_time
                                     ? new Date(
-                                          transactionDetails.transaction_data.scheduled_entry_time
+                                          transactionDetails.transaction_data.scheduled_entry_time,
                                       ).toLocaleString()
                                     : "Not Available"}
                             </TextComponent>

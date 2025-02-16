@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Platform, View } from "react-native";
+import { View } from "react-native";
 
 interface WebLocationPickerProps {
     initialLatitude: number;
@@ -57,8 +57,8 @@ const WebLocationPicker: React.FC<WebLocationPickerProps> = ({
     }, [initialLatitude, initialLongitude, onLocationChange]);
 
     return (
-        <View style={{ height: 500, width: "100%" }}>
-            <div ref={mapRef} style={{ height: 500, width: "100%" }} />
+        <View style={{ height: 900, width: "100%" }}>
+            <div ref={mapRef} style={{ height: 900, width: "100%" }} />
         </View>
     );
 };
