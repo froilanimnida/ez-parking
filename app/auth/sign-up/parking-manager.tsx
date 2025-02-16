@@ -1,5 +1,5 @@
 import { StyleSheet, View } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ButtonComponent from "@/components/ButtonComponent";
 import * as DocumentPicker from "expo-document-picker";
 import TextInputComponent from "@/components/TextInputComponent";
@@ -137,7 +137,7 @@ const ParkingManagerSignUp = () => {
 
         try {
             const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`,
             );
             const data = await response.json();
             if (data.length > 0) {
@@ -180,10 +180,9 @@ const ParkingManagerSignUp = () => {
                         parkingPhotos: [...(prev.parkingPhotos || []), ...newPhotos],
                     }));
                 }
-                return; // Early return after handling photos
+                return;
             }
 
-            // Handle single file selection for other documents
             result = await DocumentPicker.getDocumentAsync({
                 type: ["application/pdf", "image/*"],
                 copyToCacheDirectory: true,
@@ -240,7 +239,7 @@ const ParkingManagerSignUp = () => {
                 parkingEstablishmentData,
                 operatingHours,
                 paymentMethodData,
-                documents
+                documents,
             );
             if (result.status === 201) {
                 alert("Registration successful. Please wait for approval.");

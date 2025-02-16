@@ -42,12 +42,12 @@ const EstablishmentDetails = () => {
                 const response = await getEstablishment(uuid);
                 setEstablishment(response.data.data);
                 setIsLoading(false);
-            } catch (error: unknown) {
-                const axiosError = error as AxiosError;
+            } catch (e: unknown) {
+                const axiosError = e as AxiosError<ApiErrorResponse>;
                 alert(axiosError.response?.data?.message || "An error occurred");
             }
         };
-        fetchEstablishment();
+        fetchEstablishment().then();
     });
 
     return (

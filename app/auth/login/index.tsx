@@ -12,6 +12,7 @@ import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { loginUser, verifyOTP } from "@/lib/api/auth";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
+import React from "react";
 
 const LoginForm = () => {
     const [showOtpForm, setShowOtpForm] = useState(false);
