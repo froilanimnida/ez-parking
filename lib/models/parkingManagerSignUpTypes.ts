@@ -28,7 +28,7 @@ export interface ParkingEstablishmentData {
     custom_layout: string;
     dimensions: string;
     is24_7: false;
-    access_info: "gate_code" | "security_check" | "key_pickup" | "no_specific_access" | "other";
+    access_info: "gate_code" | "security_check" | "key_pickup" | "no_special_access" | "other";
     custom_access: string;
     name: string;
     lighting: string;

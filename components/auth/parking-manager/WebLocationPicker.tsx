@@ -26,11 +26,22 @@ const WebLocationPicker: React.FC<WebLocationPickerProps> = ({
         scriptEl.src = "https://unpkg.com/leaflet@1.7.1/dist/leaflet.js";
         scriptEl.onload = () => {
             const L = (window as any).L;
-            const map = L.map(mapRef.current).setView([initialLatitude, initialLongitude], 13);
+            const map = L.map(mapRef.current, {
+                maxBounds: [
+                    [-90, -180],
+                    [90, 180],
+                ],
+                maxBoundsViscosity: 1.0,
+            }).setView([initialLatitude, initialLongitude], 13);
 
             L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
                 maxZoom: 19,
                 attribution: "© OpenStreetMap contributors",
+                noWrap: true,
+                bounds: [
+                    [-90, -180],
+                    [90, 180],
+                ],
             }).addTo(map);
 
             let marker = L.marker([initialLatitude, initialLongitude], {
