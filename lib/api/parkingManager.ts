@@ -9,7 +9,7 @@ import type {
     ParkingOperatingHoursData,
 } from "../models/parkingManagerSignUpTypes";
 import type { Documents } from "../types/documents";
-import { OperatingHour } from "@lib/models/operatingHour";
+import { OperatingHour, OperatingSchedule } from "@lib/models/operatingHour";
 import { DAYS_OF_WEEK } from "@lib/types/models/common/constants";
 
 const root = "/parking-manager" as const;
@@ -79,7 +79,7 @@ export const parkingManagerSignUp = async (
     companyProfile: ParkingCompanyProfile,
     addressData: ParkingAddressData,
     parkingEstablishmentData: ParkingEstablishmentData,
-    operatingHours: { [key: string]: ParkingOperatingHoursData },
+    operatingHours: OperatingSchedule,
     paymentMethodData: ParkingPaymentMethodData,
     documents: Documents,
 ) =>

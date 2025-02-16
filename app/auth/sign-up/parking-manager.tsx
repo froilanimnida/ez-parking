@@ -129,6 +129,24 @@ const ParkingManagerSignUp = () => {
     const handlePaymentDataChange = (key: string, value: boolean | string) => {
         setPaymentMethodData({ ...paymentMethodData, [key]: value });
     };
+    useEffect(() => {
+        console.log("Form Data updated:");
+        console.log("User Information: ", userInformation);
+        console.log("Company Profile: ", companyProfile);
+        console.log("Address Data: ", addressData);
+        console.log("Parking Establishment Data: ", parkingEstablishmentData);
+        console.log("Operating Hours: ", operatingHours);
+        console.log("Payment Method Data: ", paymentMethodData);
+        console.log("Documents: ", documents);
+    }, [
+        userInformation,
+        companyProfile,
+        addressData,
+        parkingEstablishmentData,
+        operatingHours,
+        paymentMethodData,
+        documents,
+    ]);
 
     const searchLocation = async () => {
         if (!query) {

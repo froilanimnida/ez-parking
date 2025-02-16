@@ -110,8 +110,6 @@ const ParkingLocation = ({
                     placeholder="Landmarks: e.g., near a mall, beside a church"
                     value={nearby_landmarks}
                     onChangeText={(value) => setParkingEstablishmentData((prev) => ({ ...prev, landmarks: value }))}
-                    multiline
-                    numberOfLines={3}
                 />
             </View>
         </CardComponent>
