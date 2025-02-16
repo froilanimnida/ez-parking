@@ -29,7 +29,6 @@ const NativeLocationPicker: React.FC<NativeLocationPickerProps> = ({
                     onLocationChange(region.latitude, region.longitude);
                 }}
                 mapType="standard"
-                showsUserLocation={true}
                 zoomEnabled={true}
             />
         </View>

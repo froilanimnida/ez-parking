@@ -199,74 +199,69 @@ const EstablishmentOverview = () => {
                                 />
                             </View>
                         </View>
-                        <TextComponent>To Be Implemented</TextComponent>
-                        {/*<View style={styles.mapContainer}>*/}
-                        {/*    {PlatformType() !== "web" ? (*/}
-                        {/*        <MapView*/}
-                        {/*            style={{ width: "100%", height: 500 }}*/}
-                        {/*            provider={PROVIDER_DEFAULT}*/}
-                        {/*            initialRegion={region}*/}
-                        {/*            mapType="standard"*/}
-                        {/*            showsUserLocation={true}*/}
-                        {/*            showsTraffic={true}*/}
-                        {/*        >*/}
-                        {/*            <Marker*/}
-                        {/*                coordinate={{*/}
-                        {/*                    latitude: establishment.establishment.latitude,*/}
-                        {/*                    longitude: establishment.establishment.longitude,*/}
-                        {/*                }}*/}
-                        {/*            >*/}
-                        {/*                <MaterialCommunityIcons name="map-marker" size={40} color="red" />*/}
-                        {/*            </Marker>*/}
-                        {/*        </MapView>*/}
-                        {/*    ) : (*/}
-                        {/*        <iframe title={establishment.establishment.name} src={mapUrl} height={500} />*/}
-                        {/*    )}*/}
-                        {/*</View>*/}
+                        <View style={styles.mapContainer}>
+                            {PlatformType() !== "web" ? (
+                                <MapView
+                                    style={{ width: "100%", height: 500 }}
+                                    provider={PROVIDER_DEFAULT}
+                                    initialRegion={region}
+                                    mapType="standard"
+                                >
+                                    <Marker
+                                        coordinate={{
+                                            latitude: establishment.establishment.latitude,
+                                            longitude: establishment.establishment.longitude,
+                                        }}
+                                    >
+                                        <MaterialCommunityIcons name="map-marker" size={40} color="red" />
+                                    </Marker>
+                                </MapView>
+                            ) : (
+                                <iframe title={establishment.establishment.name} src={mapUrl} height={500} />
+                            )}
+                        </View>
                     </CardComponent>
                     <CardComponent customStyles={styles.card} header="Location | Birds Eye View">
-                        <TextComponent>To Be Implemented</TextComponent>
-                        {/*<View style={styles.mapContainer}>*/}
-                        {/*    {PlatformType() !== "web" ? (*/}
-                        {/*        <MapView*/}
-                        {/*            style={{ width: "100%", height: 500 }}*/}
-                        {/*            provider={PROVIDER_DEFAULT}*/}
-                        {/*            initialRegion={{*/}
-                        {/*                latitude: establishment.establishment.latitude,*/}
-                        {/*                longitude: establishment.establishment.longitude,*/}
-                        {/*                latitudeDelta: 0.005,*/}
-                        {/*                longitudeDelta: 0.005,*/}
-                        {/*            }}*/}
-                        {/*            mapType="satellite"*/}
-                        {/*        />*/}
-                        {/*    ) : (*/}
-                        {/*        <iframe title={establishment.establishment.name} src={mapUrlSat} height={500} />*/}
-                        {/*    )}*/}
-                        {/*</View>*/}
+                        <View style={styles.mapContainer}>
+                            <TextComponent> To be Implemented </TextComponent>
+                            {PlatformType() !== "web" ? (
+                                <MapView
+                                    style={{ width: "100%", height: 500 }}
+                                    provider={PROVIDER_DEFAULT}
+                                    initialRegion={{
+                                        latitude: establishment.establishment.latitude,
+                                        longitude: establishment.establishment.longitude,
+                                        latitudeDelta: 0.005,
+                                        longitudeDelta: 0.005,
+                                    }}
+                                    mapType="satellite"
+                                />
+                            ) : (
+                                <iframe title={establishment.establishment.name} src={mapUrlSat} height={500} />
+                            )}
+                        </View>
                     </CardComponent>
                     <CardComponent customStyles={styles.card} header="Location | 3D View">
                         <View style={styles.mapContainer}>
-                            <TextComponent>To Be Implemented</TextComponent>
-                            {/*{PlatformType() !== "web" ? (*/}
-                            {/*    <MapView*/}
-                            {/*        style={{ width: "100%", height: 500 }}*/}
-                            {/*        provider={PROVIDER_DEFAULT}*/}
-                            {/*        initialRegion={{*/}
-                            {/*            latitude: establishment.establishment.latitude,*/}
-                            {/*            longitude: establishment.establishment.longitude,*/}
-                            {/*            latitudeDelta: 0.0922,*/}
-                            {/*            longitudeDelta: 0.0421,*/}
-                            {/*        }}*/}
-                            {/*        mapType="terrain"*/}
-                            {/*        zoomEnabled={true}*/}
-                            {/*        zoomControlEnabled={true}*/}
-                            {/*        pitchEnabled={true}*/}
-                            {/*        rotateEnabled={true}*/}
-                            {/*        showsBuildings={true}*/}
-                            {/*    />*/}
-                            {/*) : (*/}
-                            {/*    <iframe title={establishment.establishment.name} src={mapUrl3D} height={500} />*/}
-                            {/*)}*/}
+                            <TextComponent> To be Implemented </TextComponent>
+                            {PlatformType() !== "web" ? (
+                                <MapView
+                                    style={{ width: "100%", height: 500 }}
+                                    provider={PROVIDER_DEFAULT}
+                                    initialRegion={{
+                                        latitude: establishment.establishment.latitude,
+                                        longitude: establishment.establishment.longitude,
+                                        latitudeDelta: 0.0922,
+                                        longitudeDelta: 0.0421,
+                                    }}
+                                    zoomEnabled={true}
+                                    zoomControlEnabled={true}
+                                    pitchEnabled={true}
+                                    rotateEnabled={true}
+                                />
+                            ) : (
+                                <iframe title={establishment.establishment.name} src={mapUrl3D} height={500} />
+                            )}
                         </View>
                     </CardComponent>
 
