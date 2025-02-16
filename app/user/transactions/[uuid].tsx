@@ -2,31 +2,35 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Pressable, Image, Modal, Alert, ActivityIndicator } from "react-native";
 import WebView from "react-native-webview";
 import CardComponent from "@/components/CardComponent";
-import PlatformType from "@/lib/platform";
+import PlatformType from "@lib/helper/platform";
 import TextComponent from "@/components/TextComponent";
 import LinkComponent from "@/components/LinkComponent";
 import ButtonComponent from "@/components/ButtonComponent";
-import { viewTransaction } from "@/lib/api/transaction";
+import { cancelTransaction, viewTransaction } from "@/lib/api/transaction";
 import { router, useLocalSearchParams } from "expo-router";
 import type { TransactionDetailsType } from "@/lib/models/userRoleTypes";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
-
-function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    return Math.random() * 10;
-}
+import calculateDistance from "@/lib/helper/calculateDistance";
+import { threeDimensionalMapURL, normalMapURL, satelliteMapURL } from "@/lib/helper/mapViewFunction";
 
 const TransactionDetails = () => {
-    const [transactionDetails, setTransactionDetails] = useState<TransactionDetailsType>({});
+    const [transactionDetails, setTransactionDetails] = useState<TransactionDetailsType | null>(null);
     const [isFetching, setIsFetching] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
     const [userLatitude, setUserLatitude] = useState(0);
     const [userLongitude, setUserLongitude] = useState(0);
+    const [establishmentLatitude, setEstablishmentLatitude] = useState(0);
+    const [establishmentLongitude, setEstablishmentLongitude] = useState(0);
     const [loadingLocation, setLoadingLocation] = useState(true);
     const { uuid } = useLocalSearchParams<{ uuid: string }>();
 
     useEffect(() => {
+        setTransactionDetails(null);
+        setIsFetching(true);
+        setLoadingLocation(true);
+
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 setUserLatitude(position.coords.latitude);
@@ -39,42 +43,65 @@ const TransactionDetails = () => {
             },
             { enableHighAccuracy: true }
         );
-        const getTransactionDetails = async () => {
-            viewTransaction(uuid).then((response) => {
-                console.log(response);
-                setIsFetching(false);
-                setTransactionDetails(response.data.transaction);
-                if (!transactionDetails) {
-                    router.replace("../transactions");
-                }
-            });
-        };
-        getTransactionDetails();
-    }, []);
 
-    const handleCancelTransaction = () => {
+        const fetchTransactionDetails = async () => {
+            try {
+                const response = await viewTransaction(uuid);
+                setTransactionDetails(response.data.transaction);
+                setEstablishmentLatitude(response.data.transaction?.establishment_info?.latitude);
+                setEstablishmentLongitude(response.data.transaction?.establishment_info?.longitude);
+            } catch (error) {
+                console.error("Error fetching transaction:", error);
+                alert("Error loading transaction details");
+            } finally {
+                setIsFetching(false);
+            }
+        };
+
+        fetchTransactionDetails();
+
+        return () => {
+            setTransactionDetails(null);
+            setIsFetching(true);
+            setLoadingLocation(true);
+        };
+    }, [uuid]);
+
+    const handleCancelTransaction = async () => {
         setIsCancelModalOpen(false);
-        Alert.alert("Transaction cancelled.");
+        try {
+            const result = await cancelTransaction(uuid);
+            if (result.status === 200) {
+                alert("Transaction cancelled.");
+                router.reload();
+            } else {
+                alert("Error cancelling transaction.");
+            }
+        } catch {
+            alert("Error cancelling transaction.");
+        }
     };
 
-    const establishmentLatitude = transactionDetails?.establishment_info?.latitude;
-    const establishmentLongitude = transactionDetails?.establishment_info?.longitude;
-
-    const mapUrl =
-        establishmentLatitude && establishmentLongitude
-            ? `https://maps.google.com/maps?width=100%25&height=600&hl=en&q=${establishmentLatitude},${establishmentLongitude}+(${encodeURIComponent(
-                  transactionDetails.establishment_info.name
-              )})&t=&z=14&ie=UTF8&iwloc=B&output=embed`
-            : "";
+    const threeDimensionMap = transactionDetails?.establishment_info.name
+        ? threeDimensionalMapURL(
+              establishmentLatitude!,
+              establishmentLongitude!,
+              transactionDetails.establishment_info.name
+          )
+        : "";
+    const birdsEyeMapUrl = transactionDetails?.establishment_info.name
+        ? satelliteMapURL(establishmentLatitude!, establishmentLongitude!, transactionDetails.establishment_info.name)
+        : "";
+    const normalMapUrl = transactionDetails?.establishment_info.name
+        ? normalMapURL(establishmentLatitude!, establishmentLongitude!, transactionDetails.establishment_info.name)
+        : "";
     const distanceKm =
-        transactionDetails.slot_info?.slot_status === "reserved"
-            ? calculateDistance(establishmentLatitude, establishmentLongitude, userLatitude, userLongitude).toFixed(1)
+        transactionDetails?.slot_info?.slot_status === "reserved"
+            ? calculateDistance(establishmentLatitude!, establishmentLongitude!, userLatitude, userLongitude).toFixed(1)
             : null;
     return (
         <ResponsiveContainer>
-            <LinkComponent style={{ marginBottom: 16 }} href="../transactions">
-                ← Back to Transaction
-            </LinkComponent>
+            <LinkComponent style={{ marginBottom: 16 }} href="../transactions" label="← Back to Transaction" />
             {isFetching && <LoadingComponent text="Fetching transaction details..." />}
 
             {!isFetching && transactionDetails && (
@@ -152,10 +179,8 @@ const TransactionDetails = () => {
                         <View style={styles.lineRow}>
                             <TextComponent style={styles.lineLabel}>Address</TextComponent>
                             <TextComponent style={styles.lineValue}>
-                                {transactionDetails.address_info.street}
-                                {transactionDetails.address_info.city}
-                                {transactionDetails.address_info.province}
-                                {transactionDetails.address_info.postal_code}
+                                {transactionDetails.address_info.street} {transactionDetails.address_info.city}{" "}
+                                {transactionDetails.address_info.province} {transactionDetails.address_info.postal_code}
                             </TextComponent>
                         </View>
                         <View style={styles.lineRow}>
@@ -187,21 +212,38 @@ const TransactionDetails = () => {
                                     },${transactionDetails.establishment_info.longitude}+(${encodeURIComponent(
                                         transactionDetails.establishment_info.name
                                     )})&t=&z=14&ie=UTF8&iwloc=B&output=embed`}
-                                >
-                                    Google Maps
-                                </LinkComponent>
+                                    label="Google Maps"
+                                />
                                 <LinkComponent
                                     style={{ marginRight: 16 }}
                                     href={`https://www.waze.com/ul?ll=${transactionDetails.establishment_info.latitude},${transactionDetails.establishment_info.longitude}&navigate=yes`}
-                                >
-                                    Waze
-                                </LinkComponent>
-                                <LinkComponent href="./">Our Map</LinkComponent>
+                                    label="Waze"
+                                />
+                                {/* <LinkComponent href="./">Our Map</LinkComponent> */}
                             </View>
                         </View>
                     </CardComponent>
 
                     <CardComponent header="Timing Details">
+
+                        <View style={styles.lineRow}>
+                            <TextComponent style={styles.lineLabel}>Scheduled Entry Time</TextComponent>
+                            <TextComponent style={styles.lineValue}>
+                                {transactionDetails.transaction_data.scheduled_entry_time
+                                    ? new Date(
+                                          transactionDetails.transaction_data.scheduled_entry_time
+                                      ).toLocaleString()
+                                    : "Not Available"}
+                            </TextComponent>
+                        </View>
+                        <View style={styles.lineRow}>
+                            <TextComponent style={styles.lineLabel}>Scheduled Exit Time</TextComponent>
+                            <TextComponent style={styles.lineValue}>
+                                {transactionDetails.transaction_data.scheduled_exit_time
+                                    ? new Date(transactionDetails.transaction_data.scheduled_exit_time).toLocaleString()
+                                    : "Not Available"}
+                            </TextComponent>
+                        </View>
                         <View style={styles.lineRow}>
                             <TextComponent style={styles.lineLabel}>Entry Time</TextComponent>
                             <TextComponent style={styles.lineValue}>
@@ -211,16 +253,14 @@ const TransactionDetails = () => {
                             </TextComponent>
                         </View>
 
-                        {transactionDetails.transaction_data.exit_time && (
-                            <View style={styles.lineRow}>
-                                <TextComponent style={styles.lineLabel}>Exit Time</TextComponent>
-                                <TextComponent style={styles.lineValue}>
-                                    {transactionDetails.transaction_data.exit_time !== "Not Available"
-                                        ? new Date(transactionDetails.transaction_data.exit_time).toLocaleString()
-                                        : "Not Available"}
-                                </TextComponent>
-                            </View>
-                        )}
+                        <View style={styles.lineRow}>
+                            <TextComponent style={styles.lineLabel}>Exit Time</TextComponent>
+                            <TextComponent style={styles.lineValue}>
+                                {transactionDetails.transaction_data.exit_time !== "Not Available"
+                                    ? new Date(transactionDetails.transaction_data.exit_time).toLocaleString()
+                                    : "Not Available"}
+                            </TextComponent>
+                        </View>
                         <View style={styles.lineRow}>
                             <TextComponent style={styles.lineLabel}>Amount Due</TextComponent>
                             <TextComponent style={styles.lineValue}>
@@ -229,7 +269,6 @@ const TransactionDetails = () => {
                         </View>
                     </CardComponent>
 
-                    {/* Slot Details */}
                     <CardComponent header="Slot Details">
                         <View style={styles.lineRow}>
                             <TextComponent style={styles.lineLabel}>Slot Code</TextComponent>
@@ -258,18 +297,13 @@ const TransactionDetails = () => {
                         </View>
                     </CardComponent>
 
-                    {/* QR Code if active or reserved */}
                     {transactionDetails.qr_code &&
                         ["active", "reserved"].includes(transactionDetails.transaction_data.status) && (
                             <CardComponent header="QR Code">
                                 <View style={{ alignItems: "center", marginTop: 16 }}>
                                     <Image
                                         source={{ uri: `data:image/png;base64,${transactionDetails.qr_code}` }}
-                                        style={{ width: 100, height: 100, marginBottom: 16 }}
-                                    />
-                                    <Image
-                                        source={require("@/assets/images/mock_qr.png")}
-                                        style={{ width: "25%", marginBottom: 16, aspectRatio: 1, height: "auto" }}
+                                        style={{ width: "50%", marginBottom: 16, aspectRatio: 1, height: "auto" }}
                                     />
                                     <Pressable style={styles.qrButton} onPress={() => setIsModalOpen(true)}>
                                         <TextComponent style={styles.qrButtonText}>View Larger</TextComponent>
@@ -281,15 +315,26 @@ const TransactionDetails = () => {
                             </CardComponent>
                         )}
 
-                    {/* Map Location */}
                     <CardComponent header="Location Details">
-                        <View style={styles.mapContainer}>
-                            {PlatformType() === "web" ? (
-                                <iframe src={mapUrl} style={{ width: "100%", height: "100%" }}></iframe>
-                            ) : (
-                                <WebView source={{ uri: mapUrl }} style={{ flex: 1 }} />
-                            )}
-                        </View>
+                        {PlatformType() === "web" ? (
+                            <iframe src={normalMapUrl} style={{ width: "100%", height: "100%" }} />
+                        ) : (
+                            <WebView source={{ uri: normalMapUrl }} style={{ flex: 1 }} />
+                        )}
+                    </CardComponent>
+                    <CardComponent header="Location Details (Satellite)">
+                        {PlatformType() === "web" ? (
+                            <iframe src={birdsEyeMapUrl} style={{ width: "100%", height: "100%" }} />
+                        ) : (
+                            <WebView source={{ uri: birdsEyeMapUrl }} style={{ flex: 1 }} />
+                        )}
+                    </CardComponent>
+                    <CardComponent header="Location Details (3D)">
+                        {PlatformType() === "web" ? (
+                            <iframe src={threeDimensionMap} style={{ width: "100%", height: "100%" }} />
+                        ) : (
+                            <WebView source={{ uri: threeDimensionMap }} style={{ flex: 1 }} />
+                        )}
                     </CardComponent>
 
                     <View style={styles.footer}>
@@ -299,10 +344,7 @@ const TransactionDetails = () => {
                                     ? "Transaction Cancelled"
                                     : "Cancel Transaction"
                             }
-                            style={[
-                                transactionDetails.transaction_data.status === "cancelled" &&
-                                    styles.cancelButtonDisabled,
-                            ]}
+                            disabled={transactionDetails.transaction_data.status === "cancelled"}
                             onPress={
                                 transactionDetails.transaction_data.status === "cancelled"
                                     ? () => {}
@@ -327,15 +369,12 @@ const TransactionDetails = () => {
                                     Are you sure you want to cancel this transaction? This action cannot be undone.
                                 </Text>
                                 <View style={styles.modalActions}>
-                                    <Pressable
-                                        style={styles.modalCancelBtn}
-                                        onPress={() => setIsCancelModalOpen(false)}
-                                    >
-                                        <Text style={styles.modalCancelText}>No, keep it</Text>
-                                    </Pressable>
-                                    <Pressable style={styles.modalConfirmBtn} onPress={handleCancelTransaction}>
-                                        <Text style={styles.modalConfirmText}>Yes, cancel transaction</Text>
-                                    </Pressable>
+                                    <ButtonComponent onPress={() => setIsCancelModalOpen(false)} title="No, keep it" />
+                                    <ButtonComponent
+                                        variant="destructive"
+                                        onPress={handleCancelTransaction}
+                                        title="Yes, cancel transaction"
+                                    />
                                 </View>
                             </View>
                         </Pressable>
@@ -349,16 +388,13 @@ const TransactionDetails = () => {
                     >
                         <Pressable style={styles.qrModalOverlay} onPress={() => setIsModalOpen(false)}>
                             <View style={styles.qrModalContent}>
-                                <Pressable onPress={() => setIsModalOpen(false)} style={styles.qrModalClose}>
-                                    <Text style={{ color: "#fff" }}>Close</Text>
-                                </Pressable>
-                                <Image
-                                    source={require("@/assets/images/mock_qr.png")}
-                                    style={styles.qrModalImage}
-                                    resizeMode="contain"
+                                <ButtonComponent
+                                    title="Close"
+                                    onPress={() => setIsModalOpen(false)}
+                                    style={styles.qrModalClose}
                                 />
                                 <Image
-                                    source={require("@/assets/images/mock_qr.png")}
+                                    source={{ uri: `data:image/png;base64,${transactionDetails.qr_code}` }}
                                     style={styles.qrModalImage}
                                     resizeMode="contain"
                                 />
@@ -459,7 +495,6 @@ const styles = StyleSheet.create({
     },
     mapContainer: {
         marginTop: 16,
-        height: 300,
         borderRadius: 8,
         overflow: "hidden",
     },
@@ -522,9 +557,9 @@ const styles = StyleSheet.create({
     modalActions: {
         flexDirection: "row",
         justifyContent: "flex-end",
+        gap: 8,
     },
     modalCancelBtn: {
-        backgroundColor: "#f9fafb",
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 4,
@@ -553,16 +588,20 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontWeight: "600",
     },
-    // QR Modal
     qrModalOverlay: {
         flex: 1,
         backgroundColor: "rgba(0,0,0,0.6)",
         justifyContent: "center",
+        width: "100%",
         alignItems: "center",
     },
     qrModalContent: {
         position: "relative",
+        width: "90%",
         maxWidth: "90%",
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
         maxHeight: "90%",
     },
     qrModalClose: {
@@ -573,7 +612,7 @@ const styles = StyleSheet.create({
     },
     qrModalImage: {
         width: "100%",
-        height: "auto",
+        height: "100%",
         borderRadius: 8,
     },
 });

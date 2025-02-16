@@ -1,16 +1,19 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, Linking } from "react-native";
 import WebView from "react-native-webview";
 import { OperatingHour } from "@/lib/models/operating-hour";
 import { PaymentMethod } from "@/lib/models/payment-method";
-import { PricingPlan } from "@/lib/models/pricing-plan";
 import type { ParkingSlot } from "@/lib/models/parking-slot";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import LinkComponent from "@/components/LinkComponent";
 import CardComponent from "@/components/CardComponent";
 import TextComponent from "@/components/TextComponent";
 import ButtonComponent from "@/components/ButtonComponent";
-import { useLocalSearchParams, useGlobalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
+import PlatformType from "@lib/helper/platform";
+import { fetchEstablishmentData } from "@/lib/api/fetchSlots";
+import SlotCard from "@/components/SlotCard";
+import LoadingComponent from "@/components/reusable/LoadingComponent";
 
 interface ParkingEstablishment {
     uuid: string;
@@ -36,102 +39,50 @@ interface EstablishmentData {
     establishment: ParkingEstablishment;
     operating_hours: OperatingHour[];
     payment_methods: PaymentMethod[];
-    pricing_plans: PricingPlan[];
     slots: Slot[];
 }
 
 const EstablishmentView = () => {
-    const { uuid, slot } = useLocalSearchParams();
-    console.log(uuid, slot);
-    const mockEstablishmentData = {
-        establishment: {
-            uuid: "e123-456",
-            name: "Central Park Garage",
-            nearby_landmarks: "Near Central Mall, beside City Bank",
-            space_type: "Indoor",
-            space_layout: "Multi-level",
-            lighting: "Well-lit with LED lighting",
-            verified: true,
-            facilities: "Security Guard,CCTV,Restroom,Elevator",
-            is24_7: false,
-            latitude: 14.5995,
-            longitude: 120.9842,
-        },
-        operating_hours: [
-            { day_of_week: "Monday", is_enabled: true, opening_time: "06:00", closing_time: "22:00" },
-            { day_of_week: "Tuesday", is_enabled: true, opening_time: "06:00", closing_time: "22:00" },
-            { day_of_week: "Wednesday", is_enabled: true, opening_time: "06:00", closing_time: "22:00" },
-            { day_of_week: "Thursday", is_enabled: true, opening_time: "06:00", closing_time: "22:00" },
-            { day_of_week: "Friday", is_enabled: true, opening_time: "06:00", closing_time: "23:00" },
-            { day_of_week: "Saturday", is_enabled: true, opening_time: "07:00", closing_time: "23:00" },
-            { day_of_week: "Sunday", is_enabled: true, opening_time: "08:00", closing_time: "21:00" },
-        ],
-        payment_methods: [
-            {
-                accepts_cash: true,
-                accepts_mobile: true,
-                accepts_other: true,
-                other_methods: "Credit Card",
-            },
-        ],
-        pricing_plans: [
-            { vehicle_type: "CAR", rate_per_hour: 50, daily_rate: 400 },
-            { vehicle_type: "MOTORCYCLE", rate_per_hour: 20, daily_rate: 160 },
-        ],
-        slots: [
-            {
-                uuid: "s1",
-                name: "A1",
-                vehicle_type_code: "CAR",
-                vehicle_type_name: "Car",
-                vehicle_type_size: "Standard",
-                status: "AVAILABLE",
-            },
-            {
-                uuid: "s2",
-                name: "A2",
-                vehicle_type_code: "CAR",
-                vehicle_type_name: "Car",
-                vehicle_type_size: "Standard",
-                status: "AVAILABLE",
-            },
-            {
-                uuid: "s3",
-                name: "B1",
-                vehicle_type_code: "MOTORCYCLE",
-                vehicle_type_name: "Motorcycle",
-                vehicle_type_size: "Small",
-                status: "AVAILABLE",
-            },
-            {
-                uuid: "s4",
-                name: "B2",
-                vehicle_type_code: "MOTORCYCLE",
-                vehicle_type_name: "Motorcycle",
-                vehicle_type_size: "Small",
-                status: "OCCUPIED",
-            },
-            {
-                uuid: "s5",
-                name: "C1",
-                vehicle_type_code: "CAR",
-                vehicle_type_name: "Car",
-                vehicle_type_size: "Standard",
-                status: "MAINTENANCE",
-            },
-        ],
+    const { uuid } = useLocalSearchParams() as { uuid: string };
+    const [establishmentData, setEstablishmentData] = useState<EstablishmentData | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    const pollSlotStatus = async () => {
+        try {
+            const response = await fetchEstablishmentData(uuid);
+            setEstablishmentData(response.data.establishment);
+        } catch (error) {
+            console.error("Error fetching establishment data:", error);
+        }
     };
 
+    useEffect(() => {
+        const fetchEstablishment = async () => {
+            try {
+                const response = await fetchEstablishmentData(uuid);
+                setEstablishmentData(response.data.establishment);
+            } catch (error) {
+                console.error("Error fetching establishment data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchEstablishment();
+    }, [uuid]);
+
     const mapUrl = useMemo(() => {
+        if (!establishmentData?.establishment) return "";
+
         return `https://maps.google.com/maps?width=100%25&height=600&hl=en&q=${
-            mockEstablishmentData.establishment.latitude
-        },${mockEstablishmentData.establishment.longitude}+(${encodeURIComponent(
-            mockEstablishmentData.establishment.name
+            establishmentData.establishment.latitude
+        },${establishmentData.establishment.longitude}+(${encodeURIComponent(
+            establishmentData.establishment.name
         )})&t=&z=14&ie=UTF8&iwloc=B&output=embed`;
-    }, [mockEstablishmentData.establishment.latitude, mockEstablishmentData.establishment.longitude]);
+    }, [establishmentData?.establishment]);
 
     const openNavigation = (provider: "google" | "waze") => {
-        const { latitude, longitude } = mockEstablishmentData.establishment;
+        const { latitude, longitude } = establishmentData!.establishment;
 
         if (provider === "google") {
             Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`);
@@ -142,111 +93,126 @@ const EstablishmentView = () => {
 
     return (
         <ResponsiveContainer>
-            <LinkComponent style={{ width: "auto", marginBottom: 16 }} href="../../user">
-                ← Back to Dashboard
-            </LinkComponent>
-
-            <CardComponent
-                customStyles={styles.card}
-                header="Establishment Information"
-                subHeader="Details about the parking establishment"
-            >
-                <View style={styles.headerRow}>
-                    <View style={{ flex: 1 }}>
-                        <TextComponent style={styles.establishmentName}>
-                            {mockEstablishmentData.establishment.name}
-                        </TextComponent>
-                        <TextComponent style={styles.landmarksText}>
-                            {mockEstablishmentData.establishment.nearby_landmarks}
-                        </TextComponent>
-                        <View style={styles.infoRow}>
-                            <TextComponent style={styles.infoText}>
-                                {mockEstablishmentData.establishment.space_type} Layout -{" "}
-                                {mockEstablishmentData.establishment.space_layout} Parking
-                            </TextComponent>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <TextComponent style={styles.infoText}>
-                                {mockEstablishmentData.establishment.lighting}
-                            </TextComponent>
-                        </View>
-                    </View>
-
-                    {mockEstablishmentData.establishment.verified && <Text style={styles.verifiedBadge}>Verified</Text>}
-                </View>
-            </CardComponent>
-
-            <CardComponent
-                customStyles={styles.card}
-                header="Payment Methods and Facilities"
-                subHeader="Accepted payment methods and facilities"
-            >
-                <View style={styles.chipContainer}>
-                    {mockEstablishmentData.payment_methods[0]?.accepts_cash && (
-                        <TextComponent style={styles.paymentChip}>Cash</TextComponent>
-                    )}
-                    {mockEstablishmentData.payment_methods[0]?.accepts_mobile && (
-                        <TextComponent style={styles.paymentChip}>Mobile Payment</TextComponent>
-                    )}
-                    {mockEstablishmentData.payment_methods[0]?.accepts_other && (
-                        <TextComponent style={styles.paymentChip}>
-                            {mockEstablishmentData.payment_methods[0]?.other_methods}
-                        </TextComponent>
-                    )}
-                    {mockEstablishmentData.establishment.facilities?.split(",").map((facility, idx) => (
-                        <TextComponent style={styles.facilityChip} key={idx}>
-                            {facility.trim()}
-                        </TextComponent>
-                    ))}
-                </View>
-            </CardComponent>
-
-            {/* Map with Navigation Links */}
-            <View style={[styles.card, { height: 400 }]}>
-                <View style={styles.mapHeader}>
-                    <TextComponent style={styles.sectionTitle}>Location</TextComponent>
-                    <View style={styles.mapLinks}>
-                        <ButtonComponent onPress={() => openNavigation("google")}>Google Maps</ButtonComponent>
-                        <ButtonComponent onPress={() => openNavigation("waze")}>Waze</ButtonComponent>
-                    </View>
-                </View>
-                <View style={styles.mapContainer}>
-                    <WebView source={{ uri: mapUrl }} style={{ flex: 1 }} />
-                </View>
-            </View>
-
-            {/* Operating Hours */}
-            <View style={styles.card}>
-                <TextComponent style={styles.sectionTitle}>Operating Hours</TextComponent>
-                {mockEstablishmentData.establishment.is24_7 ? (
-                    <TextComponent style={styles.operatingHourText}>Open 24/7</TextComponent>
-                ) : (
-                    <View style={styles.hoursGrid}>
-                        {mockEstablishmentData.operating_hours.map((hour, idx) => (
-                            <View style={styles.hourItem} key={idx}>
-                                <TextComponent style={styles.hourItemDay}>{hour.day_of_week}</TextComponent>
-                                <TextComponent style={styles.hourItemTime}>
-                                    {hour.is_enabled ? `${hour.opening_time} - ${hour.closing_time}` : "Closed"}
+            <LinkComponent label="← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="../../user" />
+            {!loading && establishmentData && (
+                <>
+                    <CardComponent
+                        customStyles={styles.card}
+                        header="Establishment Information"
+                        subHeader="Details about the parking establishment"
+                    >
+                        <View style={styles.headerRow}>
+                            <View style={{ flex: 1 }}>
+                                <TextComponent style={styles.establishmentName}>
+                                    {establishmentData.establishment.name}
                                 </TextComponent>
+                                <TextComponent style={styles.landmarksText}>
+                                    {establishmentData.establishment.nearby_landmarks}
+                                </TextComponent>
+                                <View style={styles.infoRow}>
+                                    <TextComponent style={styles.infoText}>
+                                        {establishmentData.establishment.space_type} Layout -{" "}
+                                        {establishmentData.establishment.space_layout} Parking
+                                    </TextComponent>
+                                </View>
+                                <View style={styles.infoRow}>
+                                    <TextComponent style={styles.infoText}>
+                                        {establishmentData.establishment.lighting}
+                                    </TextComponent>
+                                </View>
                             </View>
-                        ))}
+
+                            {establishmentData.establishment.verified && (
+                                <Text style={styles.verifiedBadge}>Verified</Text>
+                            )}
+                        </View>
+                    </CardComponent>
+
+                    <CardComponent
+                        customStyles={styles.card}
+                        header="Payment Methods and Facilities"
+                        subHeader="Accepted payment methods and facilities"
+                    >
+                        <View style={styles.chipContainer}>
+                            {establishmentData.payment_methods[0]?.accepts_cash && (
+                                <TextComponent style={styles.paymentChip}>Cash</TextComponent>
+                            )}
+                            {establishmentData.payment_methods[0]?.accepts_mobile && (
+                                <TextComponent style={styles.paymentChip}>Mobile Payment</TextComponent>
+                            )}
+                            {establishmentData.payment_methods[0]?.accepts_other && (
+                                <TextComponent style={styles.paymentChip}>
+                                    {establishmentData.payment_methods[0]?.other_methods}
+                                </TextComponent>
+                            )}
+                            {establishmentData.establishment.facilities?.split(",").map((facility, idx) => (
+                                <TextComponent style={styles.facilityChip} key={idx}>
+                                    {facility.trim()}
+                                </TextComponent>
+                            ))}
+                        </View>
+                    </CardComponent>
+
+                    <View style={[styles.card, { height: 400 }]}>
+                        <View style={styles.mapHeader}>
+                            <TextComponent style={styles.sectionTitle}>Location</TextComponent>
+                            <View style={styles.mapLinks}>
+                                <ButtonComponent title="Google Maps" onPress={() => openNavigation("google")} />
+                                <ButtonComponent title="Waze" onPress={() => openNavigation("waze")} />
+                            </View>
+                        </View>
+                        <CardComponent
+                            header="Map"
+                            subHeader="View the location of the parking establishment"
+                            customStyles={styles.mapContainer}
+                        >
+                            {PlatformType() === "web" ? (
+                                <iframe
+                                    width="100%"
+                                    height="100%"
+                                    src={mapUrl}
+                                />
+                            ) : (
+                                <WebView source={{ uri: mapUrl }} style={{ flex: 1 }} />
+                            )}
+                        </CardComponent>
                     </View>
-                )}
-            </View>
-            <View style={{ marginVertical: 16 }}>
-                <TextComponent style={styles.sectionMainTitle}>Available Parking Slots</TextComponent>
-                <View style={styles.slotGrid}>
-                    {/* {mockEstablishmentData.slots.map((slot) => (
-                        // <SlotCard
-                        //     key={slot.uuid}
-                        //     slotInfo={slot}
-                        //     rates={mockEstablishmentData.pricing_plans}
-                        //     establishmentUuid={mockEstablishmentData.establishment.uuid}
-                        //     slotUuid={slot.uuid}
-                        // />
-                    ))} */}
-                </View>
-            </View>
+
+                    {/* Operating Hours */}
+                    <View style={styles.card}>
+                        <TextComponent style={styles.sectionTitle}>Operating Hours</TextComponent>
+                        {establishmentData.establishment.is24_7 ? (
+                            <TextComponent style={styles.operatingHourText}>Open 24/7</TextComponent>
+                        ) : (
+                            <View style={styles.hoursGrid}>
+                                {establishmentData.operating_hours.map((hour, idx) => (
+                                    <View style={styles.hourItem} key={idx}>
+                                        <TextComponent style={styles.hourItemDay}>{hour.day_of_week}</TextComponent>
+                                        <TextComponent style={styles.hourItemTime}>
+                                            {hour.is_enabled ? `${hour.opening_time} - ${hour.closing_time}` : "Closed"}
+                                        </TextComponent>
+                                    </View>
+                                ))}
+                            </View>
+                        )}
+                    </View>
+                    <View style={{ marginVertical: 16 }}>
+                        <TextComponent style={styles.sectionMainTitle}>Available Parking Slots</TextComponent>
+                        <View style={styles.slotGrid}>
+                            {establishmentData.slots.map((slot) => (
+                                <SlotCard
+                                    establishmentUuid={uuid}
+                                    key={slot.uuid}
+                                    isGuest={false}
+                                    slotInfo={slot}
+                                    slotUuid={slot.uuid}
+                                />
+                            ))}
+                        </View>
+                    </View>
+                </>
+            )}
+            {loading && <LoadingComponent text="Loading establishment data..." />}
         </ResponsiveContainer>
     );
 };
@@ -342,6 +308,7 @@ const styles = StyleSheet.create({
         flex: 1,
         borderRadius: 8,
         overflow: "hidden",
+        height: 300,
     },
     operatingHourText: {
         color: "#6b7280",

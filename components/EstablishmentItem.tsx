@@ -6,19 +6,18 @@ import CardComponent from "@/components/CardComponent";
 import calculateDistance from "@/lib/function/calculateDistance";
 import LinkComponent from "./LinkComponent";
 import type { ParkingEstablishment } from "@/lib/models/parking-establishment";
-import type { PricingPlan } from "@/lib/models/pricing-plan";
 
 interface EstablishmentItem {
     establishment: ParkingEstablishment;
-    // pricing_plans: PricingPlan[];
 }
 
 interface EstablishmentItemProps extends EstablishmentItem {
     userLat: number;
     userLong: number;
+    guest: boolean;
 }
 
-const EstablishmentItem: React.FC<EstablishmentItemProps> = ({ userLat, userLong, establishment }) => {
+const EstablishmentItem = ({ userLat, userLong, establishment, guest }: EstablishmentItemProps) => {
     const distance = calculateDistance(userLat, userLong, establishment.latitude, establishment.longitude);
 
     return (
@@ -77,11 +76,19 @@ const EstablishmentItem: React.FC<EstablishmentItemProps> = ({ userLat, userLong
                     >
                         <TextComponent style={styles.directionsText}>Directions</TextComponent>
                     </TouchableOpacity>
-                    <LinkComponent href={`../establishment/${establishment.uuid}`} asChild>
-                        <TouchableOpacity style={styles.detailsButton}>
-                            <TextComponent style={styles.detailsText}>View Details</TextComponent>
-                        </TouchableOpacity>
-                    </LinkComponent>
+                    {guest ? (
+                        <LinkComponent href={`../establishment/${establishment.uuid}`} asChild>
+                            <TouchableOpacity style={styles.detailsButton}>
+                                <TextComponent style={styles.detailsText}>View Details</TextComponent>
+                            </TouchableOpacity>
+                        </LinkComponent>
+                    ) : (
+                        <LinkComponent href={`../../user/book/${establishment.uuid}`} asChild>
+                            <TouchableOpacity style={styles.detailsButton}>
+                                <TextComponent style={styles.detailsText}>Book Now</TextComponent>
+                            </TouchableOpacity>
+                        </LinkComponent>
+                    )}
                 </View>
             </View>
         </CardComponent>

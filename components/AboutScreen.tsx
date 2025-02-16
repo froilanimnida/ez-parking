@@ -2,7 +2,7 @@ import React from "react";
 import { View, Image, StyleSheet, TouchableOpacity, Linking } from "react-native";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
-import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
+import ResponsiveContainer from "@components/reusable/ResponsiveContainer";
 
 const developers = [
     {
@@ -34,7 +34,7 @@ const developers = [
 
 const About = () => {
     return (
-        <View style={styles.container}>
+        <ResponsiveContainer>
             <TextComponent variant="h1" bold style={styles.title}>
                 About Us
             </TextComponent>
@@ -99,15 +99,11 @@ const About = () => {
                     <TextComponent style={styles.link}>support@ezparking.com</TextComponent>
                 </TouchableOpacity>
             </CardComponent>
-        </View>
+        </ResponsiveContainer>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { ...defaultContainerStyles, minHeight: 100 },
-    content: {
-        ...defaultBodyStyles,
-    },
     title: {
         textAlign: "center",
         marginVertical: 24,

@@ -4,35 +4,11 @@ import CardComponent from "@/components/CardComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import LinkComponent from "@/components/LinkComponent";
 import TextInputComponent from "@/components/TextInputComponent";
-import axiosInstance from "@/lib/axiosInstance";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { router } from "expo-router";
-
-const createAccount = async (
-    email: string,
-    middleName: string,
-    firstName: string,
-    lastName: string,
-    phone: string,
-    nickname: string,
-    plateNumber: string,
-    suffix: string
-) => {
-    const result = await axiosInstance.post(`${process.env.EXPO_PUBLIC_API_USER_ROOT}/create-new-account`, {
-        user: {
-            email: email,
-            first_name: firstName,
-            last_name: lastName,
-            middle_name: middleName,
-            phone_number: phone as string,
-            plate_number: plateNumber,
-            nickname: nickname,
-            suffix: suffix,
-        },
-    });
-    if (result.status != 201) return Promise.reject(result.data);
-    return result;
-};
+import { createAccount } from "@/lib/api/user";
+import type { SimplifiedValidationError } from "@/lib/models/validationError";
+import type { AxiosError } from "axios";
 
 const UserSignUp = () => {
     const [formData, setFormData] = useState({
@@ -48,7 +24,7 @@ const UserSignUp = () => {
 
     const handleSignUp = async () => {
         try {
-            await createAccount(
+            const result = await createAccount(
                 formData.email,
                 formData.middleName,
                 formData.firstName,
@@ -58,11 +34,21 @@ const UserSignUp = () => {
                 formData.plateNumber,
                 formData.suffix
             );
-            alert("Account created successfully.");
+            if (result.status === 201) {
+                alert("Account created successfully.");
+            }
             router.replace("/auth/login");
-        } catch (err) {
-            const errorResponse = err as { code: string; message: string };
-            alert(errorResponse.message || "An error occurred.");
+        } catch (error: unknown) {
+            const err = error as AxiosError;
+            if (err.status === 422) {
+                if ((error as any)?.name === "ValidationError") {
+                    const validationError = error as SimplifiedValidationError;
+                    alert(validationError.messages.join("\n\n"));
+                }
+            } else {
+                const err = error as AxiosError as { response: { data: { message: string } } };
+                alert(err.response?.data!.message || "An error occurred.");
+            }
         }
     };
 
@@ -123,7 +109,18 @@ const UserSignUp = () => {
                             onChangeText={(text) => setFormData({ ...formData, plateNumber: text })}
                         />
 
-                        <ButtonComponent title="Sign Up" onPress={handleSignUp} variant="primary" />
+                        <ButtonComponent
+                            title="Sign Up"
+                            onPress={handleSignUp}
+                            disabled={
+                                !formData.firstName ||
+                                !formData.lastName ||
+                                !formData.email ||
+                                !formData.phone ||
+                                !formData.plateNumber
+                            }
+                            variant="primary"
+                        />
 
                         <View style={styles.loginLink}>
                             <LinkComponent

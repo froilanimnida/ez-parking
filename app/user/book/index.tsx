@@ -6,10 +6,8 @@ import LinkComponent from "@/components/LinkComponent";
 const index = () => {
     return (
         <ResponsiveContainer>
-            <LinkComponent style={{ width: "auto", marginBottom: 16 }} href="../user">
-                ← Back to Dashboard
-            </LinkComponent>
-            <EstablishmentSearch />
+            <LinkComponent style={{ width: "auto", marginBottom: 16 }} href="../user" label="← Back to Dashboard" />
+            <EstablishmentSearch guest={false} />
         </ResponsiveContainer>
     );
 };

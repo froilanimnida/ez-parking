@@ -19,4 +19,6 @@ export interface Transaction {
     updated_at: string;
     user_id: number;
     vehicle_type_id: number;
+    scheduled_entry_time: string;
+    scheduled_exit_time: string;
 }

@@ -1,10 +1,12 @@
-import axios from "axios";
+import axios, {type AxiosError, AxiosRequestHeaders} from "axios";
 import * as SecureStore from "expo-secure-store";
-import PlatformType from "./platform";
-import Constants from "expo-constants";
-import { router } from "expo-router";
-import { getAuthHeaders } from "./credentialsManager";
-type UserRole = "user" | "parking_manager" | "admin";
+import PlatformType from "./helper/platform";
+import { type RelativePathString } from "expo-router";
+import getAuthHeaders from "@lib/helper/getAuthHeaders";
+import type ApiValidationError from "./models/validationError";
+import type { SimplifiedValidationError } from "./models/validationError";
+import {UserRole} from "@lib/types/models/common/constants";
+
 
 async function verifyAndGetRole(
     authToken: string | undefined | null,
@@ -12,7 +14,6 @@ async function verifyAndGetRole(
     csrf_refresh_token: string | undefined | null,
     refresh_token_cookie: string | undefined | null
 ): Promise<UserRole | null> {
-    console.log("Verifying role with auth token:", authToken);
     if (!authToken) return null;
     try {
         const result = await axiosInstance.post(
@@ -20,8 +21,8 @@ async function verifyAndGetRole(
             {},
             {
                 headers: {
-                    Authorization: authToken,
-                    "X-CSRF-TOKEN": xsrfToken || "",
+                    access_token_cookie: authToken,
+                    csrf_access_token: xsrfToken || "",
                     refresh_token_cookie: refresh_token_cookie || "",
                     csrf_refresh_token: csrf_refresh_token || "",
                 },
@@ -33,27 +34,23 @@ async function verifyAndGetRole(
     }
 }
 
-function getRedirectPath(role: UserRole): string {
+export function getRedirectPath(role: UserRole): RelativePathString {
     switch (role) {
         case "admin":
-            return "/admin/dashboard";
+            return "/admin" as RelativePathString;
         case "parking_manager":
-            return "/parking-manager/dashboard";
+            return "/parking-manager" as RelativePathString;
         case "user":
-            return "/user/dashboard";
+            return "/user" as RelativePathString;
         default:
-            return "/";
+            return "/" as RelativePathString;
     }
 }
 
-const API_BASE_URL = __DEV__
-    ? process.env.EXPO_PUBLIC_API_BASE_URL
-    : Constants.expoConfig?.extra?.apiBaseUrl || "https://ez-parking-system.onrender.com/api/v1";
-
 const axiosInstance = axios.create({
     withCredentials: true,
-    // baseURL: API_BASE_URL,
-    baseURL: "https://ez-parking-system.onrender.com/api/v1",
+    baseURL: "https://ez-parking-system-pr-54.onrender.com/api/v1",
+    // baseURL: "https://localhost:5000/api/v1",
     headers: {
         Accept: "application/json",
     },
@@ -64,59 +61,39 @@ axiosInstance.interceptors.request.use(
         const requestUrl = value.url;
         if (requestUrl?.endsWith("/login")) {
             if (PlatformType() !== "web") {
-                const authToken = await SecureStore.getItemAsync("Authorization");
-                const xsrfToken = await SecureStore.getItemAsync("X-CSRF-TOKEN");
+                const access_token_cookie = await SecureStore.getItemAsync("access_token_cookie");
+                const csrf_access_token = await SecureStore.getItemAsync("csrf_access_token");
                 const csrf_refresh_token = await SecureStore.getItemAsync("csrf_refresh_token");
                 const refresh_token_cookie = await SecureStore.getItemAsync("refresh_token_cookie");
-
-                const userRole = await verifyAndGetRole(authToken, xsrfToken, csrf_refresh_token, refresh_token_cookie);
+                const userRole = await verifyAndGetRole(
+                    access_token_cookie,
+                    csrf_access_token,
+                    csrf_refresh_token,
+                    refresh_token_cookie
+                );
                 if (userRole) {
                     value.url = getRedirectPath(userRole);
-                }
-            }
-            return value;
-        } else if (
-            requestUrl?.endsWith("/admin") ||
-            requestUrl?.endsWith("/user") ||
-            requestUrl?.endsWith("/parking-manager")
-        ) {
-            if (PlatformType() !== "web") {
-                const authToken = await SecureStore.getItemAsync("Authorization");
-                const xsrfToken = await SecureStore.getItemAsync("X-CSRF-TOKEN");
-                const csrf_refresh_token = await SecureStore.getItemAsync("csrf_refresh_token");
-                const refresh_token_cookie = await SecureStore.getItemAsync("refresh_token_cookie");
-                const userRole = await verifyAndGetRole(authToken, xsrfToken, csrf_refresh_token, refresh_token_cookie);
-                if (!userRole) {
-                    value.url = "/login";
                 }
             }
             return value;
         }
         return value;
     },
-    (error) => {}
+    async (error) => {
+        return Promise.reject(error);
+    }
 );
 
 axiosInstance.interceptors.request.use(
     async (config) => {
         const authHeaders = await getAuthHeaders();
-        config.headers = { ...config.headers, ...authHeaders };
+        config.headers = { ...config.headers, ...authHeaders } as AxiosRequestHeaders;
         if (config.data instanceof FormData) {
             config.headers["Content-Type"] = "multipart/form-data";
         }
         return config;
     },
     (error) => Promise.reject(error)
-);
-
-axiosInstance.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-        if (error.response?.status === 401) {
-            router.replace("./auth/login");
-        }
-        return Promise.reject(error);
-    }
 );
 
 axiosInstance.interceptors.response.use(
@@ -141,7 +118,31 @@ axiosInstance.interceptors.response.use(
         }
         return response;
     },
-    (error) => Promise.reject(error)
+    (error: AxiosError) => {
+        if (error.response?.status === 422) {
+            const apiError = error.response.data as ApiValidationError;
+            const messages: string[] = [];
+            if (apiError.errors?.json) {
+                Object.entries(apiError.errors.json).forEach(([, categoryErrors]) => {
+                    Object.entries(categoryErrors).forEach(([, fieldMessages]) => {
+                        fieldMessages.forEach((message) => {
+                            messages.push(message);
+                        });
+                    });
+                });
+            }
+
+            const simplifiedError: SimplifiedValidationError = {
+                name: "ValidationError",
+                status: 422,
+                messages,
+                code: apiError.code,
+            };
+
+            return Promise.reject(simplifiedError);
+        }
+        return Promise.reject(error);
+    }
 );
 
 export default axiosInstance;

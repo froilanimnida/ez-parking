@@ -1,19 +1,12 @@
-import { StyleSheet, View, SafeAreaView, FlatList, TouchableOpacity, ScrollView } from "react-native";
-import React from "react";
+import { StyleSheet, View, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
 import { router } from "expo-router";
 import TextComponent from "@/components/TextComponent";
-import { defaultContainerStyles, defaultBodyStyles } from "@/styles/default";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
-
-type Transaction = {
-    uuid: string;
-    slot_code: string;
-    entry_time: string;
-    exit_time: string;
-    amount_due: number;
-    payment_status: string;
-    status: string;
-};
+import { getTransactions } from "@/lib/api/parkingManager";
+import { type Transaction } from "@/lib/models/transaction";
+import LoadingComponent from "@/components/reusable/LoadingComponent";
+import LinkComponent from "@components/LinkComponent";
 
 const TransactionItem = ({ item }: { item: Transaction }) => (
     <TouchableOpacity style={styles.row} onPress={() => router.push(`/parking-manager/transactions/${item.uuid}`)}>
@@ -36,9 +29,27 @@ const TransactionItem = ({ item }: { item: Transaction }) => (
 );
 
 const Transactions = () => {
-    const transactions: Transaction[] = [];
+    useEffect(() => {
+        const fetchTransaction = async () => {
+            try {
+                const response = await getTransactions();
+                const flattenedTransactions = response.data.data
+                    .flat()
+                    .filter((transaction: Transaction) => transaction);
+                setTransactions(flattenedTransactions);
+            } catch (error) {
+                console.error("Error fetching transactions:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchTransaction();
+    }, []);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     return (
         <ResponsiveContainer>
+            <LinkComponent label="← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="../" />
             <TextComponent bold variant="h1" style={styles.title}>
                 Transactions
             </TextComponent>
@@ -60,19 +71,16 @@ const Transactions = () => {
                     <TextComponent style={styles.headerText}>Status</TextComponent>
                 </View>
             </View>
-
-            <FlatList
-                data={transactions}
-                renderItem={({ item }) => <TransactionItem item={item} />}
-                keyExtractor={(item) => item.uuid}
-            />
+            {isLoading && transactions.length === 0 ? (
+                <LoadingComponent text="Loading..." />
+            ) : (
+                transactions.map((transaction) => <TransactionItem item={transaction} key={transaction.uuid} />)
+            )}
         </ResponsiveContainer>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { ...defaultContainerStyles },
-    body: { ...defaultBodyStyles },
     header: {
         padding: 16,
     },

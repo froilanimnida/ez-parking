@@ -10,6 +10,7 @@ interface LinkProps extends BaseComponentProps {
     href: RelativePathString | ExternalPathString;
     label?: string;
     asChild?: boolean;
+    target?: "_self" | "_blank";
 }
 
 const LinkComponent: React.FC<LinkProps> = ({
@@ -22,6 +23,7 @@ const LinkComponent: React.FC<LinkProps> = ({
     size = "md",
     disabled = false,
     icon,
+    target = "_self",
     iconPosition = "left",
     fullWidth = false,
     children,
@@ -55,7 +57,7 @@ const LinkComponent: React.FC<LinkProps> = ({
     ];
 
     return (
-        <Link href={href} style={linkStyles}>
+        <Link href={href} style={linkStyles} target={target}>
             {content}
         </Link>
     );

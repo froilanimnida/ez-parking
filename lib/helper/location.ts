@@ -1,4 +1,5 @@
 import * as Location from "expo-location";
+
 export async function getReverseGeocoding(latitude: number, longitude: number) {
     try {
         const response = await fetch(
@@ -28,8 +29,5 @@ export const getIPBasedLocation = async () => {
 
 export const askLocationPermission = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-        return false;
-    }
-    return true;
+    return status === "granted"
 }

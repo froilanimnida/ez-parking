@@ -1,61 +1,61 @@
 import * as SecureStore from "expo-secure-store";
-import PlatformType from "./platform";
+import PlatformType from "./helper/platform";
 import axiosInstance from "./axiosInstance";
 import { router } from "expo-router";
+import getAuthHeaders from "@lib/helper/getAuthHeaders";
 
-const PLATFORM = PlatformType();
+let authState: { loggedIn: boolean; role: string } | null = null;
 
-export async function getAuthHeaders() {
+export async function isAuthenticated(): Promise<{ loggedIn: boolean; role: string }> {
     try {
-        if (PLATFORM === "web") {
-            const xsrfToken = document.cookie.split(";").find((cookie) => cookie.includes("X-CSRF-TOKEN"));
-            const csrfRefreshToken = document.cookie.split(";").find((cookie) => cookie.includes("csrf_refresh_token"));
-            return {
-                "X-CSRF-TOKEN": xsrfToken || "",
-                csrf_refresh_token: csrfRefreshToken || "",
-            };
+        authState = null;
+
+        if (PlatformType() === "web") {
+            try {
+                const response = await axiosInstance.post("/auth/verify-token");
+                if (response.data?.role) {
+                    authState = { loggedIn: true, role: response.data.role as string };
+                    return authState;
+                }
+            } catch (error) {
+                authState = { loggedIn: false, role: "" };
+                return authState;
+            }
         }
-        const authorization = await SecureStore.getItemAsync("Authorization");
-        const xsrfToken = await SecureStore.getItemAsync("X-CSRF-TOKEN");
-        const csrfRefreshToken = await SecureStore.getItemAsync("csrf_refresh_token");
-        const refreshToken = await SecureStore.getItemAsync("refresh_token_cookie");
 
-        return {
-            Authorization: authorization ? `Bearer ${authorization}` : "",
-            "X-CSRF-TOKEN": xsrfToken || "",
-            csrf_refresh_token: csrfRefreshToken || "",
-            refresh_token_cookie: refreshToken || "",
-        };
-    } catch (error) {
-        return {};
-    }
-}
-
-export async function isAuthenticated() {
-    try {
         const authHeaders = await getAuthHeaders();
-        if (!authHeaders.Authorization) {
-            router.replace("/auth/login");
-            return false;
+        if (!authHeaders?.access_token_cookie) {
+            authState = { loggedIn: false, role: "" };
+            return authState;
         }
 
-        const response = await axiosInstance.post("/auth/verify-token", {}, { headers: authHeaders });
+        const response = await axiosInstance.post(
+            "/auth/verify-token",
+            {},
+            {
+                headers: authHeaders,
+            }
+        );
+
         if (response.data?.role) {
-            return true;
+            authState = { loggedIn: true, role: response.data.role as string };
+            return authState;
         }
-        router.replace("/auth/login");
-        return false;
+
+        authState = { loggedIn: false, role: "" };
+        return authState;
     } catch (error) {
-        router.replace("/auth/login");
-        return false;
+        console.error("Auth check error:", error);
+        authState = { loggedIn: false, role: "" };
+        return authState;
     }
 }
 
 export async function logoutCurrentUser() {
     try {
         if (PlatformType() !== "web") {
-            await SecureStore.deleteItemAsync("Authorization");
-            await SecureStore.deleteItemAsync("X-CSRF-TOKEN");
+            await SecureStore.deleteItemAsync("access_token_cookie");
+            await SecureStore.deleteItemAsync("csrf_access_token");
             await SecureStore.deleteItemAsync("csrf_refresh_token");
             await SecureStore.deleteItemAsync("refresh_token_cookie");
         }

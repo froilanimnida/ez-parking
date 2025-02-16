@@ -1,13 +1,13 @@
-import { StyleSheet, View, Image, Linking } from "react-native";
+import { StyleSheet, View, Image } from "react-native";
 import React from "react";
 import CardComponent from "./CardComponent";
 import TextComponent from "./TextComponent";
-import { defaultBodyStyles } from "@/styles/default";
 import LinkComponent from "./LinkComponent";
+import ResponsiveContainer from "@components/reusable/ResponsiveContainer";
 
 const ContactScreen = () => {
     return (
-        <View style={styles.container}>
+        <ResponsiveContainer>
             <CardComponent customStyles={styles.contactCard} header="Contact Us | Nearby Spot">
                 <Image source={require("@/assets/images/binigirls.jpg")} style={styles.image} />
 
@@ -34,18 +34,11 @@ const ContactScreen = () => {
                     </View>
                 </View>
             </CardComponent>
-        </View>
+        </ResponsiveContainer>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#f4f4f4",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 20,
-    },
     contactCard: {
         borderRadius: 10,
         padding: 20,

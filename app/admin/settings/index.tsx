@@ -4,7 +4,6 @@ import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import TextInputComponent from "@/components/TextInputComponent";
 import ButtonComponent from "@/components/ButtonComponent";
-import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 
 interface UserData {
@@ -142,21 +141,18 @@ const AdminSettings = () => {
             </CardComponent>
 
             <View style={styles.buttonContainer}>
-                <ButtonComponent onPress={handleSave} disabled={isUpdating} loading={isUpdating}>
-                    {isUpdating ? "Saving..." : "Save Changes"}
-                </ButtonComponent>
+                <ButtonComponent
+                    onPress={handleSave}
+                    disabled={isUpdating}
+                    loading={isUpdating}
+                    title={`${isUpdating}` ? "Saving..." : "Save Changes"}
+                />
             </View>
         </ResponsiveContainer>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        ...defaultContainerStyles,
-    },
-    body: {
-        ...defaultBodyStyles,
-    },
     content: {
         padding: 16,
         maxWidth: 768,

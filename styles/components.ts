@@ -68,7 +68,6 @@ const baseStyles = StyleSheet.create({
     ghost: {
         backgroundColor: "transparent",
     },
-    // Text colors
     primaryText: { color: "white" },
     secondaryText: { color: "#4F46E5" },
     textText: { color: "#4F46E5" },

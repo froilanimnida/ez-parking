@@ -1,12 +1,9 @@
-import { SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
-import React, { useEffect } from "react";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import React from "react";
 import LinkComponent from "@/components/LinkComponent";
-import { defaultBodyStyles, defaultContainerStyles } from "@/styles/default";
 import TextComponent from "@/components/TextComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { getAuthHeaders } from "@/lib/credentialsManager";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
-import axiosInstance from "@/lib/axiosInstance";
 
 interface UserActionTypes {
     title: string;
@@ -36,18 +33,6 @@ const UserDashboard = () => {
             href: "./user/settings",
         },
     ];
-    useEffect(() => {
-        const fetchAuthHeaders = async () => {
-            try {
-                const headers = await getAuthHeaders();
-                const result = await axiosInstance.post("/auth/protected-route");
-                console.log("Result from protected route:", result);
-            } catch (error) {
-                console.error("Error fetching auth headers:", error);
-            }
-        };
-        fetchAuthHeaders();
-    }, []);
     return (
         <ResponsiveContainer>
             <TextComponent bold variant="h1" style={{ marginBottom: 16 }}>

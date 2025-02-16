@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ButtonComponent from "@/components/ButtonComponent";
-import LinkComponent from "@/components/LinkComponent";
+import * as DocumentPicker from "expo-document-picker";
 import TextInputComponent from "@/components/TextInputComponent";
 import CardComponent from "@/components/CardComponent";
 import SelectComponent from "@/components/SelectComponent";
@@ -9,106 +9,247 @@ import TextComponent from "@/components/TextComponent";
 import CheckboxComponent from "@/components/CheckboxComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import LocationPicker from "@/components/auth/parking-manager/LocationPicker";
+import {
+    ParkingCompanyProfile,
+    ParkingPaymentMethodData,
+    type ParkingAddressData,
+    type ParkingEstablishmentData,
+    type ParkingOwnerInformation,
+} from "@/lib/models/parkingManagerSignUpTypes";
+import OperatingHoursForm from "@/components/auth/parking-manager/OperatingHoursForm";
+import { parkingManagerSignUp } from "@/lib/api/parkingManager";
+import { METRO_MANILA_CITIES } from "@/lib/models/cities";
+import PaymentMethods from "@/components/auth/parking-manager/PaymentMethods";
+import ParkingOwnerInfoCard from "@/components/auth/parking-manager/ParkingOwnerInfoCard";
+import FacilitiesAndAmenitiesCard from "@/components/auth/parking-manager/FacilitiesAndAmenitiesCard";
+import { ParkingOperatingHoursData } from "@/lib/models/parkingManagerSignUpTypes";
+import type { DocumentInfo, Documents } from "@/lib/types/documents";
+import { Image } from "react-native";
+import InfoContainer from "@/components/auth/parking-manager/InfoContainer";
 
 const ParkingManagerSignUp = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [ownerInformation, setOwnerInformation] = useState({
-        ownerType: "individual",
-        firstName: "",
-        middleName: "",
-        lastName: "",
-        suffix: "",
+    const [query, setQuery] = useState("");
+    const [userInformation, setUserInformation] = useState<ParkingOwnerInformation>({
         email: "",
-        contactNumber: "",
+        first_name: "",
+        last_name: "",
+        middle_name: "",
+        suffix: "",
+        phone_number: "",
+    });
+    const [companyProfile, setCompanyProfile] = useState<ParkingCompanyProfile>({
+        owner_type: "individual",
+        company_name: "",
+        company_reg_number: "",
         tin: "",
+    });
+    const [addressData, setAddressData] = useState<ParkingAddressData>({
+        street: "",
+        barangay: "",
+        city: "",
+        province: "",
+        postal_code: "",
+    });
+
+    const [parkingEstablishmentData, setParkingEstablishmentData] = useState<ParkingEstablishmentData>({
+        space_type: "",
+        space_layout: "",
+        custom_layout: "",
+        dimensions: "",
+        is24_7: false,
+        access_info: "no_specific_access",
+        custom_access: "",
         name: "",
-        companyName: "",
-        companyRegNumber: "",
-    });
-    const [addressData, setAddressData] = useState({
-        address: {
-            street: "",
-            barangay: "",
-            city: "",
-            province: "",
-            postalCode: "",
-        },
-        location: {
-            latitude: 14.5995,
-            longitude: 120.9842,
-        },
-        landmarks: "",
-    });
-    const [facilitiesAndAmenities, setFacilitiesAndAmenities] = useState({
-        facilities: {
-            accessInformation: "gate_code",
-            customAccess: "",
-            lightingAndSecurity: "",
-            accessibility: "",
-            nearbyFacilities: "",
-        },
-        parkingDetails: {
-            spaceType: "indoor",
-            spaceLayout: "parallel",
-            customLayout: "",
-            dimensions: "",
-        },
+        lighting: "",
+        accessibility: "",
+        facilities: "",
+        longitude: 14.5995,
+        latitude: 120.9842,
+        nearby_landmarks: "",
     });
 
-    const [paymentData, setPaymentData] = useState({
-        paymentMethods: {
-            cash: false,
-            mobile: false,
-            other: false,
-            otherText: "",
-        },
+    const [operatingHours, setOperatingHours] = useState({
+        monday: { enabled: false, open: "", close: "" },
+        tuesday: { enabled: false, open: "", close: "" },
+        wednesday: { enabled: false, open: "", close: "" },
+        thursday: { enabled: false, open: "", close: "" },
+        friday: { enabled: false, open: "", close: "" },
+        saturday: { enabled: false, open: "", close: "" },
+        sunday: { enabled: false, open: "", close: "" },
     });
 
-    // Add handler after existing handlers
-    const handlePaymentChange = (method: string, value: boolean | string) => {
-        setPaymentData((prev) => ({
-            paymentMethods: {
-                ...prev.paymentMethods,
-                [method]: value,
+    const [paymentMethodData, setPaymentMethodData] = useState<ParkingPaymentMethodData>({
+        accepts_cash: false,
+        accepts_mobile: false,
+        accepts_other: false,
+        other_methods: "",
+    });
+
+    let [documents, setDocuments] = useState<Documents>({
+        govId: null,
+        parkingPhotos: [],
+        proofOfOwnership: null,
+        businessCert: null,
+        birCert: null,
+        liabilityInsurance: null,
+    });
+
+    const handleParkingOwnerInfo = (key: string, value: string) => {
+        setUserInformation({ ...userInformation, [key]: value });
+    };
+
+    const handleCompanyInfoChange = (key: string, value: string) => {
+        setCompanyProfile({ ...companyProfile, [key]: value });
+    };
+
+    const handleAddressInfoChange = (key: string, value: string) => {
+        setAddressData({ ...addressData, [key]: value });
+    };
+
+    const handleParkingEstablishmentData = (key: string, value: string | boolean) => {
+        setParkingEstablishmentData((prev) => ({
+            ...prev,
+            [key]: value,
+        }));
+    };
+
+    const handleOperatingHoursData = (day: string, field: keyof ParkingOperatingHoursData, value: string | boolean) => {
+        setOperatingHours((prev) => ({
+            ...prev,
+            [day]: {
+                ...prev[day],
+                [field]: value,
             },
         }));
     };
 
-    const handleFacilitiesChange = (section: string, field: string, value: string) => {
-        setFacilitiesAndAmenities((prev) => ({
-            ...prev,
-            [section]: {
-                ...prev[section],
-                [field]: value,
-            },
-        }));
+    const handlePaymentDataChange = (key: string, value: boolean | string) => {
+        setPaymentMethodData({ ...paymentMethodData, [key]: value });
+    };
+
+    const searchLocation = async () => {
+        if (!query) {
+            alert("Please enter an address above to search");
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
+            );
+            const data = await response.json();
+            if (data.length > 0) {
+                const { lat, lon } = data[0];
+                setParkingEstablishmentData((prev) => ({
+                    ...prev,
+                    latitude: parseFloat(lat),
+                    longitude: parseFloat(lon),
+                }));
+            } else {
+                alert("Location not found. Please enter a valid address");
+            }
+        } catch {
+            alert("An error occurred while searching for the location");
+        }
+    };
+
+    const handleDocumentPick = async (type: keyof Documents) => {
+        try {
+            let result;
+
+            if (type === "parkingPhotos") {
+                // Handle multiple photo selection
+                result = await DocumentPicker.getDocumentAsync({
+                    type: ["image/*"],
+                    multiple: true,
+                    copyToCacheDirectory: true,
+                });
+
+                if (!result.canceled) {
+                    const newPhotos = result.assets.map((asset) => ({
+                        name: asset.name,
+                        uri: asset.uri,
+                        type: asset.mimeType || "application/octet-stream",
+                        size: asset.size || 0,
+                    }));
+
+                    setDocuments((prev) => ({
+                        ...prev,
+                        parkingPhotos: [...(prev.parkingPhotos || []), ...newPhotos],
+                    }));
+                }
+                return; // Early return after handling photos
+            }
+
+            // Handle single file selection for other documents
+            result = await DocumentPicker.getDocumentAsync({
+                type: ["application/pdf", "image/*"],
+                copyToCacheDirectory: true,
+            });
+
+            if (!result.canceled) {
+                const file = result.assets[0];
+                const documentInfo: DocumentInfo = {
+                    name: file.name,
+                    uri: file.uri,
+                    type: file.mimeType || "application/octet-stream",
+                    size: file.size || 0,
+                };
+
+                if (documentInfo.size > 10 * 1024 * 1024) {
+                    alert("File size must be less than 10MB");
+                    return;
+                }
+
+                setDocuments((prev) => ({
+                    ...prev,
+                    [type]: documentInfo,
+                }));
+            }
+        } catch (error) {
+            console.error("Error picking document:", error);
+            alert("Error selecting document. Please try again.");
+        }
+    };
+
+    // Update your remove document handler
+    const handleRemoveDocument = (type: keyof Documents) => {
+        if (type === "parkingPhotos") {
+            setDocuments((prev) => ({
+                ...prev,
+                [type]: [],
+            }));
+        } else {
+            setDocuments((prev) => ({
+                ...prev,
+                [type]: null,
+            }));
+        }
     };
 
     const [agreed, setAgreed] = useState(false);
-
-    const handleInputChange = (key: string, value: string) => {
-        setOwnerInformation({ ...ownerInformation, [key]: value });
-    };
-
-    const handleAddressChange = (field: string, value: string) => {
-        setAddressData((prev) => ({
-            ...prev,
-            address: {
-                ...prev.address,
-                [field]: value,
-            },
-        }));
-    };
-
-    // const handleLocationSelect = (event) => {
-    //     const { latitude, longitude } = event.nativeEvent.coordinate;
-    //     setAddressData((prev) => ({
-    //         ...prev,
-    //         location: { latitude, longitude },
-    //     }));
-    // };
-    const handleSubmit = () => {
-        throw new Error("Not implemented");
+    const handleSubmit = async () => {
+        setIsSubmitting(true);
+        try {
+            const result = await parkingManagerSignUp(
+                userInformation,
+                companyProfile,
+                addressData,
+                parkingEstablishmentData,
+                operatingHours,
+                paymentMethodData,
+                documents
+            );
+            if (result.status === 201) {
+                alert("Registration successful. Please wait for approval.");
+            } else {
+                alert("An error occurred while submitting the form. Please try again.");
+            }
+        } catch {
+            alert("An error occurred while submitting the form. Please try again.");
+        }
     };
     const [zoningCompliance, setZoningCompliance] = useState(false);
     return (
@@ -120,129 +261,56 @@ const ParkingManagerSignUp = () => {
                 <TextComponent variant="body">Create an account to get started</TextComponent>
             </View>
             <View style={styles.formsContainer}>
-                <CardComponent
-                    header="Owner Information"
-                    subHeader="Enter your information below"
-                    customStyles={{ width: "95%", maxWidth: 768 }}
-                >
-                    <View style={styles.form}>
-                        <SelectComponent
-                            items={[
-                                { label: "Individual", value: "individual" },
-                                { label: "Company", value: "company" },
-                            ]}
-                            selectedValue={ownerInformation.ownerType}
-                            onValueChange={(value) => handleInputChange("ownerType", value)}
-                        />
-
-                        {ownerInformation.ownerType === "company" ? (
-                            <View style={styles.formGroup}>
-                                <TextInputComponent
-                                    placeholder="Company Name"
-                                    value={ownerInformation.companyName}
-                                    onChangeText={(value) => handleInputChange("companyName", value)}
-                                />
-                                <TextInputComponent
-                                    placeholder="Company Registration Number"
-                                    value={ownerInformation.companyRegNumber}
-                                    onChangeText={(value) => handleInputChange("companyRegNumber", value)}
-                                />
-                            </View>
-                        ) : (
-                            <View style={styles.formGroup}>
-                                <TextInputComponent
-                                    placeholder="First Name"
-                                    value={ownerInformation.firstName}
-                                    onChangeText={(value) => handleInputChange("firstName", value)}
-                                />
-                                <TextInputComponent
-                                    placeholder="Middle Name (optional)"
-                                    value={ownerInformation.middleName}
-                                    onChangeText={(value) => handleInputChange("middleName", value)}
-                                />
-                                <TextInputComponent
-                                    placeholder="Last Name"
-                                    value={ownerInformation.lastName}
-                                    onChangeText={(value) => handleInputChange("lastName", value)}
-                                />
-                                <TextInputComponent
-                                    placeholder="Suffix (optional)"
-                                    value={ownerInformation.suffix}
-                                    onChangeText={(value) => handleInputChange("suffix", value)}
-                                />
-                            </View>
-                        )}
-
-                        <View style={styles.formGroup}>
-                            <TextInputComponent
-                                placeholder="Email"
-                                value={ownerInformation.email}
-                                onChangeText={(value) => handleInputChange("email", value)}
-                                keyboardType="email-address"
-                            />
-                            <TextInputComponent
-                                placeholder="Phone Number"
-                                value={ownerInformation.contactNumber}
-                                onChangeText={(value) => handleInputChange("contactNumber", value)}
-                                keyboardType="phone-pad"
-                            />
-                        </View>
-
-                        <TextInputComponent
-                            placeholder="TIN (Tax Identification Number)"
-                            value={ownerInformation.tin}
-                            onChangeText={(value) => handleInputChange("tin", value)}
-                        />
-
-                        <TextInputComponent
-                            placeholder="Parking Establishment Name"
-                            value={ownerInformation.name}
-                            onChangeText={(value) => handleInputChange("name", value)}
-                        />
-                    </View>
-                </CardComponent>
+                <ParkingOwnerInfoCard
+                    owner_type={companyProfile.owner_type}
+                    company_name={companyProfile.company_name}
+                    company_reg_number={companyProfile.company_reg_number}
+                    email={userInformation.email}
+                    first_name={userInformation.first_name}
+                    last_name={userInformation.last_name}
+                    middle_name={userInformation.middle_name}
+                    phone_number={userInformation.phone_number}
+                    suffix={userInformation.suffix}
+                    tin={companyProfile.tin}
+                    handleCompanyInfoChange={handleCompanyInfoChange}
+                    handleParkingOwnerInfo={handleParkingOwnerInfo}
+                    handleParkingEstablishmentDataChange={handleParkingEstablishmentData}
+                    name={parkingEstablishmentData.name}
+                />
 
                 <CardComponent
                     header="Parking Location"
                     subHeader="Enter the location details"
-                    customStyles={{ width: "95%", maxWidth: 768 }}
+                    customStyles={{ width: "95%" }}
                 >
                     <View style={styles.form}>
                         <TextInputComponent
+                            placeholder="Search for address to get coordinates and map data"
+                            value={query}
+                            onChangeText={(value) => setQuery(value)}
+                        />
+
+                        <ButtonComponent onPress={searchLocation} title="Search" />
+
+                        <TextInputComponent
                             placeholder="Street Address"
-                            value={addressData.address.street}
-                            onChangeText={(value) => handleAddressChange("street", value)}
+                            value={addressData.street}
+                            onChangeText={(value) => handleAddressInfoChange("street", value)}
                         />
 
                         <View style={styles.formGroup}>
                             <TextInputComponent
                                 placeholder="Barangay"
-                                value={addressData.address.barangay}
-                                onChangeText={(value) => handleAddressChange("barangay", value)}
+                                value={addressData.barangay}
+                                onChangeText={(value) => handleAddressInfoChange("barangay", value)}
                             />
                             <SelectComponent
-                                items={[
-                                    { label: "Manila", value: "manila" },
-                                    { label: "Quezon City", value: "quezon_city" },
-                                    { label: "Makati", value: "makati" },
-                                    { label: "Pasig", value: "pasig" },
-                                    { label: "Taguig", value: "taguig" },
-                                    { label: "Mandaluyong", value: "mandaluyong" },
-                                    { label: "San Juan", value: "san_juan" },
-                                    { label: "Pasay", value: "pasay" },
-                                    { label: "Parañaque", value: "paranaque" },
-                                    { label: "Las Piñas", value: "las_pinas" },
-                                    { label: "Muntinlupa", value: "muntinlupa" },
-                                    { label: "Valenzuela", value: "valenzuela" },
-                                    { label: "Caloocan", value: "caloocan" },
-                                    { label: "Malabon", value: "malabon" },
-                                    { label: "Navotas", value: "navotas" },
-                                    { label: "Marikina", value: "marikina" },
-                                    { label: "Pateros", value: "pateros" },
-                                ]}
+                                items={METRO_MANILA_CITIES.map((city) => {
+                                    return { label: city, value: city.toLowerCase().replace(" ", "_") };
+                                })}
                                 placeholder="City/Municipality"
-                                selectedValue={addressData.address.city}
-                                onValueChange={(value) => handleAddressChange("city", value)}
+                                selectedValue={addressData.city}
+                                onValueChange={(value) => handleAddressInfoChange("city", value)}
                             />
                         </View>
 
@@ -250,182 +318,162 @@ const ParkingManagerSignUp = () => {
                             <SelectComponent
                                 items={[{ label: "Metro Manila", value: "metro_manila" }]}
                                 placeholder="Province"
-                                selectedValue={addressData.address.province}
-                                onValueChange={(value) => handleAddressChange("province", value)}
+                                selectedValue={addressData.province}
+                                onValueChange={(value) => handleAddressInfoChange("province", value)}
                             />
                             <TextInputComponent
                                 placeholder="Postal Code"
-                                value={addressData.address.postalCode}
-                                onChangeText={(value) => handleAddressChange("postalCode", value)}
+                                value={addressData.postal_code}
+                                onChangeText={(value) => handleAddressInfoChange("postal_code", value)}
                             />
                         </View>
 
-                        <View style={styles.mapContainer}>{/* {<MapView></MapView>} */}</View>
+                        <View style={styles.mapContainer}>
+                            <LocationPicker
+                                initialLatitude={parkingEstablishmentData.latitude}
+                                initialLongitude={parkingEstablishmentData.longitude}
+                                onLocationChange={(latitude: number, longitude: number) => {
+                                    setParkingEstablishmentData((prev) => ({
+                                        ...prev,
+                                        latitude,
+                                        longitude,
+                                    }));
+                                }}
+                            />
+                        </View>
 
                         <View style={styles.formGroup}>
                             <TextInputComponent
                                 placeholder="Longitude"
-                                value={String(addressData.location.longitude)}
+                                value={String(parkingEstablishmentData.longitude)}
                                 editable={false}
                             />
                             <TextInputComponent
                                 placeholder="Latitude"
-                                value={String(addressData.location.latitude)}
+                                value={String(parkingEstablishmentData.latitude)}
                                 editable={false}
                             />
                         </View>
 
                         <TextInputComponent
                             placeholder="Landmarks: e.g., near a mall, beside a church"
-                            value={addressData.landmarks}
-                            onChangeText={(value) => setAddressData((prev) => ({ ...prev, landmarks: value }))}
+                            value={parkingEstablishmentData.nearby_landmarks}
+                            onChangeText={(value) =>
+                                setParkingEstablishmentData((prev) => ({ ...prev, nearby_landmarks: value }))
+                            }
                             multiline
                             numberOfLines={3}
                         />
                     </View>
                 </CardComponent>
+                <FacilitiesAndAmenitiesCard
+                    access_info={parkingEstablishmentData.access_info}
+                    custom_access={parkingEstablishmentData.custom_access}
+                    space_type={parkingEstablishmentData.space_type}
+                    space_layout={parkingEstablishmentData.space_layout}
+                    custom_layout={parkingEstablishmentData.custom_layout}
+                    dimensions={parkingEstablishmentData.dimensions}
+                    lighting={parkingEstablishmentData.lighting}
+                    accessibility={parkingEstablishmentData.accessibility}
+                    facilities={parkingEstablishmentData.facilities}
+                    handleParkingEstablishmentData={handleParkingEstablishmentData}
+                />
 
+                <OperatingHoursForm
+                    is24_7={parkingEstablishmentData.is24_7}
+                    operatingHours={operatingHours}
+                    onIs24_7Change={handleParkingEstablishmentData}
+                    onOperatingHoursChange={handleOperatingHoursData}
+                    onParkingDataChange={handleParkingEstablishmentData}
+                />
+
+                <PaymentMethods
+                    accepts_cash={paymentMethodData.accepts_cash}
+                    accepts_mobile={paymentMethodData.accepts_mobile}
+                    accepts_other={paymentMethodData.accepts_other}
+                    other_methods={paymentMethodData.other_methods}
+                    handlePaymentDataChange={handlePaymentDataChange}
+                />
                 <CardComponent
-                    header="Facilities & Amenities"
-                    subHeader="Specify your parking facility details"
-                    customStyles={{ width: "95%", maxWidth: 768 }}
+                    header="Upload Documents"
+                    subHeader="Upload required documents"
+                    customStyles={{ width: "95%" }}
                 >
                     <View style={styles.form}>
-                        <SelectComponent
-                            placeholder="Access Information (Optional)"
-                            items={[
-                                { label: "Gate Code", value: "gate_code" },
-                                { label: "Security Check", value: "security_check" },
-                                { label: "Key Pickup", value: "key_pickup" },
-                                { label: "No Special Access", value: "no_special_access" },
-                                { label: "Other", value: "other" },
-                            ]}
-                            selectedValue={facilitiesAndAmenities.facilities.accessInformation}
-                            onValueChange={(value) => handleFacilitiesChange("facilities", "accessInformation", value)}
-                        />
+                        {Object.entries(documents).map(([type, file]) => (
+                            <View key={type} style={styles.documentSection}>
+                                <TextComponent style={styles.documentLabel}>
+                                    {type
+                                        .split(/(?=[A-Z])/)
+                                        .join(" ")
+                                        .toUpperCase()}
+                                    {type !== "parkingPhotos" ? " (PDF or Image)" : " (Images)"}
+                                </TextComponent>
 
-                        <TextInputComponent
-                            placeholder="Other? (Specify it here)"
-                            value={facilitiesAndAmenities.facilities.customAccess}
-                            onChangeText={(value) => handleFacilitiesChange("facilities", "customAccess", value)}
-                            editable={facilitiesAndAmenities.facilities.accessInformation === "other"}
-                        />
-
-                        <SelectComponent
-                            placeholder="Space Type"
-                            items={[
-                                { label: "Indoor", value: "indoor" },
-                                { label: "Outdoor", value: "outdoor" },
-                                { label: "Covered", value: "covered" },
-                                { label: "Uncovered", value: "uncovered" },
-                            ]}
-                            selectedValue={facilitiesAndAmenities.parkingDetails.spaceType}
-                            onValueChange={(value) => handleFacilitiesChange("parkingDetails", "spaceType", value)}
-                        />
-
-                        <SelectComponent
-                            placeholder="Space Layout"
-                            items={[
-                                { label: "Parallel", value: "parallel" },
-                                { label: "Perpendicular", value: "perpendicular" },
-                                { label: "Angled", value: "angled" },
-                                { label: "Other", value: "other" },
-                            ]}
-                            selectedValue={facilitiesAndAmenities.parkingDetails.spaceLayout}
-                            onValueChange={(value) => handleFacilitiesChange("parkingDetails", "spaceLayout", value)}
-                        />
-
-                        <TextInputComponent
-                            placeholder="Dimensions (e.g., 2.5m x 5m)"
-                            value={facilitiesAndAmenities.parkingDetails.dimensions}
-                            onChangeText={(value) => handleFacilitiesChange("parkingDetails", "dimensions", value)}
-                        />
-
-                        <TextInputComponent
-                            placeholder="Lighting & Security Features: e.g., CCTV, guards, lighting"
-                            value={facilitiesAndAmenities.facilities.lightingAndSecurity}
-                            onChangeText={(value) => handleFacilitiesChange("facilities", "lightingAndSecurity", value)}
-                            numberOfLines={3}
-                        />
-
-                        <TextInputComponent
-                            placeholder="Accessibility Features: e.g., ramps, elevators"
-                            value={facilitiesAndAmenities.facilities.accessibility}
-                            onChangeText={(value) => handleFacilitiesChange("facilities", "accessibility", value)}
-                            numberOfLines={3}
-                        />
-
-                        <TextInputComponent
-                            placeholder="Nearby Facilities: e.g., EV charging stations, Restrooms, Elevators"
-                            value={facilitiesAndAmenities.facilities.nearbyFacilities}
-                            onChangeText={(value) => handleFacilitiesChange("facilities", "nearbyFacilities", value)}
-                            numberOfLines={3}
-                        />
-                    </View>
-                </CardComponent>
-
-                <CardComponent
-                    header="Accepted Payment Methods"
-                    subHeader="Select available payment options"
-                    customStyles={{ width: "95%", maxWidth: 768 }}
-                >
-                    <View style={styles.form}>
-                        <View style={styles.checkboxGroup}>
-                            <CheckboxComponent
-                                placeholder="Cash"
-                                value={paymentData.paymentMethods.cash}
-                                onValueChange={(value) => handlePaymentChange("cash", value)}
-                            />
-
-                            <CheckboxComponent
-                                placeholder="Mobile Payment"
-                                value={paymentData.paymentMethods.mobile}
-                                onValueChange={(value) => handlePaymentChange("mobile", value)}
-                            />
-
-                            <View style={styles.otherPaymentContainer}>
-                                <CheckboxComponent
-                                    placeholder="Other"
-                                    value={paymentData.paymentMethods.other}
-                                    onValueChange={(value) => handlePaymentChange("other", value)}
-                                />
-                                <TextInputComponent
-                                    placeholder="Specify other payment method"
-                                    value={paymentData.paymentMethods.otherText}
-                                    onChangeText={(value) => handlePaymentChange("otherText", value)}
-                                    editable={paymentData.paymentMethods.other}
-                                    customStyles={[
-                                        styles.otherInput,
-                                        !paymentData.paymentMethods.other && styles.disabledInput,
-                                    ]}
-                                />
+                                {file ? (
+                                    type === "parkingPhotos" ? (
+                                        <View style={styles.photoSection}>
+                                            <View style={styles.photoGrid}>
+                                                {(file as DocumentInfo[]).map((photo, index) => (
+                                                    <View key={index} style={styles.photoPreview}>
+                                                        <Image
+                                                            source={{ uri: photo.uri }}
+                                                            style={styles.photoThumbnail}
+                                                        />
+                                                    </View>
+                                                ))}
+                                            </View>
+                                            <View style={styles.photoActions}>
+                                                <ButtonComponent
+                                                    title="Add More Photos"
+                                                    onPress={() => handleDocumentPick("parkingPhotos")}
+                                                    variant="primary"
+                                                />
+                                                <ButtonComponent
+                                                    title="Remove All"
+                                                    variant="destructive"
+                                                    onPress={() => handleRemoveDocument("parkingPhotos")}
+                                                />
+                                            </View>
+                                        </View>
+                                    ) : (
+                                        <View style={styles.filePreview}>
+                                            <View style={styles.fileInfo}>
+                                                <MaterialCommunityIcons
+                                                    name={file.type?.includes("image") ? "image" : "file-document"}
+                                                    size={24}
+                                                    color="#4B5563"
+                                                />
+                                                <TextComponent>{(file as DocumentInfo).name}</TextComponent>
+                                            </View>
+                                            <ButtonComponent
+                                                title="Remove"
+                                                onPress={() => handleRemoveDocument(type as keyof Documents)}
+                                                style={styles.removeButton}
+                                            />
+                                        </View>
+                                    )
+                                ) : (
+                                    <View style={styles.uploadArea}>
+                                        <MaterialCommunityIcons name="upload" size={24} color="#6B7280" />
+                                        <TextComponent>Drag and drop or click to upload</TextComponent>
+                                        <TextComponent style={styles.fileLimit}>
+                                            {type === "parkingPhotos"
+                                                ? "PNG, JPG, GIF up to 10MB each"
+                                                : "PDF or images up to 10MB"}
+                                        </TextComponent>
+                                        <ButtonComponent
+                                            title="Choose File"
+                                            onPress={() => handleDocumentPick(type as keyof Documents)}
+                                            style={styles.uploadButton}
+                                        />
+                                    </View>
+                                )}
                             </View>
-                        </View>
+                        ))}
                     </View>
                 </CardComponent>
-                <View style={styles.infoContainer}>
-                    <View style={styles.infoHeader}>
-                        <MaterialCommunityIcons name="information" size={24} color="#1E40AF" />
-                        <TextComponent style={styles.infoTitle}>Account Verification Process</TextComponent>
-                    </View>
-                    <View style={styles.infoContent}>
-                        <TextComponent style={styles.bulletPoint}>
-                            • Your registration will be reviewed by our admin team
-                        </TextComponent>
-                        <TextComponent style={styles.bulletPoint}>
-                            • Verification typically takes 1-2 business days
-                        </TextComponent>
-                        <TextComponent style={styles.bulletPoint}>
-                            • Your establishment will be visible to customers after approval
-                        </TextComponent>
-                        <TextComponent style={styles.bulletPoint}>
-                            • You'll receive an email notification once approved
-                        </TextComponent>
-                        <TextComponent style={styles.bulletPoint}>
-                            • Make sure all documents are clear and valid to speed up the process
-                        </TextComponent>
-                    </View>
-                </View>
+                <InfoContainer />
                 <View style={styles.submitContainer}>
                     <View style={styles.checkboxContainer}>
                         <CheckboxComponent
@@ -459,8 +507,38 @@ const styles = StyleSheet.create({
         paddingBottom: 16,
         alignItems: "center",
     },
-    submitContainer: {
+    photoSection: {
         width: "100%",
+        gap: 12,
+    },
+    photoGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 8,
+        marginTop: 8,
+    },
+    photoPreview: {
+        width: 80,
+        height: 80,
+        borderRadius: 4,
+        overflow: "hidden",
+        backgroundColor: "#F3F4F6",
+    },
+    photoThumbnail: {
+        width: "100%",
+        height: "100%",
+        resizeMode: "cover",
+    },
+    photoActions: {
+        flexDirection: "row",
+        gap: 8,
+        marginTop: 8,
+    },
+    addMoreButton: {
+        flex: 1,
+    },
+    submitContainer: {
+        width: "95%",
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
@@ -468,36 +546,12 @@ const styles = StyleSheet.create({
     checkboxContainer: {
         width: "100%",
         marginBottom: 16,
+        gap: 16,
     },
     submitButton: {
         width: "100%",
     },
 
-    infoContainer: {
-        backgroundColor: "#EFF6FF",
-        borderRadius: 8,
-        padding: 16,
-        width: "95%",
-        maxWidth: 768,
-        marginBottom: 20,
-    },
-    infoHeader: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
-    },
-    infoTitle: {
-        color: "#1E40AF",
-        fontWeight: "600",
-    },
-    infoContent: {
-        marginTop: 12,
-        paddingLeft: 8,
-    },
-    bulletPoint: {
-        color: "#1E40AF",
-        marginVertical: 4,
-    },
     formGroup: {
         gap: 16,
     },
@@ -520,17 +574,7 @@ const styles = StyleSheet.create({
     map: {
         flex: 1,
     },
-    checkboxGroup: {
-        gap: 16,
-    },
-    otherPaymentContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
-    },
-    otherInput: {
-        flex: 1,
-    },
+
     disabledInput: {
         backgroundColor: "#F3F4F6",
     },
@@ -551,5 +595,59 @@ const styles = StyleSheet.create({
     },
     priceInput: {
         flex: 1,
+    },
+    priceLabel: {
+        color: "#6B7280",
+    },
+    documentSection: {
+        marginBottom: 16,
+    },
+    documentLabel: {
+        color: "#374151",
+        fontWeight: "600",
+    },
+    filePreview: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        padding: 8,
+        backgroundColor: "#F3F4F6",
+        borderRadius: 8,
+    },
+    fileInfo: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+    },
+    removeButton: {
+        padding: 8,
+        backgroundColor: "#F3F4F6",
+    },
+    uploadArea: {
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 8,
+        padding: 16,
+        borderWidth: 2,
+        borderColor: "#E5E7EB",
+        borderStyle: "dashed",
+        borderRadius: 8,
+    },
+    fileLimit: {
+        color: "#6B7280",
+    },
+    uploadButton: {
+        width: "100%",
+    },
+    overlay: {
+        position: "absolute",
+        bottom: 20,
+        left: 20,
+        backgroundColor: "rgba(0,0,0,0.7)",
+        padding: 10,
+        borderRadius: 5,
+    },
+    text: {
+        color: "white",
     },
 });

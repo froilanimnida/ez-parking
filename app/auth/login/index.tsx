@@ -1,34 +1,17 @@
 import { useState, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import Checkbox from "expo-checkbox";
-import TextComponent from "components/TextComponent";
-import ButtonComponent from "components/ButtonComponent";
+import TextComponent from "@components/TextComponent";
+import ButtonComponent from "@components/ButtonComponent";
 import CardComponent from "@/components/CardComponent";
-import axiosInstance from "@/lib/axiosInstance";
 import TextInputComponent from "@/components/TextInputComponent";
-import type { AxiosError } from "axios";
-import { getAuthHeaders } from "@/lib/credentialsManager";
+import { AxiosError } from "axios";
+import { isAuthenticated } from "@/lib/credentialsManager";
 import { router, useLocalSearchParams, type ExternalPathString, type RelativePathString } from "expo-router";
 import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
-
-const loginUser = async (email: string) => {
-    const result = await axiosInstance.post("auth/login", {
-        email: email,
-    });
-    if (result.status >= 400) return Promise.reject(result.data);
-    console.log(result);
-    return result;
-};
-
-const verifyOTP = async (email: string, otp: string, rememberMe: boolean) => {
-    const result = await axiosInstance.patch(`/auth/verify-otp`, {
-        email: email,
-        otp: otp,
-        remember_me: rememberMe,
-    });
-    return result;
-};
+import { loginUser, verifyOTP } from "@/lib/api/auth";
+import LoadingComponent from "@/components/reusable/LoadingComponent";
 
 const LoginForm = () => {
     const [showOtpForm, setShowOtpForm] = useState(false);
@@ -44,21 +27,38 @@ const LoginForm = () => {
     const startTimer = () => {
         setTimer(300);
     };
-
     useEffect(() => {
-        const nextParams = local.next as RelativePathString | ExternalPathString;
-        if (nextParams) {
-            setTimeout(() => {
-                router.replace(nextParams);
-            }, 1500);
+        if (timer === 0) {
+            setShowOtpForm(false);
         }
-
-        let interval: NodeJS.Timeout;
-        if (timer > 0) {
-            interval = setInterval(() => setTimer((t) => t - 1), 1000);
-        }
-        return () => clearInterval(interval);
     }, [timer]);
+
+    const nextParams = local.next as RelativePathString | ExternalPathString;
+    const [isChecking, setIsChecking] = useState(true);
+    useEffect(() => {
+        const checkAuthStatus = async () => {
+            try {
+                const auth = await isAuthenticated();
+
+                if (auth.loggedIn && auth.role) {
+                    if (nextParams && auth.role === "user") {
+                        router.replace(nextParams);
+                        return;
+                    }
+                    router.replace(auth.role.replace("_", "-") as ExternalPathString);
+                }
+            } catch (error) {
+                console.error("Auth check failed:", error);
+            } finally {
+                setIsChecking(false);
+            }
+        };
+
+        checkAuthStatus();
+        return () => {
+            setIsChecking(false);
+        };
+    }, [nextParams]);
 
     const handleOtpOnChange = (otp: string) => {
         if (otp.length === 6) {
@@ -68,15 +68,15 @@ const LoginForm = () => {
     const handleLogin = async () => {
         setLoggingIn(true);
         try {
-            await loginUser(email);
-            alert("OTP sent successfully.");
+            await loginUser(email.toLowerCase());
             setTimeout(() => {
                 setShowOtpForm(true);
                 setLoggingIn(false);
                 startTimer();
             }, 1500);
-        } catch (error) {
-            const errorBody = error as { code: string; message: string };
+        } catch (error: unknown) {
+            const err = error as AxiosError;
+            const errorBody = err.response!.data as { code: string; message: string };
             alert(errorBody?.message || "An error occurred");
             setLoggingIn(false);
         }
@@ -87,89 +87,93 @@ const LoginForm = () => {
             const result = await verifyOTP(email, otp, rememberMe);
             const role = result.data.role as string;
 
-            const nextParams = local.next as RelativePathString | ExternalPathString;
-            const headers = await getAuthHeaders();
-            if (!headers.Authorization) {
-                console.warn("No authorization token found");
-            }
-            if (nextParams) {
-                router.replace(nextParams);
-            }
-            router.replace(role.replace("_", "-") as ExternalPathString);
             alert("Logged in successfully.");
-            setLoggingIn(false);
+
+            if (nextParams && role === "user") {
+                router.replace(nextParams);
+                return;
+            }
+
+            router.replace(role.replace("_", "-") as ExternalPathString);
         } catch (error) {
             console.error("Login error:", error);
-            const errorBody = error as AxiosError;
-            const errorMessage = errorBody.response?.data as { code: string; message: string };
-            alert(errorMessage.message || "An error occurred");
+            if (error instanceof AxiosError) {
+                const errorMessage = error.response?.data?.message || "Invalid OTP code";
+                alert(errorMessage);
+            } else {
+                alert("An unexpected error occurred");
+            }
+        } finally {
             setLoggingIn(false);
         }
     };
 
     return (
         <ResponsiveContainer>
-            <View style={styles.body}>
-                {!showOtpForm ? (
-                    <View style={styles.loginForm}>
-                        <CardComponent
-                            header="Welcome back"
-                            subHeader="Please enter your registered email address"
-                            customStyles={{ gap: 16 }}
-                        >
-                            <TextInputComponent
-                                customStyles={styles.input}
-                                placeholder="Email address"
-                                keyboardType="email-address"
-                                value={email}
-                                onChangeText={setEmail}
-                                autoCapitalize="none"
-                            />
-                            <View style={styles.checkbox}>
-                                <Checkbox onValueChange={setRememberMe} value={rememberMe} color="#4F46E5" />
-                                <TextComponent>Remember me</TextComponent>
-                            </View>
-                            <ButtonComponent
-                                title="Continue"
-                                onPress={handleLogin}
-                                variant="primary"
-                                loading={loggingIn}
-                                disabled={!isEmailValid(email) || loggingIn}
-                            />
-                            <LinkComponent href="./sign-up" label="Create user account" variant="text" />
-                        </CardComponent>
-                    </View>
-                ) : (
-                    <View>
-                        <CardComponent
-                            header="Verify your email"
-                            subHeader={`Enter the 6-digit code sent to ${email}`}
-                            children={
-                                <>
-                                    <View style={styles.otpContainer}>
-                                        <TextInputComponent
-                                            customStyles={styles.otpInput}
-                                            maxLength={6}
-                                            keyboardType="number-pad"
-                                            onChangeText={handleOtpOnChange}
-                                        />
-                                    </View>
+            {isChecking && <LoadingComponent text="Checking authentication status..." />}
+            {!isChecking && (
+                <View style={styles.body}>
+                    {!showOtpForm ? (
+                        <View style={styles.loginForm}>
+                            <CardComponent
+                                header="Welcome back"
+                                subHeader="Please enter your registered email address"
+                                customStyles={{ gap: 16 }}
+                            >
+                                <TextInputComponent
+                                    customStyles={styles.input}
+                                    placeholder="Email address"
+                                    keyboardType="email-address"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    autoCapitalize="none"
+                                />
+                                <View style={styles.checkbox}>
+                                    <Checkbox onValueChange={setRememberMe} value={rememberMe} color="#4F46E5" />
+                                    <TextComponent>Remember me</TextComponent>
+                                </View>
+                                <ButtonComponent
+                                    title="Continue"
+                                    onPress={handleLogin}
+                                    variant="primary"
+                                    loading={loggingIn}
+                                    disabled={!isEmailValid(email) || loggingIn}
+                                />
+                                <LinkComponent href="./sign-up" label="Create user account" variant="text" />
+                            </CardComponent>
+                        </View>
+                    ) : (
+                        <View style={styles.loginForm}>
+                            <CardComponent
+                                header="Verify your email"
+                                subHeader={`Enter the 6-digit code sent to ${email}`}
+                                children={
+                                    <>
+                                        <View style={styles.otpContainer}>
+                                            <TextInputComponent
+                                                customStyles={styles.otpInput}
+                                                maxLength={6}
+                                                keyboardType="number-pad"
+                                                onChangeText={handleOtpOnChange}
+                                            />
+                                        </View>
 
-                                    <TextComponent style={styles.timerText}>
-                                        Get new code in {timer} seconds
-                                    </TextComponent>
-                                    <ButtonComponent
-                                        title="Resend Code"
-                                        onPress={startTimer}
-                                        variant="primary"
-                                        disabled={timer > 0}
-                                    />
-                                </>
-                            }
-                        />
-                    </View>
-                )}
-            </View>
+                                        <TextComponent style={styles.timerText}>
+                                            Get new code in {timer} seconds
+                                        </TextComponent>
+                                        <ButtonComponent
+                                            title="Resend Code"
+                                            onPress={startTimer}
+                                            variant="primary"
+                                            disabled={timer > 0}
+                                        />
+                                    </>
+                                }
+                            />
+                        </View>
+                    )}
+                </View>
+            )}
         </ResponsiveContainer>
     );
 };

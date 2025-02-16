@@ -1,10 +1,10 @@
 import React from "react";
-import { View, Text, StyleSheet, Pressable, Linking } from "react-native";
-import { PricingPlan } from "@/lib/models/pricing-plan";
+import { View, Text, StyleSheet } from "react-native";
 import { ParkingSlot } from "@/lib/models/parking-slot";
 import CardComponent from "./CardComponent";
 import TextComponent from "./TextComponent";
-import { router, type RelativePathString } from "expo-router";
+import LinkComponent from "./LinkComponent";
+import { usePathname, type RelativePathString } from "expo-router";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;
@@ -14,25 +14,12 @@ interface Slot extends ParkingSlot {
 
 interface SlotCardProps {
     slotInfo: Slot;
-    rates: PricingPlan[];
-    establishmentUuid: string;
     slotUuid: string;
+    isGuest?: boolean;
+    establishmentUuid: string;
 }
 
-function getRateDisplay(baseRate: number, rates: PricingPlan[]): { amount: string; type: string } {
-    const activeRate = rates.find((r) => r.is_enabled);
-    if (!activeRate) return { amount: "0.00", type: "hourly" };
-
-    const calculatedRate = baseRate * Number(activeRate.rate);
-    return {
-        amount: calculatedRate.toFixed(2),
-        type: activeRate.rate_type,
-    };
-}
-
-const SlotCard: React.FC<SlotCardProps> = ({ slotInfo, rates, establishmentUuid, slotUuid }) => {
-    const { amount, type } = getRateDisplay(Number(slotInfo.base_price_per_hour), rates);
-
+const SlotCard = ({ slotInfo, slotUuid, isGuest, establishmentUuid }: SlotCardProps) => {
     const getBorderColor = () => {
         switch (slotInfo.slot_status) {
             case "open":
@@ -55,14 +42,11 @@ const SlotCard: React.FC<SlotCardProps> = ({ slotInfo, rates, establishmentUuid,
         }
     };
 
-    const handleBookSlot = () => {
-        const nextUrl = `/user/book/${establishmentUuid}?slot=${slotUuid}`;
-        const loginUrl = `/auth/login?next=${encodeURIComponent(nextUrl)}` as RelativePathString;
-        router.push(loginUrl);
-    };
-
     return (
-        <CardComponent customStyles={[getBorderColor()]} header={slotInfo.slot_code} subHeader={slotInfo.slot_status}>
+        <CardComponent customStyles={[getBorderColor()]} header={slotInfo.slot_code}>
+            <View style={styles.header}>
+                <TextComponent style={getStatusBadgeStyle()}>{slotInfo.slot_status}</TextComponent>
+            </View>
             <View style={styles.infoContainer}>
                 <TextComponent style={styles.infoText}>Floor: {slotInfo.floor_level}</TextComponent>
                 <TextComponent style={styles.infoText}>Accommodates: {slotInfo.vehicle_type_name}</TextComponent>
@@ -71,15 +55,33 @@ const SlotCard: React.FC<SlotCardProps> = ({ slotInfo, rates, establishmentUuid,
                 {slotInfo.slot_status === "open" && (
                     <>
                         <View style={styles.rateRow}>
-                            <TextComponent style={styles.rateText}>
-                                ₱{amount}/{type === "hourly" ? "hr" : type === "daily" ? "day" : "mo"}
-                            </TextComponent>
-                            <Text style={styles.rateTypeText}>{type} rate</Text>
+                            <View style={styles.rateContainer}>
+                                <TextComponent style={styles.rateText}>PHP{slotInfo.base_price_per_hour}</TextComponent>
+                                <TextComponent style={styles.rateTypeText}>per hour</TextComponent>
+                            </View>
+                            <View style={styles.rateContainer}>
+                                <TextComponent style={styles.rateText}>PHP{slotInfo.base_price_per_day}</TextComponent>
+                                <TextComponent style={styles.rateTypeText}>per day</TextComponent>
+                            </View>
+                            <View style={styles.rateContainer}>
+                                <TextComponent style={styles.rateText}>
+                                    PHP{slotInfo.base_price_per_month}
+                                </TextComponent>
+                                <TextComponent style={styles.rateTypeText}>per month</TextComponent>
+                            </View>
                         </View>
 
-                        <Pressable style={styles.bookButton} onPress={handleBookSlot}>
-                            <Text style={styles.bookButtonText}>Book this slot</Text>
-                        </Pressable>
+                        <LinkComponent
+                            style={styles.bookButton}
+                            label="Book Slot"
+                            href={
+                                isGuest
+                                    ? (`../auth/login?next=${encodeURIComponent(
+                                          `/user/book/slot/${slotUuid}?establishment_uuid=${establishmentUuid}`
+                                      )}` as RelativePathString)
+                                    : (`/user/book/slot/${slotUuid}?establishment_uuid=${establishmentUuid}` as RelativePathString)
+                            }
+                        />
                     </>
                 )}
 
@@ -101,9 +103,13 @@ const styles = StyleSheet.create({
     },
     header: {
         flexDirection: "row",
+        marginBottom: 8,
+    },
+    rateContainer: {
+        flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 8,
+        marginTop: 8,
     },
     slotCode: {
         fontSize: 16,
@@ -138,9 +144,7 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     rateRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
+        flexDirection: "column",
         marginTop: 8,
     },
     rateText: {
@@ -159,6 +163,9 @@ const styles = StyleSheet.create({
         borderRadius: 4,
         paddingVertical: 10,
         alignItems: "center",
+        justifyContent: "center",
+        alignSelf: "center",
+        width: "100%",
     },
     bookButtonText: {
         color: "#ffffff",
