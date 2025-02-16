@@ -7,7 +7,7 @@ import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import CheckboxComponent from "@/components/CheckboxComponent";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import ButtonComponent from "@/components/ButtonComponent";
-import { OperatingHour } from "@lib/models/operating-hour";
+import { OperatingHour } from "@lib/models/operatingHour";
 import { DAYS_OF_WEEK } from "@lib/types/models/common/constants";
 import LinkComponent from "@components/LinkComponent";
 import TimePicker from "@components/reusable/TimePicker";
@@ -16,6 +16,7 @@ interface ParkingSchedule {
     is_24_7: boolean;
     operating_hours: OperatingHour[];
 }
+
 export const DayScheduleRow = ({
     day,
     hours,

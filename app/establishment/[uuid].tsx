@@ -5,19 +5,21 @@ import CardComponent from "@/components/CardComponent";
 import SlotCard from "@/components/SlotCard";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import type { OperatingHour } from "@/lib/models/operating-hour";
+import type { OperatingHour } from "@lib/models/operatingHour";
 import type { ParkingEstablishment } from "@/lib/models/parking-establishment";
 import type { PaymentMethod } from "@/lib/models/payment-method";
 import type { PricingPlan } from "@/lib/models/pricing-plan";
 import type { ParkingSlot } from "@/lib/models/parking-slot";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
-import WebView from "react-native-webview";
 import PlatformType from "@lib/helper/platform";
 import { useLocalSearchParams } from "expo-router";
 import { fetchEstablishmentInfo } from "@/lib/api/establishment";
 import LinkComponent from "@/components/LinkComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import { normalMapURL, satelliteMapURL, threeDimensionalMapURL } from "@/lib/helper/mapViewFunction";
+import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
+import { getRegionForCoordinates } from "@lib/helper/getRegionForCoorindates";
+import { getUserLocation } from "@lib/helper/location";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;
@@ -33,40 +35,44 @@ interface EstablishmentOverviewResponse {
     slots: Slot[];
 }
 
-const getEstablishmentInfo = async (establishmentUuid: string) => await fetchEstablishmentInfo(establishmentUuid);
 const EstablishmentOverview = () => {
     const { uuid } = useLocalSearchParams<{ uuid: string }>();
     const [establishment, setEstablishment] = useState<EstablishmentOverviewResponse | null>(null);
+    const [userLocation, setUserLocation] = useState({
+        latitude: 14.5995,
+        longitude: 120.9842,
+    });
     const [fetching, setIsFetching] = useState(true);
+
     useEffect(() => {
         let mounted = true;
         let pollInterval: NodeJS.Timeout;
 
         const fetchEstablishment = async () => {
-            try {
-                const result = await getEstablishmentInfo(uuid);
-                if (mounted) {
+            const getEstablishmentInfo = async () => {
+                try {
+                    const result = await fetchEstablishmentInfo(uuid);
+                    const currentLocation = await getUserLocation();
+                    setUserLocation(currentLocation ?? { latitude: 14.5995, longitude: 120.9842 });
                     setEstablishment(result.data.establishment);
+                } catch (error) {
+                    console.error("Error fetching establishment info:", error);
+                    return null;
+                } finally {
                     setIsFetching(false);
                 }
-            } catch (error) {
-                console.error("Error fetching establishment info:", error);
-                if (mounted) {
-                    setIsFetching(false);
-                }
-            }
+            };
+            getEstablishmentInfo().then();
         };
 
         const startPolling = () => {
-            fetchEstablishment();
+            fetchEstablishment().then();
             pollInterval = setInterval(fetchEstablishment, 10000);
         };
 
         if (uuid) {
             startPolling();
         }
-
-        // Cleanup function
         return () => {
             mounted = false;
             if (pollInterval) {
@@ -74,32 +80,44 @@ const EstablishmentOverview = () => {
             }
         };
     }, [uuid]);
+    const region = establishment
+        ? getRegionForCoordinates([
+              { latitude: establishment.establishment.latitude, longitude: establishment.establishment.longitude },
+              { latitude: userLocation.latitude, longitude: userLocation.longitude },
+          ])
+        : {
+              latitude: userLocation.latitude,
+              longitude: userLocation.longitude,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+          };
 
-    if (fetching || !establishment) {
-        return (
-            <ResponsiveContainer>
-                <LoadingComponent text="Fetching the establishment details" />
-            </ResponsiveContainer>
-        );
-    }
+    const mapUrl =
+        (establishment &&
+            normalMapURL(
+                establishment.establishment.latitude,
+                establishment.establishment.longitude,
+                establishment.establishment.name,
+            )) ||
+        "";
 
-    const mapUrl = normalMapURL(
-        establishment.establishment.latitude,
-        establishment.establishment.longitude,
-        establishment.establishment.name
-    );
+    const mapUrlSat =
+        (establishment &&
+            satelliteMapURL(
+                establishment.establishment.latitude,
+                establishment.establishment.longitude,
+                establishment.establishment.name,
+            )) ||
+        "";
 
-    const mapUrlSat = satelliteMapURL(
-        establishment.establishment.latitude,
-        establishment.establishment.longitude,
-        establishment.establishment.name
-    );
-
-    const mapUrl3D = threeDimensionalMapURL(
-        establishment.establishment.latitude,
-        establishment.establishment.longitude,
-        establishment.establishment.name
-    );
+    const mapUrl3D =
+        (establishment &&
+            threeDimensionalMapURL(
+                establishment.establishment.latitude,
+                establishment.establishment.longitude,
+                establishment.establishment.name,
+            )) ||
+        "";
 
     return (
         <ResponsiveContainer>
@@ -108,139 +126,182 @@ const EstablishmentOverview = () => {
                 href="../establishment"
                 label="← Back to Search"
             />
-            <CardComponent customStyles={styles.card} header={establishment.establishment.name}>
-                <View style={styles.header}>
-                    <View>
-                        <TextComponent style={styles.subtitle}>
-                            {establishment.establishment.nearby_landmarks}
-                        </TextComponent>
-                    </View>
-                    {establishment.establishment.verified && (
-                        <View style={styles.badge}>
-                            <TextComponent style={styles.badgeText}>Verified</TextComponent>
-                        </View>
-                    )}
-                </View>
-
-                <View style={styles.details}>
-                    <View style={styles.detailRow}>
-                        <MaterialCommunityIcons name="car" size={20} color="#6B7280" />
-                        <TextComponent style={styles.detailText}>
-                            {establishment.establishment.space_type} Layout - {establishment.establishment.space_layout}{" "}
-                            Parking
-                        </TextComponent>
-                    </View>
-                    <View style={styles.detailRow}>
-                        <MaterialCommunityIcons name="lightbulb" size={20} color="#6B7280" />
-                        <TextComponent style={styles.detailText}>{establishment.establishment.lighting}</TextComponent>
-                    </View>
-                </View>
-            </CardComponent>
-            <CardComponent customStyles={styles.card} header="Payment Methods and Facilities">
-                <View style={styles.facilities}>
-                    {establishment.payment_methods?.length > 0 && (
-                        <>
-                            {establishment.payment_methods[0]?.accepts_cash && (
-                                <View style={styles.facilityBadge}>
-                                    <TextComponent style={styles.facilityText}>Cash</TextComponent>
-                                </View>
-                            )}
-                            {establishment.payment_methods[0]?.accepts_mobile && (
-                                <View style={styles.facilityBadge}>
-                                    <TextComponent style={styles.facilityText}>Mobile Payment</TextComponent>
-                                </View>
-                            )}
-                            {establishment.payment_methods[0]?.accepts_other && (
-                                <View style={styles.facilityBadge}>
-                                    <TextComponent style={styles.facilityText}>
-                                        {establishment.payment_methods[0]?.other_methods}
-                                    </TextComponent>
-                                </View>
-                            )}
-                        </>
-                    )}
-                </View>
-            </CardComponent>
-
-            <CardComponent customStyles={styles.card} header="Location">
-                <View style={styles.mapHeader}>
-                    <View style={styles.mapLinks}>
-                        <ButtonComponent
-                            onPress={() =>
-                                Linking.openURL(
-                                    `https://www.google.com/maps/dir/?api=1&destination=${establishment.establishment.latitude},${establishment.establishment.longitude}`
-                                )
-                            }
-                            title="Google Maps"
-                        />
-                        <ButtonComponent
-                            title="Waze"
-                            onPress={() =>
-                                Linking.openURL(
-                                    `https://www.waze.com/ul?ll=${establishment.establishment.latitude},${establishment.establishment.longitude}&navigate=yes`
-                                )
-                            }
-                        />
-                    </View>
-                </View>
-                <View style={styles.mapContainer}>
-                    {PlatformType() !== "web" ? (
-                        <WebView source={{ uri: mapUrl }} />
-                    ) : (
-                        <iframe title={establishment.establishment.name} src={mapUrl} height={500} />
-                    )}
-                </View>
-            </CardComponent>
-            <CardComponent customStyles={styles.card} header="Location | Birds Eye View">
-                <View style={styles.mapContainer}>
-                    {PlatformType() !== "web" ? (
-                        <WebView source={{ uri: mapUrlSat }} />
-                    ) : (
-                        <iframe title={establishment.establishment.name} src={mapUrlSat} height={500} />
-                    )}
-                </View>
-            </CardComponent>
-            <CardComponent customStyles={styles.card} header="Location | 3D View">
-                <View style={styles.mapContainer}>
-                    {PlatformType() !== "web" ? (
-                        <WebView source={{ uri: mapUrl3D }} />
-                    ) : (
-                        <iframe title={establishment.establishment.name} src={mapUrl3D} height={500} />
-                    )}
-                </View>
-            </CardComponent>
-
-            <CardComponent customStyles={styles.card} header="Operating Hours">
-                {establishment.establishment.is24_7 ? (
-                    <TextComponent style={styles.operatingHours}>Open 24/7</TextComponent>
-                ) : (
-                    <View style={styles.operatingHoursGrid}>
-                        {establishment.operating_hours.map((hour, index) => (
-                            <View key={index} style={styles.operatingHour}>
-                                <TextComponent style={styles.operatingDay}>{hour.day_of_week}</TextComponent>
-                                <TextComponent style={styles.operatingTime}>
-                                    {hour.is_enabled ? `${hour.opening_time} - ${hour.closing_time}` : "Closed"}
+            {fetching && <LoadingComponent text="Fetching the establishment details" />}
+            {establishment != null && !fetching && (
+                <>
+                    <CardComponent customStyles={styles.card} header={establishment.establishment.name}>
+                        <View style={styles.header}>
+                            <View>
+                                <TextComponent style={styles.subtitle}>
+                                    {establishment.establishment.nearby_landmarks}
                                 </TextComponent>
                             </View>
-                        ))}
-                    </View>
-                )}
-            </CardComponent>
+                        </View>
 
-            <View style={styles.slotsSection}>
-                <TextComponent variant="h2">Available Parking Slots</TextComponent>
-                <View style={styles.slotsGrid}>
-                    {establishment.slots.map((slot, index) => (
-                        <SlotCard
-                            key={index}
-                            slotInfo={slot}
-                            isGuest={true}
-                            slotUuid={slot.uuid}
-                            establishmentUuid={uuid}
-                        />
-                    ))}
-                </View>
-            </View>
+                        <View style={styles.details}>
+                            <View style={styles.detailRow}>
+                                <MaterialCommunityIcons name="car" size={20} color="#6B7280" />
+                                <TextComponent style={styles.detailText}>
+                                    {establishment.establishment.space_type} Layout -{" "}
+                                    {establishment.establishment.space_layout} Parking
+                                </TextComponent>
+                            </View>
+                            <View style={styles.detailRow}>
+                                <MaterialCommunityIcons name="lightbulb" size={20} color="#6B7280" />
+                                <TextComponent style={styles.detailText}>
+                                    {establishment.establishment.lighting}
+                                </TextComponent>
+                            </View>
+                        </View>
+                    </CardComponent>
+                    <CardComponent customStyles={styles.card} header="Payment Methods and Facilities">
+                        <View style={styles.facilities}>
+                            {establishment.payment_methods?.length > 0 && (
+                                <>
+                                    {establishment.payment_methods[0]?.accepts_cash && (
+                                        <View style={styles.facilityBadge}>
+                                            <TextComponent style={styles.facilityText}>Cash</TextComponent>
+                                        </View>
+                                    )}
+                                    {establishment.payment_methods[0]?.accepts_mobile && (
+                                        <View style={styles.facilityBadge}>
+                                            <TextComponent style={styles.facilityText}>Mobile Payment</TextComponent>
+                                        </View>
+                                    )}
+                                    {establishment.payment_methods[0]?.accepts_other && (
+                                        <View style={styles.facilityBadge}>
+                                            <TextComponent style={styles.facilityText}>
+                                                {establishment.payment_methods[0]?.other_methods}
+                                            </TextComponent>
+                                        </View>
+                                    )}
+                                </>
+                            )}
+                        </View>
+                    </CardComponent>
+
+                    <CardComponent customStyles={styles.card} header="Location">
+                        <View style={styles.mapHeader}>
+                            <View style={styles.mapLinks}>
+                                <ButtonComponent
+                                    onPress={() =>
+                                        Linking.openURL(
+                                            `https://www.google.com/maps/dir/?api=1&destination=${establishment.establishment.latitude},${establishment.establishment.longitude}`,
+                                        )
+                                    }
+                                    title="Google Maps"
+                                />
+                                <ButtonComponent
+                                    title="Waze"
+                                    onPress={() =>
+                                        Linking.openURL(
+                                            `https://www.waze.com/ul?ll=${establishment.establishment.latitude},${establishment.establishment.longitude}&navigate=yes`,
+                                        )
+                                    }
+                                />
+                            </View>
+                        </View>
+                        <View style={styles.mapContainer}>
+                            {PlatformType() !== "web" ? (
+                                <MapView
+                                    style={{ width: "100%", height: 500 }}
+                                    provider={PROVIDER_DEFAULT}
+                                    initialRegion={region}
+                                    mapType="standard"
+                                    showsUserLocation={true}
+                                    showsTraffic={true}
+                                >
+                                    <Marker
+                                        coordinate={{
+                                            latitude: establishment.establishment.latitude,
+                                            longitude: establishment.establishment.longitude,
+                                        }}
+                                    >
+                                        <MaterialCommunityIcons name="map-marker" size={40} color="red" />
+                                    </Marker>
+                                </MapView>
+                            ) : (
+                                <iframe title={establishment.establishment.name} src={mapUrl} height={500} />
+                            )}
+                        </View>
+                    </CardComponent>
+                    <CardComponent customStyles={styles.card} header="Location | Birds Eye View">
+                        <View style={styles.mapContainer}>
+                            {PlatformType() !== "web" ? (
+                                <MapView
+                                    style={{ width: "100%", height: 500 }}
+                                    provider={PROVIDER_DEFAULT}
+                                    initialRegion={{
+                                        latitude: establishment.establishment.latitude,
+                                        longitude: establishment.establishment.longitude,
+                                        latitudeDelta: 0.005,
+                                        longitudeDelta: 0.005,
+                                    }}
+                                    mapType="satellite"
+                                />
+                            ) : (
+                                <iframe title={establishment.establishment.name} src={mapUrlSat} height={500} />
+                            )}
+                        </View>
+                    </CardComponent>
+                    <CardComponent customStyles={styles.card} header="Location | 3D View">
+                        <View style={styles.mapContainer}>
+                            {PlatformType() !== "web" ? (
+                                <MapView
+                                    style={{ width: "100%", height: 500 }}
+                                    provider={PROVIDER_DEFAULT}
+                                    initialRegion={{
+                                        latitude: establishment.establishment.latitude,
+                                        longitude: establishment.establishment.longitude,
+                                        latitudeDelta: 0.0922,
+                                        longitudeDelta: 0.0421,
+                                    }}
+                                    mapType="terrain"
+                                    zoomEnabled={true}
+                                    zoomControlEnabled={true}
+                                    pitchEnabled={true}
+                                    rotateEnabled={true}
+                                    showsBuildings={true}
+                                />
+                            ) : (
+                                <iframe title={establishment.establishment.name} src={mapUrl3D} height={500} />
+                            )}
+                        </View>
+                    </CardComponent>
+
+                    <CardComponent customStyles={styles.card} header="Operating Hours">
+                        {establishment.establishment.is24_7 ? (
+                            <TextComponent style={styles.operatingHours}>Open 24/7</TextComponent>
+                        ) : (
+                            <View style={styles.operatingHoursGrid}>
+                                {establishment.operating_hours.map((hour, index) => (
+                                    <View key={index} style={styles.operatingHour}>
+                                        <TextComponent style={styles.operatingDay}>{hour.day_of_week}</TextComponent>
+                                        <TextComponent style={styles.operatingTime}>
+                                            {hour.is_enabled ? `${hour.opening_time} - ${hour.closing_time}` : "Closed"}
+                                        </TextComponent>
+                                    </View>
+                                ))}
+                            </View>
+                        )}
+                    </CardComponent>
+
+                    <View style={styles.slotsSection}>
+                        <TextComponent variant="h2">Available Parking Slots</TextComponent>
+                        <View style={styles.slotsGrid}>
+                            {establishment.slots.map((slot, index) => (
+                                <SlotCard
+                                    key={index}
+                                    slotInfo={slot}
+                                    isGuest={true}
+                                    slotUuid={slot.uuid}
+                                    establishmentUuid={uuid}
+                                />
+                            ))}
+                        </View>
+                    </View>
+                </>
+            )}
         </ResponsiveContainer>
     );
 };
@@ -260,6 +321,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         marginBottom: 16,
+        maxWidth: "100%",
     },
     subtitle: {
         color: "#6B7280",
@@ -282,6 +344,8 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 8,
+        maxWidth: "100%",
+        overflow: "scroll",
     },
     detailText: {
         color: "#6B7280",

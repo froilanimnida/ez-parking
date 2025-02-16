@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import { Address } from "@/lib/models/address";
 import { ParkingEstablishment } from "@/lib/models/parking-establishment";
-import { OperatingHour } from "@/lib/models/operating-hour";
+import { OperatingHour } from "@lib/models/operatingHour";
 import { PaymentMethod } from "@/lib/models/payment-method";
 import { ParkingSlot } from "@/lib/models/parking-slot";
 import { router, useLocalSearchParams } from "expo-router";
@@ -79,8 +79,8 @@ const SlotInfo = () => {
             pricingType === "hourly"
                 ? transactionCheckoutInfo.slot_info.base_price_per_hour
                 : pricingType === "daily"
-                ? transactionCheckoutInfo.slot_info.base_price_per_day
-                : transactionCheckoutInfo.slot_info.base_price_per_month;
+                  ? transactionCheckoutInfo.slot_info.base_price_per_day
+                  : transactionCheckoutInfo.slot_info.base_price_per_month;
 
         const multiplier = parseFloat(transactionCheckoutInfo.slot_info.price_multiplier || "1");
         const premiumMultiplier = transactionCheckoutInfo.slot_info.is_premium ? 1.2 : 1;
@@ -185,7 +185,7 @@ const SlotInfo = () => {
             scheduled_exit_time: calculateDuration(
                 String(new Date(year, month - 1, day)),
                 duration,
-                pricingType
+                pricingType,
             ).toISOString(),
             amount_due: getCurrentRate() * duration,
             slot_uuid: uuid,
@@ -252,8 +252,8 @@ const SlotInfo = () => {
                                 {pricingType === "hourly"
                                     ? "(in hours)"
                                     : pricingType === "daily"
-                                    ? "(in days)"
-                                    : "(in months)"}
+                                      ? "(in days)"
+                                      : "(in months)"}
                             </TextComponent>
                             <TextInputComponent
                                 customStyles={styles.input}
@@ -363,8 +363,8 @@ const SlotInfo = () => {
                                 transactionCheckoutInfo?.has_ongoing_transaction
                                     ? "You have an ongoing transaction"
                                     : isSubmitting
-                                    ? "Confirming..."
-                                    : "Confirm Booking"
+                                      ? "Confirming..."
+                                      : "Confirm Booking"
                             }
                             disabled={
                                 transactionCheckoutInfo?.has_ongoing_transaction ||

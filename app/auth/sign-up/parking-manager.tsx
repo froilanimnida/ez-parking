@@ -27,6 +27,7 @@ import { ParkingOperatingHoursData } from "@/lib/models/parkingManagerSignUpType
 import type { DocumentInfo, Documents } from "@/lib/types/documents";
 import { Image } from "react-native";
 import InfoContainer from "@/components/auth/parking-manager/InfoContainer";
+import { OperatingSchedule } from "@lib/models/operatingHour";
 
 const ParkingManagerSignUp = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,7 +71,7 @@ const ParkingManagerSignUp = () => {
         nearby_landmarks: "",
     });
 
-    const [operatingHours, setOperatingHours] = useState({
+    const [operatingHours, setOperatingHours] = useState<OperatingSchedule>({
         monday: { enabled: false, open: "", close: "" },
         tuesday: { enabled: false, open: "", close: "" },
         wednesday: { enabled: false, open: "", close: "" },

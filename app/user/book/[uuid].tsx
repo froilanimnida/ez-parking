@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, Linking } from "react-native";
 import WebView from "react-native-webview";
-import { OperatingHour } from "@/lib/models/operating-hour";
+import { OperatingHour } from "@lib/models/operatingHour";
 import { PaymentMethod } from "@/lib/models/payment-method";
 import type { ParkingSlot } from "@/lib/models/parking-slot";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
@@ -68,7 +68,7 @@ const EstablishmentView = () => {
             }
         };
 
-        fetchEstablishment();
+        fetchEstablishment().then();
     }, [uuid]);
 
     const mapUrl = useMemo(() => {
@@ -77,7 +77,7 @@ const EstablishmentView = () => {
         return `https://maps.google.com/maps?width=100%25&height=600&hl=en&q=${
             establishmentData.establishment.latitude
         },${establishmentData.establishment.longitude}+(${encodeURIComponent(
-            establishmentData.establishment.name
+            establishmentData.establishment.name,
         )})&t=&z=14&ie=UTF8&iwloc=B&output=embed`;
     }, [establishmentData?.establishment]);
 
@@ -167,11 +167,7 @@ const EstablishmentView = () => {
                             customStyles={styles.mapContainer}
                         >
                             {PlatformType() === "web" ? (
-                                <iframe
-                                    width="100%"
-                                    height="100%"
-                                    src={mapUrl}
-                                />
+                                <iframe width="100%" height="100%" src={mapUrl} />
                             ) : (
                                 <WebView source={{ uri: mapUrl }} style={{ flex: 1 }} />
                             )}

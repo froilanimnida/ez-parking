@@ -14,7 +14,7 @@ const CardComponent = ({ header, subHeader, children, customStyles }: CardCompon
         <View style={[styles.container, customStyles]}>
             <View style={styles.headerContainer}>
                 <TextComponent style={styles.headerText}>{header}</TextComponent>
-                {subHeader && <TextComponent>{subHeader}</TextComponent>}
+                {subHeader && <TextComponent style={styles.subHeader}>{subHeader}</TextComponent>}
             </View>
             <View>{children}</View>
         </View>
@@ -32,11 +32,16 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     headerContainer: {
+        flexDirection: "column",
         marginVertical: 20,
     },
     headerText: {
-        fontSize: 24,
+        fontSize: 18,
         fontWeight: "bold",
         marginBottom: 8,
+    },
+    subHeader: {
+        fontSize: 14,
+        color: "#9ca3af",
     },
 });

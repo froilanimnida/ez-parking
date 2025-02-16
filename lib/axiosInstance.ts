@@ -1,18 +1,17 @@
-import axios, {type AxiosError, AxiosRequestHeaders} from "axios";
+import axios, { type AxiosError, AxiosRequestHeaders } from "axios";
 import * as SecureStore from "expo-secure-store";
 import PlatformType from "./helper/platform";
 import { type RelativePathString } from "expo-router";
 import getAuthHeaders from "@lib/helper/getAuthHeaders";
 import type ApiValidationError from "./models/validationError";
 import type { SimplifiedValidationError } from "./models/validationError";
-import {UserRole} from "@lib/types/models/common/constants";
-
+import { UserRole } from "@lib/types/models/common/constants";
 
 async function verifyAndGetRole(
     authToken: string | undefined | null,
     xsrfToken: string | undefined | null,
     csrf_refresh_token: string | undefined | null,
-    refresh_token_cookie: string | undefined | null
+    refresh_token_cookie: string | undefined | null,
 ): Promise<UserRole | null> {
     if (!authToken) return null;
     try {
@@ -26,7 +25,7 @@ async function verifyAndGetRole(
                     refresh_token_cookie: refresh_token_cookie || "",
                     csrf_refresh_token: csrf_refresh_token || "",
                 },
-            }
+            },
         );
         return result.data.role as UserRole;
     } catch {
@@ -49,8 +48,8 @@ export function getRedirectPath(role: UserRole): RelativePathString {
 
 const axiosInstance = axios.create({
     withCredentials: true,
-    baseURL: "https://ez-parking-system-pr-54.onrender.com/api/v1",
-    // baseURL: "https://localhost:5000/api/v1",
+    // baseURL: "https://ez-parking-system-pr-54.onrender.com/api/v1",
+    baseURL: "https://localhost:5000/api/v1",
     headers: {
         Accept: "application/json",
     },
@@ -69,7 +68,7 @@ axiosInstance.interceptors.request.use(
                     access_token_cookie,
                     csrf_access_token,
                     csrf_refresh_token,
-                    refresh_token_cookie
+                    refresh_token_cookie,
                 );
                 if (userRole) {
                     value.url = getRedirectPath(userRole);
@@ -81,7 +80,7 @@ axiosInstance.interceptors.request.use(
     },
     async (error) => {
         return Promise.reject(error);
-    }
+    },
 );
 
 axiosInstance.interceptors.request.use(
@@ -93,7 +92,7 @@ axiosInstance.interceptors.request.use(
         }
         return config;
     },
-    (error) => Promise.reject(error)
+    (error) => Promise.reject(error),
 );
 
 axiosInstance.interceptors.response.use(
@@ -142,7 +141,7 @@ axiosInstance.interceptors.response.use(
             return Promise.reject(simplifiedError);
         }
         return Promise.reject(error);
-    }
+    },
 );
 
 export default axiosInstance;

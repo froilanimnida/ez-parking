@@ -1,11 +1,10 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import CheckboxComponent from "@/components/CheckboxComponent";
-import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
-import TextInputComponent from "@/components/TextInputComponent";
-import TimePicker from "@/app/parking-manager/settings/schedule";
 import { DAYS_OF_WEEK } from "@lib/types/models/common/constants";
+import { OperatingSchedule } from "@lib/models/operatingHour";
+import TimePicker from "@components/reusable/TimePicker";
 
 interface OperatingHours {
     enabled: boolean;
@@ -13,15 +12,15 @@ interface OperatingHours {
     close: string;
 }
 
-interface OperatingSchedule {
-    [key: string]: OperatingHours;
-}
-
 interface Props {
     is24_7: boolean;
     operatingHours: OperatingSchedule;
     onIs24_7Change: (key: string, value: any) => void;
-    onOperatingHoursChange: (day: string, field: keyof OperatingHours, value: string | boolean) => void;
+    onOperatingHoursChange: (
+        day: keyof OperatingSchedule,
+        field: keyof OperatingHours,
+        value: string | boolean,
+    ) => void;
     onParkingDataChange: (key: string, value: any) => void;
 }
 
@@ -52,37 +51,39 @@ const OperatingHoursForm: React.FC<Props> = ({
 
                 {!is24_7 && (
                     <>
-                        {DAYS_OF_WEEK.map((day) => (
-                            <View key={day} style={styles.dayContainer}>
-                                <View style={styles.dayHeader}>
-                                    <CheckboxComponent
-                                        placeholder={formatDayName(day)}
-                                        value={operatingHours[day].enabled}
-                                        onValueChange={(value) => onOperatingHoursChange(day, "enabled", value)}
-                                    />
-                                </View>
-
-                                <View style={styles.timeContainer}>
-                                    <View style={styles.timeInputContainer}>
-                                        <TextComponent style={styles.timeLabel}>Open</TextComponent>
-                                        <TextInputComponent
-                                            value={operatingHours[day].open}
-                                            onChangeText={(value) => onOperatingHoursChange(day, "open", value)}
-                                            editable={operatingHours[day].enabled}
+                        {DAYS_OF_WEEK.map((day) => {
+                            const dayKey = day.toLowerCase() as keyof OperatingSchedule;
+                            return (
+                                <View key={day} style={styles.dayContainer}>
+                                    <View style={styles.dayHeader}>
+                                        <CheckboxComponent
+                                            placeholder={day}
+                                            value={operatingHours[dayKey].enabled}
+                                            onValueChange={(value) => onOperatingHoursChange(dayKey, "enabled", value)}
                                         />
                                     </View>
 
-                                    <View style={styles.timeInputContainer}>
-                                        <TextComponent style={styles.timeLabel}>Close</TextComponent>
-                                        <TextInputComponent
-                                            value={operatingHours[day].close}
-                                            onChangeText={(value) => onOperatingHoursChange(day, "close", value)}
-                                            editable={operatingHours[day].enabled}
+                                    <View style={styles.timeContainer}>
+                                        <TimePicker
+                                            value={
+                                                operatingHours[dayKey].enabled ? operatingHours[dayKey].open : "00:00"
+                                            }
+                                            onChange={(value) => onOperatingHoursChange(dayKey, "open", value)}
+                                            label={"Open"}
+                                            disabled={!operatingHours[dayKey].enabled}
+                                        />
+                                        <TimePicker
+                                            value={
+                                                operatingHours[dayKey].enabled ? operatingHours[dayKey].close : "00:00"
+                                            }
+                                            onChange={(value) => onOperatingHoursChange(dayKey, "close", value)}
+                                            label={"Close"}
+                                            disabled={!operatingHours[dayKey].enabled}
                                         />
                                     </View>
                                 </View>
-                            </View>
-                        ))}
+                            );
+                        })}
                     </>
                 )}
             </View>
@@ -93,6 +94,7 @@ const OperatingHoursForm: React.FC<Props> = ({
 const styles = StyleSheet.create({
     container: {
         width: "100%",
+        gap: 8,
     },
     is24_7Container: {
         marginBottom: 16,
@@ -102,14 +104,15 @@ const styles = StyleSheet.create({
     },
     dayContainer: {
         marginBottom: 16,
+        gap: 8,
     },
     dayHeader: {
         marginBottom: 8,
     },
     timeContainer: {
         flexDirection: "row",
-        justifyContent: "space-between",
-        paddingLeft: 32,
+        justifyContent: "center",
+        gap: 16,
     },
     timeInputContainer: {
         flex: 1,

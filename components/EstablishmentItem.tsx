@@ -8,7 +8,11 @@ import LinkComponent from "./LinkComponent";
 import type { ParkingEstablishment } from "@/lib/models/parking-establishment";
 
 interface EstablishmentItem {
-    establishment: ParkingEstablishment;
+    establishment: ParkingEstablishment & {
+        verified: boolean;
+        open_slots: number;
+        total_slots: number;
+    };
 }
 
 interface EstablishmentItemProps extends EstablishmentItem {
@@ -62,10 +66,10 @@ const EstablishmentItem = ({ userLat, userLong, establishment, guest }: Establis
             )}
 
             <View style={styles.footer}>
-                {/* <TextComponent style={styles.slots}>
+                <TextComponent style={styles.slots}>
                     <TextComponent style={styles.slotsAvailable}>{establishment.open_slots}</TextComponent>/
                     {establishment.total_slots} slots available
-                </TextComponent> */}
+                </TextComponent>
                 <View style={styles.actions}>
                     <TouchableOpacity
                         style={styles.directionsButton}

@@ -9,8 +9,8 @@ import type {
     ParkingOperatingHoursData,
 } from "../models/parkingManagerSignUpTypes";
 import type { Documents } from "../types/documents";
-import {OperatingHour} from "@lib/models/operating-hour";
-import {DAYS_OF_WEEK} from "@lib/types/models/common/constants";
+import { OperatingHour } from "@lib/models/operatingHour";
+import { DAYS_OF_WEEK } from "@lib/types/models/common/constants";
 
 const root = "/parking-manager" as const;
 export const qrContentOverview = async (qrContent: string) => {
@@ -28,7 +28,7 @@ export const allowExit = async (
     paymentStatus: "pending" | "paid",
     exitTime: string,
     amount_due: number,
-    slotId: number
+    slotId: number,
 ) => {
     return await axiosInstance.patch(`${root}/validate/exit`, {
         qr_content: transactionId,
@@ -81,7 +81,7 @@ export const parkingManagerSignUp = async (
     parkingEstablishmentData: ParkingEstablishmentData,
     operatingHours: { [key: string]: ParkingOperatingHoursData },
     paymentMethodData: ParkingPaymentMethodData,
-    documents: Documents
+    documents: Documents,
 ) =>
     await axiosInstance.post(`${root}/signup`, {
         user: userInformation,
@@ -102,17 +102,20 @@ export const updateEstablishmentSchedules = async ({
     operatingHours: OperatingHour[];
     is24_7: boolean;
 }) => {
-    const transformedHours = DAYS_OF_WEEK.reduce((acc, day) => {
-        const daySchedule = operatingHours.find(h => h.day_of_week === day);
-        acc[day.toLowerCase()] = {
-            enabled: daySchedule?.is_enabled ?? false,
-            open: daySchedule?.opening_time ?? "09:00",
-            close: daySchedule?.closing_time ?? "17:00"
-        };
-        return acc;
-    }, {} as Record<string, { enabled: boolean; open: string; close: string }>);
+    const transformedHours = DAYS_OF_WEEK.reduce(
+        (acc, day) => {
+            const daySchedule = operatingHours.find((h) => h.day_of_week === day);
+            acc[day.toLowerCase()] = {
+                enabled: daySchedule?.is_enabled ?? false,
+                open: daySchedule?.opening_time ?? "09:00",
+                close: daySchedule?.closing_time ?? "17:00",
+            };
+            return acc;
+        },
+        {} as Record<string, { enabled: boolean; open: string; close: string }>,
+    );
 
-    if (!is24_7 && !Object.values(transformedHours).some(day => day.enabled)) {
+    if (!is24_7 && !Object.values(transformedHours).some((day) => day.enabled)) {
         throw new Error("At least one day must be enabled");
     }
 
@@ -129,6 +132,6 @@ export const updateEstablishmentSchedules = async ({
 
     return await axiosInstance.patch(`${root}/operating-hours/update`, {
         is24_7: is24_7,
-        operating_hour: transformedHours
+        operating_hour: transformedHours,
     });
 };

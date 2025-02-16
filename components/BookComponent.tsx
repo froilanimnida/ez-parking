@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { View, ScrollView, StyleSheet, Animated, Modal, Pressable } from "react-native";
-import * as Location from "expo-location";
 import EstablishmentItem from "@/components/EstablishmentItem";
 import TextComponent from "@/components/TextComponent";
 import type { ParkingEstablishment } from "@/lib/models/parking-establishment";
@@ -9,11 +8,12 @@ import TextInputComponent from "@/components/TextInputComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import PlatformType from "@lib/helper/platform";
 import { getNearbyEstablishments } from "@/lib/api/establishment";
-import { askLocationPermission, getIPBasedLocation } from "@lib/helper/location";
+import { askLocationPermission, getIPBasedLocation, getUserLocation } from "@lib/helper/location";
 import LoadingComponent from "./reusable/LoadingComponent";
 import SelectComponent from "./SelectComponent";
 import { METRO_MANILA_CITIES } from "@/lib/models/cities";
 import type { CITY } from "@/lib/types/models/common/constants";
+
 export interface EstablishmentQuery extends ParkingEstablishment {
     open_slots: number;
     total_slots: number;
@@ -21,9 +21,6 @@ export interface EstablishmentQuery extends ParkingEstablishment {
     occupied_slots: number;
     pricing_plans: PricingPlan[];
 }
-
-const getNearestEstablishments = async (latitude: number, longitude: number) =>
-    await getNearbyEstablishments(latitude, longitude);
 
 const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
     const [establishments, setEstablishments] = useState<EstablishmentQuery[]>([]);
@@ -37,7 +34,6 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
 
     const handleSearch = async () => {
         setLoading(true);
-
         setLoading(false);
     };
 
@@ -54,30 +50,26 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
     });
 
     useEffect(() => {
-        (async () => {
+        const fetchData = async () => {
             let status = await askLocationPermission();
             if (!status) {
                 const data = await getIPBasedLocation();
                 setLocation({ latitude: data.latitude, longitude: data.longitude });
-                return;
             }
 
             try {
-                let location = await Location.getCurrentPositionAsync({
-                    accuracy: Location.Accuracy.BestForNavigation,
-                });
-                setLocation({
-                    latitude: location.coords.latitude,
-                    longitude: location.coords.longitude,
-                });
+                let location = await getUserLocation();
+                location ? setLocation(location) : setLocation({ latitude: 14.5995, longitude: 120.9842 });
             } catch (error) {
                 const data = await getIPBasedLocation();
                 setLocation({ latitude: data.latitude, longitude: data.longitude });
+            } finally {
+                const data = await getNearbyEstablishments(location.latitude, location.longitude);
+                setEstablishments(data.data.establishments);
+                setLoading(false);
             }
-            const data = await getNearestEstablishments(location.latitude, location.longitude);
-            setEstablishments(data.data.establishments);
-            setLoading(false);
-        })();
+        };
+        fetchData().then();
     }, []);
 
     return (
@@ -135,26 +127,28 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
                 </Modal>
             </View>
 
-            {/* Main Content */}
-            <ScrollView style={styles.content}>
-                {loading ? (
-                    <LoadingComponent text="Searching for nearby parking establishments..." />
-                ) : establishments.length === 0 ? (
-                    <View style={styles.noResults}>{/* No results UI */}</View>
-                ) : (
-                    <View style={styles.results}>
-                        {establishments.map((establishment) => (
-                            <EstablishmentItem
-                                guest={guest}
-                                key={establishment.establishment_id}
-                                establishment={establishment}
-                                userLat={location.latitude}
-                                userLong={location.longitude}
-                            />
-                        ))}
-                    </View>
-                )}
-            </ScrollView>
+            {loading ? (
+                <LoadingComponent text="Searching for nearby parking establishments..." />
+            ) : establishments.length === 0 ? (
+                <View style={styles.noResults}>
+                    <MaterialCommunityIcons name={"car"} size={64} color={"#6b7280"} />
+                    <TextComponent style={{ textAlign: "center" }}>
+                        No parking establishments found nearby
+                    </TextComponent>
+                </View>
+            ) : (
+                <View style={styles.results}>
+                    {establishments.map((establishment) => (
+                        <EstablishmentItem
+                            guest={guest}
+                            key={establishment.establishment_id}
+                            establishment={establishment}
+                            userLat={location.latitude}
+                            userLong={location.longitude}
+                        />
+                    ))}
+                </View>
+            )}
         </View>
     );
 };

@@ -2,12 +2,8 @@ import axiosInstance from "../axiosInstance";
 
 const root = "/establishment" as const;
 
-export const fetchEstablishmentInfo = async (establishmentUuid: string) => {
-    const result = await axiosInstance.get(`${root}/view?establishment_uuid=${establishmentUuid}`);
-    return result;
-};
+export const fetchEstablishmentInfo = async (establishmentUuid: string) =>
+    await axiosInstance.get(`${root}/view?establishment_uuid=${establishmentUuid}`);
 
-export const getNearbyEstablishments = async (latitude: number, longitude: number) => {
-    const result = await axiosInstance.get(`${root}/query?user_latitude=${latitude}&longitude=${longitude}`);
-    return result;
-};
+export const getNearbyEstablishments = async (latitude: number, longitude: number) =>
+    await axiosInstance.get(`${root}/query?user_latitude=${latitude}&user_longitude=${longitude}`);
