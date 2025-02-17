@@ -372,7 +372,7 @@ const SlotInfo = () => {
                                 !agreed ||
                                 !terms ||
                                 duration <= 0 ||
-                                transactionCheckoutInfo?.slot_info.slot_status !== "reserved"
+                                transactionCheckoutInfo?.slot_info.slot_status !== "open"
                             }
                             onPress={() => {
                                 handleConfirmBooking();
