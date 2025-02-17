@@ -82,10 +82,46 @@ export const parkingManagerSignUp = async (
     paymentMethodData: ParkingPaymentMethodData,
     documents: Documents,
 ) => {
+    if (companyProfile.tin && !/^\d{3}-\d{3}-\d{3}-\d{3}$/.test(companyProfile.tin)) {
+        throw new Error("Invalid TIN format. Must be XXX-XXX-XXX-XXX where X is a digit");
+    }
+    if (addressData.postal_code && !/^\d{4}$/.test(addressData.postal_code)) {
+        throw new Error("Invalid postal code format. Must be XXXX where X is a digit");
+    }
+    if (parkingEstablishmentData.dimensions && !/\d/.test(parkingEstablishmentData.dimensions)) {
+        throw new Error("Dimensions must contain at least one numeric value");
+    }
+    if (
+        parkingEstablishmentData.name &&
+        parkingEstablishmentData.name.length < 3 &&
+        parkingEstablishmentData.name.length > 50
+    ) {
+        throw new Error("Name must be between 3 and 50 characters");
+    }
+    if (parkingEstablishmentData.nearby_landmarks && parkingEstablishmentData.nearby_landmarks.length > 100) {
+        throw new Error("Nearby landmarks must not exceed 100 characters");
+    }
+    if (
+        parkingEstablishmentData.longitude &&
+        (parkingEstablishmentData.longitude < -180 || parkingEstablishmentData.longitude > 180)
+    ) {
+        throw new Error("Invalid longitude");
+    }
+    if (
+        parkingEstablishmentData.latitude &&
+        (parkingEstablishmentData.latitude < -90 || parkingEstablishmentData.latitude > 90)
+    ) {
+        throw new Error("Invalid latitude");
+    }
     if (!parkingEstablishmentData.is24_7 && !Object.values(operatingHours).some((day) => day.enabled)) {
         throw new Error("At least one day must be enabled");
     }
-
+    if (!paymentMethodData.accepts_cash && !paymentMethodData.accepts_mobile && !paymentMethodData.accepts_other) {
+        throw new Error("At least one payment method must be enabled");
+    }
+    if (paymentMethodData.accepts_other && !paymentMethodData.other_methods) {
+        throw new Error("Other payment method is required");
+    }
     if (
         !Object.values(operatingHours).every((day) => !day.enabled || (day.open && day.close && day.open < day.close))
     ) {

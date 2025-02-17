@@ -308,13 +308,13 @@ const ParkingManagerSignUp = () => {
                     customStyles={{ width: "95%" }}
                 >
                     <View style={styles.form}>
-                        <TextInputComponent
-                            placeholder="Search for address to get coordinates and map data"
-                            value={query}
-                            onChangeText={(value) => setQuery(value)}
-                        />
+                        {/*<TextInputComponent*/}
+                        {/*    placeholder="Search for address to get coordinates and map data"*/}
+                        {/*    value={query}*/}
+                        {/*    onChangeText={(value) => setQuery(value)}*/}
+                        {/*/>*/}
 
-                        <ButtonComponent onPress={searchLocation} title="Search" />
+                        {/*<ButtonComponent onPress={searchLocation} title="Search" />*/}
 
                         <TextInputComponent
                             placeholder="Street Address"
