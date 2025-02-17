@@ -15,10 +15,16 @@ import { useLocalSearchParams } from "expo-router";
 import { fetchEstablishmentInfo } from "@/lib/api/establishment";
 import LinkComponent from "@/components/LinkComponent";
 import ButtonComponent from "@/components/ButtonComponent";
-import { normalMapURL, satelliteMapURL, threeDimensionalMapURL } from "@/lib/helper/mapViewFunction";
-import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
+import {
+    normalMapURL,
+    OSMMapURL,
+    satelliteMapURL,
+    SatteliteMap,
+    threeDimensionalMapURL,
+} from "@/lib/helper/mapViewFunction";
 import { getRegionForCoordinates } from "@lib/helper/getRegionForCoorindates";
 import { getUserLocation } from "@lib/helper/location";
+import WebView from "react-native-webview";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;
@@ -93,15 +99,6 @@ const EstablishmentOverview = () => {
     const mapUrl =
         (establishment &&
             normalMapURL(
-                establishment.establishment.latitude,
-                establishment.establishment.longitude,
-                establishment.establishment.name,
-            )) ||
-        "";
-
-    const mapUrlSat =
-        (establishment &&
-            satelliteMapURL(
                 establishment.establishment.latitude,
                 establishment.establishment.longitude,
                 establishment.establishment.name,
@@ -201,63 +198,31 @@ const EstablishmentOverview = () => {
                         </View>
                         <View style={styles.mapContainer}>
                             {PlatformType() !== "web" ? (
-                                <MapView
-                                    style={{ width: "100%", height: 500 }}
-                                    provider={PROVIDER_DEFAULT}
-                                    initialRegion={region}
-                                    mapType="standard"
-                                >
-                                    <Marker
-                                        coordinate={{
-                                            latitude: establishment.establishment.latitude,
-                                            longitude: establishment.establishment.longitude,
-                                        }}
-                                    >
-                                        <MaterialCommunityIcons name="map-marker" size={40} color="red" />
-                                    </Marker>
-                                </MapView>
+                                <WebView
+                                    source={{
+                                        uri: OSMMapURL(
+                                            establishment.establishment.latitude,
+                                            establishment.establishment.longitude,
+                                        ),
+                                    }}
+                                    style={{ height: 500 }}
+                                />
                             ) : (
                                 <iframe title={establishment.establishment.name} src={mapUrl} height={500} />
                             )}
                         </View>
                     </CardComponent>
-                    <CardComponent customStyles={styles.card} header="Location | Birds Eye View">
+                    <CardComponent customStyles={styles.card} header="Location | Top View">
                         <View style={styles.mapContainer}>
-                            <TextComponent> To be Implemented </TextComponent>
                             {PlatformType() !== "web" ? (
-                                <MapView
-                                    style={{ width: "100%", height: 500 }}
-                                    provider={PROVIDER_DEFAULT}
-                                    initialRegion={{
-                                        latitude: establishment.establishment.latitude,
-                                        longitude: establishment.establishment.longitude,
-                                        latitudeDelta: 0.005,
-                                        longitudeDelta: 0.005,
+                                <WebView
+                                    source={{
+                                        uri: SatteliteMap(
+                                            establishment.establishment.latitude,
+                                            establishment.establishment.longitude,
+                                        ),
                                     }}
-                                    mapType="satellite"
-                                />
-                            ) : (
-                                <iframe title={establishment.establishment.name} src={mapUrlSat} height={500} />
-                            )}
-                        </View>
-                    </CardComponent>
-                    <CardComponent customStyles={styles.card} header="Location | 3D View">
-                        <View style={styles.mapContainer}>
-                            <TextComponent> To be Implemented </TextComponent>
-                            {PlatformType() !== "web" ? (
-                                <MapView
-                                    style={{ width: "100%", height: 500 }}
-                                    provider={PROVIDER_DEFAULT}
-                                    initialRegion={{
-                                        latitude: establishment.establishment.latitude,
-                                        longitude: establishment.establishment.longitude,
-                                        latitudeDelta: 0.0922,
-                                        longitudeDelta: 0.0421,
-                                    }}
-                                    zoomEnabled={true}
-                                    zoomControlEnabled={true}
-                                    pitchEnabled={true}
-                                    rotateEnabled={true}
+                                    style={{ height: 500, flex: 1 }}
                                 />
                             ) : (
                                 <iframe title={establishment.establishment.name} src={mapUrl3D} height={500} />
