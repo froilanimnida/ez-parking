@@ -13,7 +13,6 @@ import { useLocalSearchParams } from "expo-router";
 import { getEstablishment } from "@/lib/api/admin";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import LinkComponent from "@/components/LinkComponent";
-import type { AxiosError } from "axios";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 
 interface Establishment {
@@ -37,9 +36,10 @@ const EstablishmentDetails = () => {
                 const response = await getEstablishment(uuid);
                 setEstablishment(response.data.data);
                 setIsLoading(false);
-            } catch (e: unknown) {
-                const axiosError = e as AxiosError<ApiErrorResponse>;
-                alert(axiosError.response?.data?.message || "An error occurred");
+            } catch {
+                alert("An error occurred");
+            } finally {
+                setIsLoading(false);
             }
         };
         fetchEstablishment().then();
@@ -52,26 +52,31 @@ const EstablishmentDetails = () => {
                 style={{ width: "auto", marginBottom: 16 }}
                 href="../../admin/establishments"
             />
-            <View style={styles.header}>
-                <TextComponent variant="h1" style={styles.title}>
-                    Establishment Name
+            <CardComponent header="Establishment Details" subHeader="Review and manage this parking establishment">
+                <TextComponent>
+                    View and manage the details of this parking establishment. You can also review the documents
+                    submitted by the applicant.
                 </TextComponent>
-                <TextComponent variant="h3" style={styles.subtitle}>
-                    Review and manage this parking establishment
-                </TextComponent>
-            </View>
+            </CardComponent>
             {isLoading && <LoadingComponent text="Loading establishment details..." />}
             {!isLoading && establishment && (
                 <View style={styles.grid}>
-                    <CardComponent header="Applicant Information">
+                    <CardComponent header="User Information">
                         <View style={styles.cardContent}>
                             <View style={styles.field}>
-                                <TextComponent style={styles.label}>Applicant Name</TextComponent>
-                                <TextComponent style={styles.value}>John Doe</TextComponent>
+                                <TextComponent variant="label">User Identifier</TextComponent>
+                                <TextComponent variant="body">{establishment.user.uuid}</TextComponent>
                             </View>
                             <View style={styles.field}>
-                                <TextComponent style={styles.label}>Email Address</TextComponent>
-                                <TextComponent style={styles.value}>john@example.com</TextComponent>
+                                <TextComponent variant="label">User Name</TextComponent>
+                                <TextComponent variant="body">
+                                    {establishment.user.first_name} {establishment.user.last_name}
+                                </TextComponent>
+                            </View>
+                            <View style={styles.field}>
+                                <TextComponent variant="label">Contact Information</TextComponent>
+                                <TextComponent variant="body">{establishment.user.email}</TextComponent>
+                                <TextComponent variant="body">{establishment.user.phone_number}</TextComponent>
                             </View>
                         </View>
                     </CardComponent>
@@ -79,36 +84,169 @@ const EstablishmentDetails = () => {
                         header="Establishment Information"
                         subHeader="Review and manage this parking establishment"
                     >
-                        <View style={{ gap: 16 }}>
+                        <View style={styles.cardContent}>
                             <View>
                                 <TextComponent variant="label" style={styles.label}>
-                                    Applicant Name
+                                    Establishment Name
                                 </TextComponent>
                                 <TextComponent style={styles.value}>
-                                    {establishment.user.first_name} {establishment.user.last_name}
+                                    {establishment.parking_establishment.name}
                                 </TextComponent>
                             </View>
                             <View>
                                 <TextComponent variant="label" style={styles.label}>
-                                    Email Address
+                                    Access Info
                                 </TextComponent>
-                                <TextComponent style={styles.value}>{establishment.user.email}</TextComponent>
+                                <TextComponent style={styles.value}>
+                                    {establishment.parking_establishment.access_info}
+                                </TextComponent>
                             </View>
                             <View>
                                 <TextComponent variant="label" style={styles.label}>
-                                    Phone Number
+                                    Accessibility
                                 </TextComponent>
-                                <TextComponent style={styles.value}>{establishment.user.phone_number}</TextComponent>
+                                <TextComponent style={styles.value}>
+                                    {establishment.parking_establishment.accessibility}
+                                </TextComponent>
+                            </View>
+                            <View>
+                                <TextComponent variant="label" style={styles.label}>
+                                    Custom Access
+                                </TextComponent>
+                                <TextComponent style={styles.value}>
+                                    {establishment.parking_establishment.custom_access}
+                                </TextComponent>
+                            </View>
+                            <View>
+                                <TextComponent variant="label" style={styles.label}>
+                                    Custom Layout
+                                </TextComponent>
+                                <TextComponent style={styles.value}>
+                                    {establishment.parking_establishment.custom_layout}
+                                </TextComponent>
+                            </View>
+                            <View>
+                                <TextComponent variant="label" style={styles.label}>
+                                    Dimensions
+                                </TextComponent>
+                                <TextComponent style={styles.value}>
+                                    {establishment.parking_establishment.dimensions}
+                                </TextComponent>
+                            </View>
+                            <View>
+                                <TextComponent variant="label" style={styles.label}>
+                                    Facilities
+                                </TextComponent>
+                                <TextComponent style={styles.value}>
+                                    {establishment.parking_establishment.facilities}
+                                </TextComponent>
+                            </View>
+                            <View>
+                                <TextComponent variant="label" style={styles.label}>
+                                    24/7 Availability
+                                </TextComponent>
+                                <TextComponent style={styles.value}>
+                                    {establishment.parking_establishment.is24_7 ? "Yes" : "No"}
+                                </TextComponent>
+                            </View>
+                            <View>
+                                <TextComponent variant="label" style={styles.label}>
+                                    Latitude
+                                </TextComponent>
+                                <TextComponent style={styles.value}>
+                                    {establishment.parking_establishment.latitude}
+                                </TextComponent>
+                            </View>
+                            <View>
+                                <TextComponent variant="label" style={styles.label}>
+                                    Longitude
+                                </TextComponent>
+                                <TextComponent style={styles.value}>
+                                    {establishment.parking_establishment.longitude}
+                                </TextComponent>
+                            </View>
+                            <View>
+                                <TextComponent variant="label" style={styles.label}>
+                                    Lighting
+                                </TextComponent>
+                                <TextComponent style={styles.value}>
+                                    {establishment.parking_establishment.lighting}
+                                </TextComponent>
+                            </View>
+                            <View>
+                                <TextComponent variant="label" style={styles.label}>
+                                    Nearby Landmarks
+                                </TextComponent>
+                                <TextComponent style={styles.value}>
+                                    {establishment.parking_establishment.nearby_landmarks}
+                                </TextComponent>
+                            </View>
+                            <View>
+                                <TextComponent variant="label" style={styles.label}>
+                                    Space Layout
+                                </TextComponent>
+                                <TextComponent style={styles.value}>
+                                    {establishment.parking_establishment.space_layout}
+                                </TextComponent>
+                            </View>
+                            <View>
+                                <TextComponent variant="label" style={styles.label}>
+                                    Space Type
+                                </TextComponent>
+                                <TextComponent style={styles.value}>
+                                    {establishment.parking_establishment.space_type}
+                                </TextComponent>
+                            </View>
+                            <View>
+                                <TextComponent variant="label" style={styles.label}>
+                                    Verified
+                                </TextComponent>
+                                <TextComponent style={styles.value}>
+                                    {establishment.parking_establishment.verified ? "Yes" : "No"}
+                                </TextComponent>
                             </View>
                         </View>
                     </CardComponent>
 
-                    <CardComponent header="Company Profile">
-                        <TextComponent style={styles.cardTitle}>Company Profile</TextComponent>
+                    <CardComponent header="Operating Hours">
+                        <TextComponent style={styles.cardTitle}>Operating Hours</TextComponent>
+                        <View style={styles.cardContent}>
+                            {establishment.operating_hours.map((hour, index) => (
+                                <View key={index} style={styles.field}>
+                                    <TextComponent style={styles.label}>{hour.day_of_week}</TextComponent>
+                                    <TextComponent style={styles.value}>
+                                        {hour.is_enabled ? `${hour.opening_time} - ${hour.closing_time}` : "Closed"}
+                                    </TextComponent>
+                                </View>
+                            ))}
+                        </View>
+                    </CardComponent>
+                    <CardComponent header="Payment Methods">
+                        <TextComponent style={styles.cardTitle}>Payment Methods</TextComponent>
                         <View style={styles.cardContent}>
                             <View style={styles.field}>
-                                <TextComponent style={styles.label}>Company Name</TextComponent>
-                                <TextComponent style={styles.value}>Company ABC</TextComponent>
+                                <TextComponent style={styles.label}>Accepts Cash</TextComponent>
+                                <TextComponent style={styles.value}>
+                                    {establishment.payment_methods[0].accepts_cash ? "Yes" : "No"}
+                                </TextComponent>
+                            </View>
+                            <View style={styles.field}>
+                                <TextComponent style={styles.label}>Accepts Mobile</TextComponent>
+                                <TextComponent style={styles.value}>
+                                    {establishment.payment_methods[0].accepts_mobile ? "Yes" : "No"}
+                                </TextComponent>
+                            </View>
+                            <View style={styles.field}>
+                                <TextComponent style={styles.label}>Accepts Other</TextComponent>
+                                <TextComponent style={styles.value}>
+                                    {establishment.payment_methods[0].accepts_other ? "Yes" : "No"}
+                                </TextComponent>
+                            </View>
+                            <View style={styles.field}>
+                                <TextComponent style={styles.label}>Other Methods</TextComponent>
+                                <TextComponent style={styles.value}>
+                                    {establishment.payment_methods[0].other_methods}
+                                </TextComponent>
                             </View>
                         </View>
                     </CardComponent>

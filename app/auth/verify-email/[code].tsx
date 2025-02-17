@@ -1,9 +1,10 @@
-import { StyleSheet, View, Animated, Easing } from "react-native";
+import { StyleSheet, Animated, Easing } from "react-native";
 import React, { useEffect } from "react";
 import { useLocalSearchParams, router } from "expo-router";
 import { Svg, Circle, Path } from "react-native-svg";
 import TextComponent from "@/components/TextComponent";
 import { verifyEmail } from "@/lib/api/auth";
+import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 
 const AnimatedSvg = Animated.createAnimatedComponent(Svg);
 
@@ -17,7 +18,7 @@ const VerifyEmail = () => {
                 duration: 2000,
                 easing: Easing.linear,
                 useNativeDriver: true,
-            })
+            }),
         ).start();
         const emailVerify = async () => {
             verifyEmail(code);
@@ -34,7 +35,7 @@ const VerifyEmail = () => {
     });
 
     return (
-        <View style={styles.container}>
+        <ResponsiveContainer>
             <AnimatedSvg
                 width={20}
                 height={20}
@@ -48,29 +49,17 @@ const VerifyEmail = () => {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 />
             </AnimatedSvg>
-            <TextComponent style={styles.text}>Please wait...{code}</TextComponent>
-        </View>
+            <TextComponent variant="h1">Please wait...</TextComponent>
+        </ResponsiveContainer>
     );
 };
 
 export default VerifyEmail;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        minHeight: "100%",
-        width: "100%",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 12,
-    },
     spinner: {
         transform: [{ rotate: "0deg" }],
         marginLeft: -4,
         marginRight: 12,
-    },
-    text: {
-        fontSize: 16,
     },
 });
