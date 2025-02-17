@@ -35,7 +35,6 @@ const EstablishmentDetails = () => {
             try {
                 const response = await getEstablishment(uuid);
                 setEstablishment(response.data.data);
-                setIsLoading(false);
             } catch {
                 alert("An error occurred");
             } finally {
