@@ -36,21 +36,27 @@ export const askLocationPermission = async () => {
 
 export const getUserLocation = async () => {
     if (PlatformType() === "web") {
-        navigator.geolocation.getCurrentPosition((position) => {
-            return {
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-            };
+        return new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    resolve({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                    });
+                },
+                (error) => reject(error),
+            ),
+                { enableHighAccuracy: true, maximumAge: 0 };
         });
-    } else {
-        const { coords } = await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.BestForNavigation,
-            distanceInterval: 1,
-            mayShowUserSettingsDialog: true,
-        });
-        return {
-            latitude: coords.latitude,
-            longitude: coords.longitude,
-        };
     }
+
+    const { coords } = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.BestForNavigation,
+        distanceInterval: 1,
+        mayShowUserSettingsDialog: true,
+    });
+    return {
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+    };
 };

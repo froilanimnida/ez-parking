@@ -107,11 +107,16 @@ const ParkingManagerSignUp = () => {
                 return;
             }
 
-            const location = await getUserLocation();
+            const location = await getUserLocation().catch(() => null);
+            if (!location) {
+                alert("Could not get your location. Please try again.");
+                return;
+            }
+
             setParkingEstablishmentData((prev) => ({
                 ...prev,
-                latitude: location!.latitude,
-                longitude: location!.longitude,
+                latitude: location.latitude,
+                longitude: location.longitude,
             }));
         } catch (error) {
             console.error("Error getting current location:", error);
@@ -150,32 +155,6 @@ const ParkingManagerSignUp = () => {
 
     const handlePaymentDataChange = (key: string, value: boolean | string) => {
         setPaymentMethodData({ ...paymentMethodData, [key]: value });
-    };
-
-    const searchLocation = async () => {
-        if (!query) {
-            alert("Please enter an address above to search");
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`,
-            );
-            const data = await response.json();
-            if (data.length > 0) {
-                const { lat, lon } = data[0];
-                setParkingEstablishmentData((prev) => ({
-                    ...prev,
-                    latitude: parseFloat(lat),
-                    longitude: parseFloat(lon),
-                }));
-            } else {
-                alert("Location not found. Please enter a valid address");
-            }
-        } catch {
-            alert("An error occurred while searching for the location");
-        }
     };
 
     const handleDocumentPick = async (type: keyof Documents) => {
