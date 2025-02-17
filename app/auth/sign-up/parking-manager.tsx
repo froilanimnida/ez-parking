@@ -9,7 +9,6 @@ import TextComponent from "@/components/TextComponent";
 import CheckboxComponent from "@/components/CheckboxComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import LocationPicker from "@/components/auth/parking-manager/LocationPicker";
 import {
     ParkingCompanyProfile,
     ParkingPaymentMethodData,
@@ -28,6 +27,10 @@ import type { DocumentInfo, Documents } from "@/lib/types/documents";
 import { Image } from "react-native";
 import InfoContainer from "@/components/auth/parking-manager/InfoContainer";
 import { OperatingSchedule } from "@lib/models/operatingHour";
+import { askLocationPermission, getUserLocation } from "@lib/helper/location";
+import PlatformType from "@lib/helper/platform";
+import WebView from "react-native-webview";
+import { OSMMapURL } from "@lib/helper/mapViewFunction";
 
 const ParkingManagerSignUp = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -96,6 +99,25 @@ const ParkingManagerSignUp = () => {
         bir_cert: null,
         liability_insurance: null,
     });
+    const getMyLocation = async () => {
+        try {
+            const status = await askLocationPermission();
+            if (!status) {
+                alert("Permission to access location was denied");
+                return;
+            }
+
+            const location = await getUserLocation();
+            setParkingEstablishmentData((prev) => ({
+                ...prev,
+                latitude: location!.latitude,
+                longitude: location!.longitude,
+            }));
+        } catch (error) {
+            console.error("Error getting current location:", error);
+            alert("Error getting current location. Please try again.");
+        }
+    };
 
     const handleParkingOwnerInfo = (key: string, value: string) => {
         setUserInformation({ ...userInformation, [key]: value });
@@ -331,30 +353,37 @@ const ParkingManagerSignUp = () => {
                         </View>
 
                         <View style={styles.mapContainer}>
-                            <LocationPicker
-                                initialLatitude={parkingEstablishmentData.latitude}
-                                initialLongitude={parkingEstablishmentData.longitude}
-                                onLocationChange={(latitude: number, longitude: number) => {
-                                    setParkingEstablishmentData((prev) => ({
-                                        ...prev,
-                                        latitude,
-                                        longitude,
-                                    }));
-                                }}
-                            />
+                            {PlatformType() !== "web" ? (
+                                <WebView
+                                    source={{
+                                        uri: OSMMapURL(
+                                            parkingEstablishmentData.latitude,
+                                            parkingEstablishmentData.longitude,
+                                        ),
+                                    }}
+                                />
+                            ) : (
+                                <iframe
+                                    title={parkingEstablishmentData.name}
+                                    src={OSMMapURL(
+                                        parkingEstablishmentData.latitude,
+                                        parkingEstablishmentData.longitude,
+                                    )}
+                                    height={500}
+                                />
+                            )}
                         </View>
 
                         <View style={styles.formGroup}>
                             <TextInputComponent
                                 placeholder="Longitude"
                                 value={String(parkingEstablishmentData.longitude)}
-                                editable={false}
                             />
                             <TextInputComponent
                                 placeholder="Latitude"
                                 value={String(parkingEstablishmentData.latitude)}
-                                editable={false}
                             />
+                            <ButtonComponent onPress={getMyLocation} title="Get My Coordinates" />
                         </View>
 
                         <TextInputComponent
