@@ -80,6 +80,42 @@ const EstablishmentDetails = () => {
                             </View>
                         </View>
                     </CardComponent>
+                    <CardComponent header="Company Profile">
+                        <View style={styles.cardContent}>
+                            <View style={styles.field}>
+                                <TextComponent variant="label">Company Name</TextComponent>
+                                <TextComponent variant="body">
+                                    {establishment.company_profile.company_name}
+                                </TextComponent>
+                            </View>
+                            <View style={styles.field}>
+                                <TextComponent variant="label">Registration Number</TextComponent>
+                                <TextComponent variant="body">
+                                    {establishment.company_profile.company_reg_number}
+                                </TextComponent>
+                            </View>
+                            <View style={styles.field}>
+                                <TextComponent variant="label">TIN</TextComponent>
+                                <TextComponent variant="body">{establishment.company_profile.tin}</TextComponent>
+                            </View>
+                            <View style={styles.field}>
+                                <TextComponent variant="label">Owner Type</TextComponent>
+                                <TextComponent variant="body">{establishment.company_profile.owner_type}</TextComponent>
+                            </View>
+                            <View style={styles.field}>
+                                <TextComponent variant="label">Profile ID</TextComponent>
+                                <TextComponent variant="body">{establishment.company_profile.profile_id}</TextComponent>
+                            </View>
+                            <View style={styles.field}>
+                                <TextComponent variant="label">Created At</TextComponent>
+                                <TextComponent variant="body">{establishment.company_profile.created_at}</TextComponent>
+                            </View>
+                            <View style={styles.field}>
+                                <TextComponent variant="label">Updated At</TextComponent>
+                                <TextComponent variant="body">{establishment.company_profile.updated_at}</TextComponent>
+                            </View>
+                        </View>
+                    </CardComponent>
                     <CardComponent
                         header="Establishment Information"
                         subHeader="Review and manage this parking establishment"
@@ -250,6 +286,70 @@ const EstablishmentDetails = () => {
                             </View>
                         </View>
                     </CardComponent>
+                    {establishment.slots.map((slot) => (
+                        <CardComponent key={slot.slot_id} header={`Slot Code: ${slot.slot_code}`}>
+                            <View style={styles.cardContent}>
+                                <View style={styles.field}>
+                                    <TextComponent variant="label">Slot ID</TextComponent>
+                                    <TextComponent variant="body">{slot.slot_id}</TextComponent>
+                                </View>
+                                <View style={styles.field}>
+                                    <TextComponent variant="label">UUID</TextComponent>
+                                    <TextComponent variant="body">{slot.uuid}</TextComponent>
+                                </View>
+                                <View style={styles.field}>
+                                    <TextComponent variant="label">Vehicle Type ID</TextComponent>
+                                    <TextComponent variant="body">{slot.vehicle_type_id}</TextComponent>
+                                </View>
+                                <View style={styles.field}>
+                                    <TextComponent variant="label">Slot Status</TextComponent>
+                                    <TextComponent variant="body">{slot.slot_status}</TextComponent>
+                                </View>
+                                <View style={styles.field}>
+                                    <TextComponent variant="label">Is Active</TextComponent>
+                                    <TextComponent variant="body">{slot.is_active ? "Yes" : "No"}</TextComponent>
+                                </View>
+                                <View style={styles.field}>
+                                    <TextComponent variant="label">Slot Features</TextComponent>
+                                    <TextComponent variant="body">{slot.slot_features}</TextComponent>
+                                </View>
+                                <View style={styles.field}>
+                                    <TextComponent variant="label">Is Premium</TextComponent>
+                                    <TextComponent variant="body">{slot.is_premium ? "Yes" : "No"}</TextComponent>
+                                </View>
+                                <View style={styles.field}>
+                                    <TextComponent variant="label">Floor Level</TextComponent>
+                                    <TextComponent variant="body">{slot.floor_level}</TextComponent>
+                                </View>
+                                <View style={styles.field}>
+                                    <TextComponent variant="label">Created At</TextComponent>
+                                    <TextComponent variant="body">{slot.created_at}</TextComponent>
+                                </View>
+                                <View style={styles.field}>
+                                    <TextComponent variant="label">Updated At</TextComponent>
+                                    <TextComponent variant="body">{slot.updated_at}</TextComponent>
+                                </View>
+                                <View style={styles.field}>
+                                    <TextComponent variant="label">Base Price Per Hour</TextComponent>
+                                    <TextComponent variant="body">{slot.base_price_per_hour}</TextComponent>
+                                </View>
+                                <View style={styles.field}>
+                                    <TextComponent variant="label">Base Price Per Day</TextComponent>
+                                    <TextComponent variant="body">{slot.base_price_per_day}</TextComponent>
+                                </View>
+                                <View style={styles.field}>
+                                    <TextComponent variant="label">Base Price Per Month</TextComponent>
+                                    <TextComponent variant="body">{slot.base_price_per_month}</TextComponent>
+                                </View>
+                                {slot.price_multiplier && (
+                                    <View style={styles.field}>
+                                        <TextComponent variant="label">Price Multiplier</TextComponent>
+                                        <TextComponent variant="body">{slot.price_multiplier}</TextComponent>
+                                    </View>
+                                )}
+                            </View>
+                        </CardComponent>
+                    ))}
                 </View>
             )}
         </ResponsiveContainer>
