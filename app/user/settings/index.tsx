@@ -1,6 +1,6 @@
 import LinkComponent from "@/components/LinkComponent";
-import React, {useEffect, useState} from "react";
-import { View, StyleSheet, ActivityIndicator } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet } from "react-native";
 import CardComponent from "@/components/CardComponent";
 import TextComponent from "@/components/TextComponent";
 import TextInputComponent from "@/components/TextInputComponent";
@@ -9,29 +9,31 @@ import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { logoutCurrentUser } from "@/lib/credentialsManager";
 import { type User } from "@/lib/models/user";
 import LoadingComponent from "@components/reusable/LoadingComponent";
-import {fetchProfile} from "@lib/api/user";
+import { fetchProfile } from "@lib/api/user";
 
 export default function UserProfileScreen() {
     const [isLoading, setIsLoading] = useState(true);
     const [userData, setUserData] = useState<User | null>(null);
-
-    const joinDate = userData ? new Date(userData.created_at).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    }) : "";
+    const joinDate = userData
+        ? new Date(userData.created_at).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+          })
+        : "";
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await fetchProfile();
                 setUserData(response.data.message);
-                setIsLoading(false);
             } catch (error) {
                 alert("Error fetching user profile");
+            } finally {
+                setIsLoading(false);
             }
-        }
-        fetchData();
+        };
+        fetchData().then();
     }, []);
 
     const handleSubmit = async () => {
@@ -43,17 +45,17 @@ export default function UserProfileScreen() {
     };
     return (
         <ResponsiveContainer>
-            <LinkComponent
-                label=" ← Back to Dashboard"
-                style={{ width: "auto", marginBottom: 16 }}
-                href="../user"
-            />
+            <LinkComponent label=" ← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="../user" />
             {isLoading ? (
                 <LoadingComponent text="Loading user profile..." />
             ) : (
                 userData && (
                     <>
-                        <CardComponent header="User Profile" subHeader="Edit your profile information" customStyles={styles.card}>
+                        <CardComponent
+                            header="User Profile"
+                            subHeader="Edit your profile information"
+                            customStyles={styles.card}
+                        >
                             <View style={styles.headerRow}>
                                 <View style={styles.avatarContainer}>
                                     <TextComponent style={styles.avatarText}>
@@ -73,15 +75,17 @@ export default function UserProfileScreen() {
                                 </View>
                                 {userData.is_verified && (
                                     <View style={styles.verifiedBadge}>
-                                        <TextComponent style={styles.verifiedBadgeText}>
-                                            Verified Account
-                                        </TextComponent>
+                                        <TextComponent style={styles.verifiedBadgeText}>Verified Account</TextComponent>
                                     </View>
                                 )}
                             </View>
                         </CardComponent>
 
-                        <CardComponent header="Edit Profile" customStyles={styles.card} subHeader="Update your profile information">
+                        <CardComponent
+                            header="Edit Profile"
+                            customStyles={styles.card}
+                            subHeader="Update your profile information"
+                        >
                             <View style={styles.formGroup}>
                                 <TextComponent style={styles.label}>First Name</TextComponent>
                                 <TextInputComponent customStyles={styles.input} value={userData.first_name} />
@@ -107,11 +111,7 @@ export default function UserProfileScreen() {
                                 <TextInputComponent customStyles={styles.input} value={userData.phone_number} />
                             </View>
 
-                            <ButtonComponent
-                                title="Save Changes"
-                                onPress={() => alert("Saved")}
-                                disabled={isLoading}
-                            />
+                            <ButtonComponent title="Save Changes" onPress={() => alert("Saved")} disabled={isLoading} />
                         </CardComponent>
 
                         <View style={styles.infoWrapper}>
@@ -148,11 +148,9 @@ export default function UserProfileScreen() {
                                     </TextComponent>
                                 </View>
                             </CardComponent>
-                            <ButtonComponent
-                                onPress={() => logoutCurrentUser()}
-                                title="Logout"
-                                variant="destructive"
-                            />
+                            <ButtonComponent onPress={handleSubmit} title="Logout" variant="destructive" />
+
+                            <ButtonComponent onPress={() => logoutCurrentUser()} title="Logout" variant="destructive" />
                         </View>
                     </>
                 )

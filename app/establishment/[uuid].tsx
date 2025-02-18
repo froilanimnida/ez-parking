@@ -15,13 +15,7 @@ import { useLocalSearchParams } from "expo-router";
 import { fetchEstablishmentInfo } from "@/lib/api/establishment";
 import LinkComponent from "@/components/LinkComponent";
 import ButtonComponent from "@/components/ButtonComponent";
-import {
-    normalMapURL,
-    OSMMapURL,
-    satelliteMapURL,
-    SatteliteMap,
-    threeDimensionalMapURL,
-} from "@/lib/helper/mapViewFunction";
+import { normalMapURL, OSMMapURL, SatteliteMap, threeDimensionalMapURL } from "@/lib/helper/mapViewFunction";
 import { getRegionForCoordinates } from "@lib/helper/getRegionForCoorindates";
 import { getUserLocation } from "@lib/helper/location";
 import WebView from "react-native-webview";
@@ -56,8 +50,11 @@ const EstablishmentOverview = () => {
             const getEstablishmentInfo = async () => {
                 try {
                     const result = await fetchEstablishmentInfo(uuid);
-                    const currentLocation = await getUserLocation();
-                    setUserLocation(currentLocation ?? { latitude: 14.5995, longitude: 120.9842 });
+                    const currentLocation = await getUserLocation().catch(() => ({
+                        latitude: 14.5995,
+                        longitude: 120.9842,
+                    }));
+                    setUserLocation(currentLocation);
                     setEstablishment(result.data.establishment);
                 } catch (error) {
                     console.error("Error fetching establishment info:", error);
@@ -84,18 +81,6 @@ const EstablishmentOverview = () => {
             }
         };
     }, [uuid]);
-    const region = establishment
-        ? getRegionForCoordinates([
-              { latitude: establishment.establishment.latitude, longitude: establishment.establishment.longitude },
-              { latitude: userLocation.latitude, longitude: userLocation.longitude },
-          ])
-        : {
-              latitude: userLocation.latitude,
-              longitude: userLocation.longitude,
-              latitudeDelta: 0.0922,
-              longitudeDelta: 0.0421,
-          };
-
     const mapUrl =
         (establishment &&
             normalMapURL(

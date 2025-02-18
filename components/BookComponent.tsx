@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { View, ScrollView, StyleSheet, Animated, Modal, Pressable } from "react-native";
+import { View, StyleSheet, Modal, Pressable } from "react-native";
 import EstablishmentItem from "@/components/EstablishmentItem";
 import TextComponent from "@/components/TextComponent";
 import type { ParkingEstablishment } from "@lib/models/parkingEstablishment";
 import TextInputComponent from "@/components/TextInputComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import PlatformType from "@lib/helper/platform";
-import { getNearbyEstablishments } from "@/lib/api/establishment";
+import { searchEstablishments } from "@/lib/api/establishment";
 import { askLocationPermission, getIPBasedLocation, getUserLocation } from "@lib/helper/location";
 import LoadingComponent from "./reusable/LoadingComponent";
 import SelectComponent from "./SelectComponent";
 import { METRO_MANILA_CITIES } from "@/lib/types/models/common/constants";
 import type { CITY } from "@/lib/types/models/common/constants";
+import ButtonComponent from "@components/ButtonComponent";
 
 export interface EstablishmentQuery extends ParkingEstablishment {
     open_slots: number;
@@ -25,22 +26,11 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [searchTerm, setSearchTerm] = useState<CITY>("");
     const [selectedCity, setSelectedCity] = useState("");
-    const [recentSearches, setRecentSearches] = useState([]);
     const [loading, setLoading] = useState(true);
-
-    const animation = new Animated.Value(0);
 
     const handleSearch = async () => {
         setLoading(true);
         setLoading(false);
-    };
-
-    const expandSearchBar = () => {
-        setModalVisible(true);
-        Animated.spring(animation, {
-            toValue: 1,
-            useNativeDriver: true,
-        }).start();
     };
     const [location, setLocation] = useState({
         latitude: 14.5995,
@@ -57,12 +47,12 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
 
             try {
                 let location = await getUserLocation();
-                location ? setLocation(location) : setLocation({ latitude: 14.5995, longitude: 120.9842 });
+                location ? setLocation({ latitude: location.latitude, longitude: location.longitude }) : null;
             } catch (error) {
                 const data = await getIPBasedLocation();
                 setLocation({ latitude: data.latitude, longitude: data.longitude });
             } finally {
-                const data = await getNearbyEstablishments(location.latitude, location.longitude);
+                const data = await searchEstablishments(location.latitude, location.longitude);
                 setEstablishments(data.data.establishments);
                 setLoading(false);
             }
@@ -73,14 +63,24 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
     return (
         <View style={{ flex: 1, gap: 16 }}>
             <View style={styles.header}>
-                <Pressable onPress={expandSearchBar}>
-                    <View style={styles.searchBarContainer}>
-                        <View style={styles.searchBar}>
-                            <MaterialCommunityIcons name="magnify" size={20} color="#4b5563" />
-                            <TextComponent style={styles.searchText}>Where to park?</TextComponent>
-                        </View>
+                <TextComponent style={{ fontSize: 24, fontWeight: "600" }}>Find Parking</TextComponent>
+                <View style={styles.searchBarContainer}>
+                    <View style={styles.formGroup}>
+                        <TextComponent variant="label">Location</TextComponent>
+                        <TextInputComponent placeholder={"Where to park"} />
                     </View>
-                </Pressable>
+                    <View style={styles.formGroup}>
+                        <TextComponent variant="label">City</TextComponent>
+                        <SelectComponent
+                            items={METRO_MANILA_CITIES.map((city) => ({ label: city.toLowerCase(), value: city }))}
+                            selectedValue={selectedCity}
+                            onValueChange={(city) => {
+                                setSelectedCity(city);
+                            }}
+                        />
+                    </View>
+                    <ButtonComponent onPress={handleSearch} title="Search" />
+                </View>
 
                 <Modal animationType="slide" visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
                     <View style={styles.modalContainer}>
@@ -105,22 +105,6 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
                                 placeholder="Select City"
                             />
                         </View>
-                        <ScrollView style={styles.modalContent}>
-                            {recentSearches.map((search, index) => (
-                                <Pressable
-                                    key={index}
-                                    style={styles.recentSearchItem}
-                                    onPress={() => {
-                                        setSearchTerm(search);
-                                        handleSearch();
-                                        setModalVisible(false);
-                                    }}
-                                >
-                                    <MaterialCommunityIcons name="clock-time-four-outline" size={24} color="#6b7280" />
-                                    <TextComponent style={styles.recentSearchText}>{search}</TextComponent>
-                                </Pressable>
-                            ))}
-                        </ScrollView>
                     </View>
                 </Modal>
             </View>
@@ -219,6 +203,10 @@ const styles = StyleSheet.create({
     searchBarContainer: {
         marginTop: 8,
         paddingHorizontal: 16,
+        width: "100%",
+        flexDirection: "row",
+        gap: 16,
+        flex: 1,
     },
     searchBar: {
         flexDirection: "row",
@@ -266,5 +254,9 @@ const styles = StyleSheet.create({
         marginLeft: 12,
         fontSize: 16,
         color: "#111827",
+    },
+    formGroup: {
+        gap: 8,
+        flex: 1,
     },
 });
