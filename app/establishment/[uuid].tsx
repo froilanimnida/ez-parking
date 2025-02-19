@@ -16,7 +16,6 @@ import { fetchEstablishmentInfo } from "@/lib/api/establishment";
 import LinkComponent from "@/components/LinkComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import { normalMapURL, OSMMapURL, SatteliteMap, threeDimensionalMapURL } from "@/lib/helper/mapViewFunction";
-import { getRegionForCoordinates } from "@lib/helper/getRegionForCoorindates";
 import { getUserLocation } from "@lib/helper/location";
 import WebView from "react-native-webview";
 
@@ -179,6 +178,14 @@ const EstablishmentOverview = () => {
                                         )
                                     }
                                 />
+                                {/*<ButtonComponent*/}
+                                {/*    title="Get Directions"*/}
+                                {/*    onPress={() =>*/}
+                                {/*        Linking.openURL(*/}
+                                {/*            `https://ez-parking.expo.dev/directions?latitude=${establishment?.establishment.latitude}&longitude=${establishment?.establishment.longitude}`,*/}
+                                {/*        )*/}
+                                {/*    }*/}
+                                {/*/>*/}
                             </View>
                         </View>
                         <View style={styles.mapContainer}>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Modal, Pressable } from "react-native";
+import { View, StyleSheet } from "react-native";
 import EstablishmentItem from "@/components/EstablishmentItem";
 import TextComponent from "@/components/TextComponent";
 import type { ParkingEstablishment } from "@lib/models/parkingEstablishment";
@@ -23,7 +23,6 @@ export interface EstablishmentQuery extends ParkingEstablishment {
 
 const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
     const [establishments, setEstablishments] = useState<EstablishmentQuery[]>([]);
-    const [modalVisible, setModalVisible] = useState(false);
     const [searchTerm, setSearchTerm] = useState<CITY>("");
     const [selectedCity, setSelectedCity] = useState("");
     const [loading, setLoading] = useState(true);
@@ -52,7 +51,12 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
                 const data = await getIPBasedLocation();
                 setLocation({ latitude: data.latitude, longitude: data.longitude });
             } finally {
-                const data = await searchEstablishments(location.latitude, location.longitude);
+                const data = await searchEstablishments(
+                    location.latitude,
+                    location.longitude,
+                    searchTerm,
+                    selectedCity,
+                );
                 setEstablishments(data.data.establishments);
                 setLoading(false);
             }
@@ -67,7 +71,7 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
                 <View style={styles.searchBarContainer}>
                     <View style={styles.formGroup}>
                         <TextComponent variant="label">Location</TextComponent>
-                        <TextInputComponent placeholder={"Where to park"} />
+                        <TextInputComponent placeholder={"Where to park"} onChangeText={setSearchTerm} />
                     </View>
                     <View style={styles.formGroup}>
                         <TextComponent variant="label">City</TextComponent>
@@ -79,34 +83,8 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
                             }}
                         />
                     </View>
-                    <ButtonComponent onPress={handleSearch} title="Search" />
                 </View>
-
-                <Modal animationType="slide" visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
-                    <View style={styles.modalContainer}>
-                        <View style={styles.modalHeader}>
-                            <Pressable onPress={() => setModalVisible(false)} style={styles.backButton}>
-                                <MaterialCommunityIcons name="arrow-left" size={24} color="#000" />
-                            </Pressable>
-                            <View style={styles.citySelectContainer}>
-                                <TextInputComponent
-                                    placeholder="Search parking locations"
-                                    value={searchTerm}
-                                    onChangeText={setSearchTerm}
-                                    autoFocus
-                                />
-                            </View>
-                            <SelectComponent
-                                items={METRO_MANILA_CITIES.map((city) => ({ label: city.toLowerCase(), value: city }))}
-                                selectedValue={selectedCity}
-                                onValueChange={(city) => {
-                                    setSelectedCity(city);
-                                }}
-                                placeholder="Select City"
-                            />
-                        </View>
-                    </View>
-                </Modal>
+                <ButtonComponent onPress={handleSearch} title="Search" />
             </View>
 
             {loading ? (
@@ -202,7 +180,6 @@ const styles = StyleSheet.create({
     },
     searchBarContainer: {
         marginTop: 8,
-        paddingHorizontal: 16,
         width: "100%",
         flexDirection: "row",
         gap: 16,

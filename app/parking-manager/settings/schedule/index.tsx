@@ -8,7 +8,7 @@ import CheckboxComponent from "@/components/CheckboxComponent";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import { OperatingHour } from "@lib/models/operatingHour";
-import { DAYS_OF_WEEK } from "@lib/types/models/common/constants";
+import { DAYS_OF_WEEK, DaysOfWeek } from "@lib/types/models/common/constants";
 import LinkComponent from "@components/LinkComponent";
 import TimePicker from "@components/reusable/TimePicker";
 
@@ -22,7 +22,7 @@ export const DayScheduleRow = ({
     hours,
     onUpdate,
 }: {
-    day: string;
+    day: DaysOfWeek;
     hours: OperatingHour;
     onUpdate: (update: Partial<OperatingHour>) => void;
 }) => {
@@ -163,7 +163,7 @@ const ParkingEstablishmentSchedule = () => {
                         </View>
                         {parkingData?.is_24_7 != true ? (
                             <View style={styles.scheduleContainer}>
-                                {DAYS_OF_WEEK.map((day) => {
+                                {DAYS_OF_WEEK.map((day: DaysOfWeek) => {
                                     const daySchedule = parkingData?.operating_hours.find(
                                         (hour) => hour.day_of_week === day,
                                     ) ?? {

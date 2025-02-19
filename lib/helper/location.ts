@@ -1,5 +1,6 @@
 import * as Location from "expo-location";
 import PlatformType from "@lib/helper/platform";
+import axios from "axios";
 
 export async function getReverseGeocoding(latitude: number, longitude: number) {
     try {
@@ -71,4 +72,15 @@ export const getUserLocation = async () => {
             longitude: 120.9842,
         };
     }
+};
+
+export const turnByTurnNavigation = async (
+    userLatitude: number,
+    userLongitude: number,
+    destinationLatitude: number,
+    destinationLongitude: number,
+) => {
+    return axios.get(
+        `https://router.project-osrm.org/route/v1/driving/${userLongitude},${userLatitude};${destinationLongitude},${destinationLatitude}?overview=full&geometries=geojson`,
+    );
 };

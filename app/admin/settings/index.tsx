@@ -8,37 +8,10 @@ import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { logoutCurrentUser } from "@lib/credentialsManager";
 import LinkComponent from "@components/LinkComponent";
 import LoadingComponent from "@components/reusable/LoadingComponent";
-
-interface UserData {
-    user_id: number;
-    uuid: string;
-    nickname: string;
-    first_name: string;
-    middle_name: string;
-    last_name: string;
-    suffix: string;
-    email: string;
-    phone_number: string;
-    role: string;
-    created_at: string;
-    is_verified: boolean;
-}
+import { User } from "@lib/models/user";
 
 const AdminSettings = () => {
-    const [userData, setUserData] = useState<UserData>({
-        user_id: 1,
-        uuid: "550e8400-e29b-41d4-a716-446655440000",
-        nickname: "admin123",
-        first_name: "Admin",
-        middle_name: "",
-        last_name: "User",
-        suffix: "",
-        email: "admin@example.com",
-        phone_number: "+1234567890",
-        role: "admin",
-        created_at: "2024-03-27T10:00:00",
-        is_verified: true,
-    });
+    const [userData, setUserData] = useState<User>();
     const [isUpdating, setIsUpdating] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     useEffect(() => {
@@ -56,8 +29,8 @@ const AdminSettings = () => {
     return (
         <ResponsiveContainer>
             <LinkComponent label=" ← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="../user" />
-            {isLoading ? (
-                <LoadingComponent text="Loading user profile..." />
+            {isLoading || isUpdating ? (
+                <LoadingComponent text="Loading..." />
             ) : (
                 userData && (
                     <>
@@ -125,10 +98,6 @@ const AdminSettings = () => {
                                 <View style={styles.infoItem}>
                                     <TextComponent style={styles.infoLabel}>Role</TextComponent>
                                     <TextComponent style={styles.infoValue}>{userData.role}</TextComponent>
-                                </View>
-                                <View style={styles.infoItem}>
-                                    <TextComponent style={styles.infoLabel}>Member Since</TextComponent>
-                                    <TextComponent style={styles.infoValue}>{joinDate}</TextComponent>
                                 </View>
                             </CardComponent>
 

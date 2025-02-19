@@ -159,6 +159,14 @@ const EstablishmentView = () => {
                             <View style={styles.mapLinks}>
                                 <ButtonComponent title="Google Maps" onPress={() => openNavigation("google")} />
                                 <ButtonComponent title="Waze" onPress={() => openNavigation("waze")} />
+                                {/*<ButtonComponent*/}
+                                {/*    title="Get Directions"*/}
+                                {/*    onPress={() =>*/}
+                                {/*        Linking.openURL(*/}
+                                {/*            `https://ez-parking.expo.dev/directions?latitude=${establishment?.establishment.latitude}&longitude=${establishment?.establishment.longitude}`,*/}
+                                {/*        )*/}
+                                {/*    }*/}
+                                {/*/>*/}
                             </View>
                         </View>
                         <CardComponent

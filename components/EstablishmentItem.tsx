@@ -6,6 +6,7 @@ import CardComponent from "@/components/CardComponent";
 import calculateDistance from "@/lib/function/calculateDistance";
 import LinkComponent from "./LinkComponent";
 import type { ParkingEstablishment } from "@lib/models/parkingEstablishment";
+import ButtonComponent from "@components/ButtonComponent";
 
 interface EstablishmentItem {
     establishment: ParkingEstablishment & {
@@ -71,7 +72,7 @@ const EstablishmentItem = ({ userLat, userLong, establishment, guest }: Establis
                     {establishment.total_slots} slots available
                 </TextComponent>
                 <View style={styles.actions}>
-                    <TouchableOpacity
+                    <ButtonComponent
                         style={styles.directionsButton}
                         onPress={() => {
                             const url = `https://www.google.com/maps/dir/?api=1&destination=${establishment.latitude},${establishment.longitude}`;
@@ -79,7 +80,7 @@ const EstablishmentItem = ({ userLat, userLong, establishment, guest }: Establis
                         }}
                     >
                         <TextComponent style={styles.directionsText}>Directions</TextComponent>
-                    </TouchableOpacity>
+                    </ButtonComponent>
                     {guest ? (
                         <LinkComponent href={`../establishment/${establishment.uuid}`} asChild>
                             <TouchableOpacity style={styles.detailsButton}>
