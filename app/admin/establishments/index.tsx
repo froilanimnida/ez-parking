@@ -30,7 +30,7 @@ const Establishments = () => {
             setEstablishments(res.data.data as Establishment[]);
             setLoading(false);
         };
-        getEstablishmentData();
+        getEstablishmentData().then();
     }, []);
     return (
         <ResponsiveContainer>

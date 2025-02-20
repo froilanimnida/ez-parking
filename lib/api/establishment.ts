@@ -9,3 +9,6 @@ export const searchEstablishments = async (latitude: number, longitude: number, 
     await axiosInstance.get(
         `${root}/query?user_latitude=${latitude}&user_longitude=${longitude}&search_term=${searchTerm}&city=${city}`,
     );
+
+export const getDocument = async (bucket_path: string) =>
+    await axiosInstance.get(`${root}/document?bucket_path=${bucket_path}`);

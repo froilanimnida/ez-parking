@@ -14,6 +14,8 @@ import { getEstablishment } from "@/lib/api/admin";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import LinkComponent from "@/components/LinkComponent";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
+import ButtonComponent from "@components/ButtonComponent";
+import { getDocument } from "@lib/api/establishment";
 
 interface Establishment {
     company_profile: CompanyProfile;
@@ -29,12 +31,21 @@ const EstablishmentDetails = () => {
     const { uuid } = useLocalSearchParams() as { uuid: string };
     const [establishment, setEstablishment] = useState<Establishment | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const documents: File[] = [];
 
     useEffect(() => {
         const fetchEstablishment = async () => {
             try {
                 const response = await getEstablishment(uuid);
                 setEstablishment(response.data.data);
+                const bucketPaths = response.data.data.establishment_documents.map(
+                    (doc: { bucket_path: string }) => doc.bucket_path,
+                );
+                bucketPaths.forEach((bucket_path: string) => {
+                    getDocument(bucket_path).then((res) => {
+                        console.log(res);
+                    });
+                });
             } catch {
                 alert("An error occurred");
             } finally {
@@ -42,7 +53,10 @@ const EstablishmentDetails = () => {
             }
         };
         fetchEstablishment().then();
-    });
+    }, []);
+    const addSlot = () => {
+        alert("Add slot");
+    };
 
     return (
         <ResponsiveContainer>
@@ -61,7 +75,7 @@ const EstablishmentDetails = () => {
             {!isLoading && establishment && (
                 <View style={styles.grid}>
                     <CardComponent header="User Information">
-                        <View style={styles.cardContent}>
+                        <View>
                             <View style={styles.field}>
                                 <TextComponent variant="label">User Identifier</TextComponent>
                                 <TextComponent variant="body">{establishment.user.uuid}</TextComponent>
@@ -80,7 +94,7 @@ const EstablishmentDetails = () => {
                         </View>
                     </CardComponent>
                     <CardComponent header="Company Profile">
-                        <View style={styles.cardContent}>
+                        <View>
                             <View style={styles.field}>
                                 <TextComponent variant="label">Company Name</TextComponent>
                                 <TextComponent variant="body">
@@ -119,7 +133,7 @@ const EstablishmentDetails = () => {
                         header="Establishment Information"
                         subHeader="Review and manage this parking establishment"
                     >
-                        <View style={styles.cardContent}>
+                        <View>
                             <View>
                                 <TextComponent variant="label" style={styles.label}>
                                     Establishment Name
@@ -244,8 +258,7 @@ const EstablishmentDetails = () => {
                     </CardComponent>
 
                     <CardComponent header="Operating Hours">
-                        <TextComponent style={styles.cardTitle}>Operating Hours</TextComponent>
-                        <View style={styles.cardContent}>
+                        <View>
                             {establishment.operating_hours.map((hour, index) => (
                                 <View key={index} style={styles.field}>
                                     <TextComponent style={styles.label}>{hour.day_of_week}</TextComponent>
@@ -257,12 +270,11 @@ const EstablishmentDetails = () => {
                         </View>
                     </CardComponent>
                     <CardComponent header="Payment Methods">
-                        <TextComponent style={styles.cardTitle}>Payment Methods</TextComponent>
-                        <View style={styles.cardContent}>
+                        <View>
                             <View style={styles.field}>
                                 <TextComponent style={styles.label}>Accepts Cash</TextComponent>
                                 <TextComponent style={styles.value}>
-                                    {establishment.payment_methods[0].accepts_cash ? "Yes" : "No"}
+                                    {establishment.payment_methods[0].accepts_cash !== undefined ? "Yes" : "No"}
                                 </TextComponent>
                             </View>
                             <View style={styles.field}>
@@ -285,70 +297,73 @@ const EstablishmentDetails = () => {
                             </View>
                         </View>
                     </CardComponent>
-                    {establishment.slots.map((slot) => (
-                        <CardComponent key={slot.slot_id} header={`Slot Code: ${slot.slot_code}`}>
-                            <View style={styles.cardContent}>
-                                <View style={styles.field}>
-                                    <TextComponent variant="label">Slot ID</TextComponent>
-                                    <TextComponent variant="body">{slot.slot_id}</TextComponent>
-                                </View>
-                                <View style={styles.field}>
-                                    <TextComponent variant="label">UUID</TextComponent>
-                                    <TextComponent variant="body">{slot.uuid}</TextComponent>
-                                </View>
-                                <View style={styles.field}>
-                                    <TextComponent variant="label">Vehicle Type ID</TextComponent>
-                                    <TextComponent variant="body">{slot.vehicle_type_id}</TextComponent>
-                                </View>
-                                <View style={styles.field}>
-                                    <TextComponent variant="label">Slot Status</TextComponent>
-                                    <TextComponent variant="body">{slot.slot_status}</TextComponent>
-                                </View>
-                                <View style={styles.field}>
-                                    <TextComponent variant="label">Is Active</TextComponent>
-                                    <TextComponent variant="body">{slot.is_active ? "Yes" : "No"}</TextComponent>
-                                </View>
-                                <View style={styles.field}>
-                                    <TextComponent variant="label">Slot Features</TextComponent>
-                                    <TextComponent variant="body">{slot.slot_features}</TextComponent>
-                                </View>
-                                <View style={styles.field}>
-                                    <TextComponent variant="label">Is Premium</TextComponent>
-                                    <TextComponent variant="body">{slot.is_premium ? "Yes" : "No"}</TextComponent>
-                                </View>
-                                <View style={styles.field}>
-                                    <TextComponent variant="label">Floor Level</TextComponent>
-                                    <TextComponent variant="body">{slot.floor_level}</TextComponent>
-                                </View>
-                                <View style={styles.field}>
-                                    <TextComponent variant="label">Created At</TextComponent>
-                                    <TextComponent variant="body">{slot.created_at}</TextComponent>
-                                </View>
-                                <View style={styles.field}>
-                                    <TextComponent variant="label">Updated At</TextComponent>
-                                    <TextComponent variant="body">{slot.updated_at}</TextComponent>
-                                </View>
-                                <View style={styles.field}>
-                                    <TextComponent variant="label">Base Price Per Hour</TextComponent>
-                                    <TextComponent variant="body">{slot.base_price_per_hour}</TextComponent>
-                                </View>
-                                <View style={styles.field}>
-                                    <TextComponent variant="label">Base Price Per Day</TextComponent>
-                                    <TextComponent variant="body">{slot.base_price_per_day}</TextComponent>
-                                </View>
-                                <View style={styles.field}>
-                                    <TextComponent variant="label">Base Price Per Month</TextComponent>
-                                    <TextComponent variant="body">{slot.base_price_per_month}</TextComponent>
-                                </View>
-                                {slot.price_multiplier && (
+                    <ButtonComponent onPress={addSlot} title="Add Slot" variant="primary" />
+                    <View style={{ flexDirection: "row", gap: 16 }}>
+                        {establishment.slots.map((slot) => (
+                            <CardComponent key={slot.slot_id} header={`Slot Code: ${slot.slot_code}`}>
+                                <View>
                                     <View style={styles.field}>
-                                        <TextComponent variant="label">Price Multiplier</TextComponent>
-                                        <TextComponent variant="body">{slot.price_multiplier}</TextComponent>
+                                        <TextComponent variant="label">Slot ID</TextComponent>
+                                        <TextComponent variant="body">{slot.slot_id}</TextComponent>
                                     </View>
-                                )}
-                            </View>
-                        </CardComponent>
-                    ))}
+                                    <View style={styles.field}>
+                                        <TextComponent variant="label">UUID</TextComponent>
+                                        <TextComponent variant="body">{slot.uuid}</TextComponent>
+                                    </View>
+                                    <View style={styles.field}>
+                                        <TextComponent variant="label">Vehicle Type ID</TextComponent>
+                                        <TextComponent variant="body">{slot.vehicle_type_id}</TextComponent>
+                                    </View>
+                                    <View style={styles.field}>
+                                        <TextComponent variant="label">Slot Status</TextComponent>
+                                        <TextComponent variant="body">{slot.slot_status}</TextComponent>
+                                    </View>
+                                    <View style={styles.field}>
+                                        <TextComponent variant="label">Is Active</TextComponent>
+                                        <TextComponent variant="body">{slot.is_active ? "Yes" : "No"}</TextComponent>
+                                    </View>
+                                    <View style={styles.field}>
+                                        <TextComponent variant="label">Slot Features</TextComponent>
+                                        <TextComponent variant="body">{slot.slot_features}</TextComponent>
+                                    </View>
+                                    <View style={styles.field}>
+                                        <TextComponent variant="label">Is Premium</TextComponent>
+                                        <TextComponent variant="body">{slot.is_premium ? "Yes" : "No"}</TextComponent>
+                                    </View>
+                                    <View style={styles.field}>
+                                        <TextComponent variant="label">Floor Level</TextComponent>
+                                        <TextComponent variant="body">{slot.floor_level}</TextComponent>
+                                    </View>
+                                    <View style={styles.field}>
+                                        <TextComponent variant="label">Created At</TextComponent>
+                                        <TextComponent variant="body">{slot.created_at}</TextComponent>
+                                    </View>
+                                    <View style={styles.field}>
+                                        <TextComponent variant="label">Updated At</TextComponent>
+                                        <TextComponent variant="body">{slot.updated_at}</TextComponent>
+                                    </View>
+                                    <View style={styles.field}>
+                                        <TextComponent variant="label">Base Price Per Hour</TextComponent>
+                                        <TextComponent variant="body">{slot.base_price_per_hour}</TextComponent>
+                                    </View>
+                                    <View style={styles.field}>
+                                        <TextComponent variant="label">Base Price Per Day</TextComponent>
+                                        <TextComponent variant="body">{slot.base_price_per_day}</TextComponent>
+                                    </View>
+                                    <View style={styles.field}>
+                                        <TextComponent variant="label">Base Price Per Month</TextComponent>
+                                        <TextComponent variant="body">{slot.base_price_per_month}</TextComponent>
+                                    </View>
+                                    {slot.price_multiplier && (
+                                        <View style={styles.field}>
+                                            <TextComponent variant="label">Price Multiplier</TextComponent>
+                                            <TextComponent variant="body">{slot.price_multiplier}</TextComponent>
+                                        </View>
+                                    )}
+                                </View>
+                            </CardComponent>
+                        ))}
+                    </View>
                 </View>
             )}
         </ResponsiveContainer>
@@ -376,7 +391,8 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
     grid: {
-        padding: 16,
+        gap: 16,
+        marginVertical: 16,
     },
     card: {
         backgroundColor: "white",
@@ -391,9 +407,6 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         color: "#111827",
         marginBottom: 16,
-    },
-    cardContent: {
-        gap: 16,
     },
     field: {
         marginBottom: 12,
