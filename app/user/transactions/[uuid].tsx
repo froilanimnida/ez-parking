@@ -11,7 +11,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import calculateDistance from "@/lib/helper/calculateDistance";
-import { threeDimensionalMapURL, normalMapURL, satelliteMapURL } from "@/lib/helper/mapViewFunction";
+import { normalMapURL, satelliteMapURL } from "@/lib/helper/mapViewFunction";
 import type { Address } from "@lib/models/address";
 import type { ParkingEstablishment } from "@lib/models/parkingEstablishment";
 import type { ParkingSlot } from "@lib/models/parkingSlot";
@@ -99,14 +99,6 @@ const TransactionDetails = () => {
             alert("Error cancelling transaction.");
         }
     };
-
-    const threeDimensionMap = transactionDetails?.establishment_info.name
-        ? threeDimensionalMapURL(
-              establishmentLatitude!,
-              establishmentLongitude!,
-              transactionDetails.establishment_info.name,
-          )
-        : "";
     const birdsEyeMapUrl = transactionDetails?.establishment_info.name
         ? satelliteMapURL(establishmentLatitude!, establishmentLongitude!, transactionDetails.establishment_info.name)
         : "";
@@ -143,7 +135,7 @@ const TransactionDetails = () => {
                                     ]}
                                 >
                                     <TextComponent style={styles.badgeText}>
-                                        {transactionDetails.transaction_data.payment_status}
+                                        {transactionDetails.transaction_data.payment_status.toUpperCase()} PAYMENT
                                     </TextComponent>
                                 </View>
                             )}
@@ -160,7 +152,7 @@ const TransactionDetails = () => {
                                 ]}
                             >
                                 <TextComponent style={styles.badgeText}>
-                                    {transactionDetails.transaction_data.status}
+                                    {transactionDetails.transaction_data.status.toUpperCase()} TRANSACTION
                                 </TextComponent>
                             </View>
                         </View>
@@ -273,9 +265,10 @@ const TransactionDetails = () => {
                         <View style={styles.lineRow}>
                             <TextComponent style={styles.lineLabel}>Exit Time</TextComponent>
                             <TextComponent style={styles.lineValue}>
-                                {transactionDetails.transaction_data.exit_time !== "Not Available"
+                                {transactionDetails.transaction_data.exit_time &&
+                                transactionDetails.transaction_data.status != "completed"
                                     ? new Date(transactionDetails.transaction_data.exit_time).toLocaleString()
-                                    : "Not Available"}
+                                    : "N/A"}
                             </TextComponent>
                         </View>
                         <View style={styles.lineRow}>
@@ -334,23 +327,16 @@ const TransactionDetails = () => {
 
                     <CardComponent header="Location Details">
                         {PlatformType() === "web" ? (
-                            <iframe src={normalMapUrl} style={{ width: "100%", height: "100%" }} />
+                            <iframe src={normalMapUrl} style={{ width: "100%", height: 500 }} />
                         ) : (
                             <WebView source={{ uri: normalMapUrl }} style={{ flex: 1 }} />
                         )}
                     </CardComponent>
-                    <CardComponent header="Location Details (Satellite)">
+                    <CardComponent header="Location Details Birds Eye View">
                         {PlatformType() === "web" ? (
-                            <iframe src={birdsEyeMapUrl} style={{ width: "100%", height: "100%" }} />
+                            <iframe src={birdsEyeMapUrl} style={{ width: "100%", height: 500 }} />
                         ) : (
                             <WebView source={{ uri: birdsEyeMapUrl }} style={{ flex: 1 }} />
-                        )}
-                    </CardComponent>
-                    <CardComponent header="Location Details (3D)">
-                        {PlatformType() === "web" ? (
-                            <iframe src={threeDimensionMap} style={{ width: "100%", height: "100%" }} />
-                        ) : (
-                            <WebView source={{ uri: threeDimensionMap }} style={{ flex: 1 }} />
                         )}
                     </CardComponent>
 

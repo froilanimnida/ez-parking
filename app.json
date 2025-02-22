@@ -65,6 +65,7 @@
                 "origin": false
             },
             "apiBaseUrl": "https://ez-parking-system.onrender.com/api/v1",
+            "openRouteServiceApiKey": "5b3ce3597851110001cf6248ba708df0d7004a078cc8f58f9e163eb9",
             "eas": {
                 "projectId": "6b86deee-c5c0-43b9-8131-a8353adf5323"
             }
