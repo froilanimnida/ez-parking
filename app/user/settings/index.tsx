@@ -111,7 +111,7 @@ export default function UserProfileScreen() {
                                 <TextInputComponent customStyles={styles.input} value={userData.phone_number} />
                             </View>
 
-                            <ButtonComponent title="Save Changes" onPress={() => alert("Saved")} disabled={isLoading} />
+                            <ButtonComponent title="Save Changes" onPress={() => handleSubmit()} disabled={isLoading} />
                         </CardComponent>
 
                         <View style={styles.infoWrapper}>
@@ -148,7 +148,6 @@ export default function UserProfileScreen() {
                                     </TextComponent>
                                 </View>
                             </CardComponent>
-                            <ButtonComponent onPress={handleSubmit} title="Logout" variant="destructive" />
 
                             <ButtonComponent onPress={() => logoutCurrentUser()} title="Logout" variant="destructive" />
                         </View>

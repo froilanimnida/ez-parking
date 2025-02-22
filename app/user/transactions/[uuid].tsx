@@ -76,7 +76,7 @@ const TransactionDetails = () => {
             }
         };
 
-        fetchTransactionDetails();
+        fetchTransactionDetails().then();
 
         return () => {
             setTransactionDetails(null);
