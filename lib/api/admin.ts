@@ -33,3 +33,9 @@ export const getEstablishment = async (establishmentUuid: string) => {
 export const getAllUsers = async () => {
     return await axiosInstance.get(`${root}/users`);
 };
+
+export const approveEstablishment = async (establishmentUuid: string) => {
+    return await axiosInstance.post(`${root}/approve-establishment`, {
+        establishment_uuid: establishmentUuid,
+    });
+};

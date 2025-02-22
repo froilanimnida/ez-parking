@@ -18,6 +18,24 @@ export async function isAuthenticated(): Promise<{ loggedIn: boolean; role: stri
                     return authState;
                 }
             } catch (error) {
+                console.error("Auth check error:");
+                // if (error.response.data.msg === "Token has expired") {
+                //     console.log("Trying to refresh token");
+                //     authState = { loggedIn: false, role: "" };
+                //     try {
+                //         const result = await refreshToken();
+                //         if (result) {
+                //             if (response.data?.role) {
+                //                 authState = { loggedIn: true, role: response.data.role as string };
+                //                 return authState;
+                //             }
+                //         }
+                //     } catch {
+                //         return authState;
+                //     }
+                //     const result = refreshToken();
+                //     console.log(result);
+                // }
                 authState = { loggedIn: false, role: "" };
                 return authState;
             }
@@ -34,7 +52,7 @@ export async function isAuthenticated(): Promise<{ loggedIn: boolean; role: stri
             {},
             {
                 headers: authHeaders,
-            }
+            },
         );
 
         if (response.data?.role) {
@@ -45,6 +63,7 @@ export async function isAuthenticated(): Promise<{ loggedIn: boolean; role: stri
         authState = { loggedIn: false, role: "" };
         return authState;
     } catch (error) {
+        console.log("Hello");
         console.error("Auth check error:", error);
         authState = { loggedIn: false, role: "" };
         return authState;

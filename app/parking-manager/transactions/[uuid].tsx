@@ -121,7 +121,10 @@ const TransactionDetails = () => {
                             <View style={styles.infoBlock}>
                                 <TextComponent style={styles.label}>Exit Time</TextComponent>
                                 <TextComponent style={styles.value}>
-                                    {transactionDetails?.transaction.exit_time ?? "N/A"}
+                                    {transactionDetails?.transaction.exit_time &&
+                                    transactionDetails.transaction.status === "completed"
+                                        ? transactionDetails.transaction.exit_time
+                                        : "N/A"}
                                 </TextComponent>
                             </View>
                             <View style={styles.infoBlock}>

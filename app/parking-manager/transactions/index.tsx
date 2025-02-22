@@ -17,13 +17,18 @@ const TransactionItem = ({ item }: { item: Transaction }) => (
             <TextComponent style={styles.cellTextSecondary}>{new Date(item.entry_time).toLocaleString()}</TextComponent>
         </View>
         <View style={styles.cell}>
-            <TextComponent style={styles.cellTextSecondary}>{new Date(item.exit_time).toLocaleString()}</TextComponent>
+            <TextComponent style={styles.cellTextSecondary}>
+                {item.exit_time && item.status === "completed" ? new Date(item.exit_time).toLocaleString() : "N/A"}
+            </TextComponent>
         </View>
         <View style={styles.cell}>
             <TextComponent style={styles.cellText}>₱{item.amount_due}</TextComponent>
         </View>
         <View style={styles.cell}>
             <TextComponent style={styles.cellTextSecondary}>{item.payment_status}</TextComponent>
+        </View>
+        <View style={styles.cell}>
+            <TextComponent style={styles.cellTextSecondary}>{item.status}</TextComponent>
         </View>
     </TouchableOpacity>
 );
@@ -43,7 +48,7 @@ const Transactions = () => {
                 setIsLoading(false);
             }
         };
-        fetchTransaction();
+        fetchTransaction().then();
     }, []);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -66,6 +71,9 @@ const Transactions = () => {
                 </View>
                 <View style={styles.headerCell}>
                     <TextComponent style={styles.headerText}>Amount</TextComponent>
+                </View>
+                <View style={styles.headerCell}>
+                    <TextComponent style={styles.headerText}>Payment Status</TextComponent>
                 </View>
                 <View style={styles.headerCell}>
                     <TextComponent style={styles.headerText}>Status</TextComponent>

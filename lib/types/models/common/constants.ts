@@ -1,6 +1,6 @@
 export const SLOT_FEATURES = ["standard", "covered", "vip", "disabled", "ev_charging"] as const;
 export const SLOT_STATUS = ["open", "occupied", "reserved", "closed"] as const;
-export const ADMIN_ESTABLISHMENT_FILTERS = ["all", "approved", "rejected", "pending"];
+export const ADMIN_ESTABLISHMENT_FILTERS = ["all", "approved", "pending"];
 export const METRO_MANILA_CITIES = [
     "Caloocan",
     "Las Piñas",

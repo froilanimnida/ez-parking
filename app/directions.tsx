@@ -6,7 +6,8 @@ import LoadingComponent from "@components/reusable/LoadingComponent";
 
 const Directions = () => {
     const { latitude, longitude } = useLocalSearchParams() as { latitude: string; longitude: string };
-    const [userLocation, setUserLocation] = useState({ latitude: 0, longitude: 0 });
+    // Default to manila
+    const [userLocation, setUserLocation] = useState({ latitude: 14.5995, longitude: 120.9842 });
     const [loading, setLoading] = useState(true);
     useEffect(() => {
         if (!latitude || !longitude) {
@@ -39,7 +40,7 @@ const Directions = () => {
                     userLocation.longitude,
                     Number(latitude),
                     Number(longitude),
-                ).then((res) => console.log(res));
+                ).then((res) => console.log(res.data));
             },
             (error) => {
                 alert(`Error: ${error}`);

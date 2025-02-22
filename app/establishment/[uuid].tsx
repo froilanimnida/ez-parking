@@ -11,7 +11,7 @@ import type { PaymentMethod } from "@lib/models/paymentMethod";
 import type { ParkingSlot } from "@lib/models/parkingSlot";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import PlatformType from "@lib/helper/platform";
-import { useLocalSearchParams } from "expo-router";
+import { RelativePathString, useLocalSearchParams } from "expo-router";
 import { fetchEstablishmentInfo } from "@/lib/api/establishment";
 import LinkComponent from "@/components/LinkComponent";
 import ButtonComponent from "@/components/ButtonComponent";
@@ -178,14 +178,12 @@ const EstablishmentOverview = () => {
                                         )
                                     }
                                 />
-                                {/*<ButtonComponent*/}
-                                {/*    title="Get Directions"*/}
-                                {/*    onPress={() =>*/}
-                                {/*        Linking.openURL(*/}
-                                {/*            `https://ez-parking.expo.dev/directions?latitude=${establishment?.establishment.latitude}&longitude=${establishment?.establishment.longitude}`,*/}
-                                {/*        )*/}
-                                {/*    }*/}
-                                {/*/>*/}
+                                <LinkComponent
+                                    label="Get Directions"
+                                    href={
+                                        `/directions?latitude=${establishment?.establishment.latitude}&longitude=${establishment?.establishment.longitude}` as RelativePathString
+                                    }
+                                />
                             </View>
                         </View>
                         <View style={styles.mapContainer}>

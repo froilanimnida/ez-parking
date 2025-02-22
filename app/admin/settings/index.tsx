@@ -9,6 +9,7 @@ import { logoutCurrentUser } from "@lib/credentialsManager";
 import LinkComponent from "@components/LinkComponent";
 import LoadingComponent from "@components/reusable/LoadingComponent";
 import { User } from "@lib/models/user";
+import { fetchProfile } from "@lib/api/user";
 
 const AdminSettings = () => {
     const [userData, setUserData] = useState<User>();
@@ -16,6 +17,16 @@ const AdminSettings = () => {
     const [isLoading, setIsLoading] = useState(true);
     useEffect(() => {
         setIsLoading(false);
+        const fetchData = async () => {
+            try {
+                const response = await fetchProfile();
+                setUserData(response.data.message);
+            } catch {
+                alert("Failed to fetch user data.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
     }, []);
 
     const handleSave = async () => {
@@ -114,11 +125,11 @@ const AdminSettings = () => {
                                     </TextComponent>
                                 </View>
                             </CardComponent>
-                            <ButtonComponent onPress={() => logoutCurrentUser()} title="Logout" variant="destructive" />
                         </View>
                     </>
                 )
             )}
+            <ButtonComponent onPress={() => logoutCurrentUser()} title="Logout" variant="destructive" />
         </ResponsiveContainer>
     );
 };

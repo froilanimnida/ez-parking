@@ -9,8 +9,8 @@ import type { EstablishmentDocument } from "@lib/models/establishmentDocument";
 import type { User } from "@/lib/models/user";
 import CardComponent from "@/components/CardComponent";
 import TextComponent from "@/components/TextComponent";
-import { useLocalSearchParams } from "expo-router";
-import { getEstablishment } from "@/lib/api/admin";
+import { router, useLocalSearchParams } from "expo-router";
+import { approveEstablishment, getEstablishment } from "@/lib/api/admin";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import LinkComponent from "@/components/LinkComponent";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
@@ -31,21 +31,50 @@ const EstablishmentDetails = () => {
     const { uuid } = useLocalSearchParams() as { uuid: string };
     const [establishment, setEstablishment] = useState<Establishment | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const documents: File[] = [];
+    const approveParkingEstablishment = async () => {
+        setIsLoading(true);
+        try {
+            await approveEstablishment(uuid);
+            alert("Establishment approved successfully");
+            router.reload();
+        } catch {
+            alert("An error occurred");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    const handleViewDocument = async (bucketPath: string, filename: string) => {
+        try {
+            const response = await getDocument(bucketPath);
+            const binaryData = response.data;
+
+            // Create a blob from the binary data
+            const blob = new Blob([binaryData], { type: "application/octet-stream" });
+
+            // Create a link element
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+
+            // Append the link to the body
+            document.body.appendChild(link);
+
+            // Programmatically click the link to trigger the download
+            link.click();
+
+            // Remove the link from the document
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error("Error downloading document:", error);
+            alert("Failed to download document");
+        }
+    };
 
     useEffect(() => {
         const fetchEstablishment = async () => {
             try {
                 const response = await getEstablishment(uuid);
                 setEstablishment(response.data.data);
-                const bucketPaths = response.data.data.establishment_documents.map(
-                    (doc: { bucket_path: string }) => doc.bucket_path,
-                );
-                bucketPaths.forEach((bucket_path: string) => {
-                    getDocument(bucket_path).then((res) => {
-                        console.log(res);
-                    });
-                });
             } catch {
                 alert("An error occurred");
             } finally {
@@ -66,10 +95,7 @@ const EstablishmentDetails = () => {
                 href="../../admin/establishments"
             />
             <CardComponent header="Establishment Details" subHeader="Review and manage this parking establishment">
-                <TextComponent>
-                    View and manage the details of this parking establishment. You can also review the documents
-                    submitted by the applicant.
-                </TextComponent>
+                <TextComponent>View and manage the details of this parking establishment.</TextComponent>
             </CardComponent>
             {isLoading && <LoadingComponent text="Loading establishment details..." />}
             {!isLoading && establishment && (
@@ -297,6 +323,20 @@ const EstablishmentDetails = () => {
                             </View>
                         </View>
                     </CardComponent>
+                    <CardComponent header="Documents">
+                        <View style={styles.documentsContainer}>
+                            {establishment.establishment_documents.map((doc, index) => (
+                                <View key={index} style={styles.documentRow}>
+                                    <TextComponent style={styles.documentName}>{doc.filename}</TextComponent>
+                                    <ButtonComponent
+                                        title="Download"
+                                        onPress={() => handleViewDocument(doc.bucket_path, doc.filename)}
+                                        variant="secondary"
+                                    />
+                                </View>
+                            ))}
+                        </View>
+                    </CardComponent>
                     <ButtonComponent onPress={addSlot} title="Add Slot" variant="primary" />
                     <View style={{ flexDirection: "row", gap: 16 }}>
                         {establishment.slots.map((slot) => (
@@ -364,6 +404,14 @@ const EstablishmentDetails = () => {
                             </CardComponent>
                         ))}
                     </View>
+                    {!establishment.parking_establishment.verified && (
+                        <ButtonComponent
+                            title="Approve Establishment"
+                            variant="primary"
+                            onPress={approveParkingEstablishment}
+                            disabled={isLoading}
+                        />
+                    )}
                 </View>
             )}
         </ResponsiveContainer>
@@ -379,6 +427,20 @@ const styles = StyleSheet.create({
     },
     header: {
         padding: 16,
+    },
+    documentsContainer: {
+        gap: 12,
+    },
+    documentRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: 12,
+        backgroundColor: "#f9fafb",
+        borderRadius: 8,
+    },
+    documentName: {
+        color: "#374151",
     },
     title: {
         fontSize: 24,
