@@ -28,11 +28,21 @@ export const vehicleDistributionReport = async (start_date?: Date | undefined, e
     return await axiosInstance.get(`${root}/vehicle-dist`);
 };
 
-export const durationStatsReport = async () => {
+export const durationStatsReport = async (start_date?: Date | undefined, end_date?: Date | undefined) => {
+    if (start_date !== undefined && end_date !== undefined) {
+        return await axiosInstance.get(
+            `${root}/duration-stats?start_date=${start_date.toISOString().split("T")[0]}&end_date=${end_date.toISOString().split("T")[0]}`,
+        );
+    }
     return await axiosInstance.get(`${root}/duration-stats`);
 };
 
-export const utilizationReport = async () => {
+export const utilizationReport = async (start_date?: Date | undefined, end_date?: Date | undefined) => {
+    if (start_date !== undefined && end_date !== undefined) {
+        return await axiosInstance.get(
+            `${root}/utilization?start_date=${start_date.toISOString().split("T")[0]}&end_date=${end_date.toISOString().split("T")[0]}`,
+        );
+    }
     return await axiosInstance.get(`${root}/utilization`);
 };
 
