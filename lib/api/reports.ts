@@ -46,7 +46,12 @@ export const utilizationReport = async (start_date?: Date | undefined, end_date?
     return await axiosInstance.get(`${root}/utilization`);
 };
 
-export const premiumAnalysisReport = async () => {
+export const premiumAnalysisReport = async (start_date?: Date | undefined, end_date?: Date | undefined) => {
+    if (start_date !== undefined && end_date !== undefined) {
+        return await axiosInstance.get(
+            `${root}/premium-analysis?start_date=${start_date.toISOString().split("T")[0]}&end_date=${end_date.toISOString().split("T")[0]}`,
+        );
+    }
     return await axiosInstance.get(`${root}/premium-analysis`);
 };
 
