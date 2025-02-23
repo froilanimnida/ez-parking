@@ -107,16 +107,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginBottom: 16,
     },
-    dataContainer: {
-        padding: 16,
-        backgroundColor: "#f9fafb",
-        borderRadius: 8,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
-    },
     dataRow: {
         flexDirection: "row",
         justifyContent: "space-between",

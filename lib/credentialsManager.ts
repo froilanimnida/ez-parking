@@ -3,13 +3,13 @@ import PlatformType from "./helper/platform";
 import axiosInstance from "./axiosInstance";
 import { router } from "expo-router";
 import getAuthHeaders from "@lib/helper/getAuthHeaders";
+import { refreshToken } from "@lib/api/auth";
 
 let authState: { loggedIn: boolean; role: string } | null = null;
 
 export async function isAuthenticated(): Promise<{ loggedIn: boolean; role: string }> {
     try {
         authState = null;
-
         if (PlatformType() === "web") {
             try {
                 const response = await axiosInstance.post("/auth/verify-token");
@@ -18,24 +18,25 @@ export async function isAuthenticated(): Promise<{ loggedIn: boolean; role: stri
                     return authState;
                 }
             } catch (error) {
-                console.error("Auth check error:");
-                // if (error.response.data.msg === "Token has expired") {
-                //     console.log("Trying to refresh token");
-                //     authState = { loggedIn: false, role: "" };
-                //     try {
-                //         const result = await refreshToken();
-                //         if (result) {
-                //             if (response.data?.role) {
-                //                 authState = { loggedIn: true, role: response.data.role as string };
-                //                 return authState;
-                //             }
-                //         }
-                //     } catch {
-                //         return authState;
-                //     }
-                //     const result = refreshToken();
-                //     console.log(result);
-                // }
+                console.error("Auth check error:" + error);
+                if (error.response.data.msg === "Token has expired") {
+                    console.log("Trying to refresh token");
+                    authState = { loggedIn: false, role: "" };
+                    try {
+                        const result = await refreshToken();
+                        console.log(result);
+                        if (result) {
+                            if (result.data?.role) {
+                                authState = { loggedIn: true, role: result.data.role as string };
+                                return authState;
+                            }
+                        }
+                    } catch {
+                        return authState;
+                    }
+                    const result = refreshToken();
+                    console.log(result);
+                }
                 authState = { loggedIn: false, role: "" };
                 return authState;
             }
@@ -63,7 +64,6 @@ export async function isAuthenticated(): Promise<{ loggedIn: boolean; role: stri
         authState = { loggedIn: false, role: "" };
         return authState;
     } catch (error) {
-        console.log("Hello");
         console.error("Auth check error:", error);
         authState = { loggedIn: false, role: "" };
         return authState;

@@ -9,6 +9,7 @@ import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import TextComponent from "@/components/TextComponent";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import CardComponent from "@/components/CardComponent";
+import LinkComponent from "@components/LinkComponent";
 
 interface TransactionDetailsType {
     slot_info: ParkingSlot & { vehicle_type_name: string; vehicle_type_size: string };
@@ -30,10 +31,11 @@ const TransactionDetails = () => {
                 alert("Error fetching transaction details.");
             }
         };
-        transaction();
+        transaction().then();
     }, [uuid]);
     return (
         <ResponsiveContainer>
+            <LinkComponent label="← Back to Transactions" style={{ width: "auto", marginBottom: 16 }} href="./" />
             <TextComponent bold variant="h1" style={styles.title}>
                 Transaction Details
             </TextComponent>
@@ -190,7 +192,6 @@ const styles = StyleSheet.create({
         fontWeight: "600",
     },
     paymentStatus: {
-        color: "#DC2626",
         fontWeight: "600",
     },
 });

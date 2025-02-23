@@ -3,7 +3,15 @@ import * as SecureStore from "expo-secure-store";
 
 export default async function getAuthHeaders() {
     try {
-        if (PlatformType() === "web") return;
+        if (PlatformType() === "web") {
+            if (document.cookie) {
+                return {
+                    csrf_access_token: document.cookie.split("csrf_access_token=")[1].split(";")[0],
+                    csrf_refresh_token: document.cookie.split("csrf_refresh_token=")[1].split(";")[0],
+                };
+            }
+            return {};
+        }
         const access_token_cookie = await SecureStore.getItemAsync("access_token_cookie");
         const csrf_access_token = await SecureStore.getItemAsync("csrf_access_token");
         const csrf_refresh_token = await SecureStore.getItemAsync("csrf_refresh_token");
