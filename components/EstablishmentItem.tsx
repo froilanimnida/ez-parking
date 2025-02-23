@@ -54,6 +54,15 @@ const EstablishmentItem = ({ userLat, userLong, establishment, guest }: Establis
                     <MaterialCommunityIcons name="map-marker-distance" size={20} color="#6B7280" />
                     <TextComponent style={styles.detailText}>{distance.toFixed(1)} km away</TextComponent>
                 </View>
+
+                <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="car-outline" size={20} color="#6B7280" />
+                    <TextComponent style={styles.detailText}>{establishment.total_slots} Total slots</TextComponent>
+                </View>
+                <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="car-outline" size={20} color="#6B7280" />
+                    <TextComponent style={styles.detailText}>{establishment.open_slots} Open slots</TextComponent>
+                </View>
             </View>
 
             {establishment.facilities && (

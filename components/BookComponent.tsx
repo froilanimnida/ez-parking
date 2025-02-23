@@ -24,17 +24,24 @@ export interface EstablishmentQuery extends ParkingEstablishment {
 const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
     const [establishments, setEstablishments] = useState<EstablishmentQuery[]>([]);
     const [searchTerm, setSearchTerm] = useState<CITY>("");
-    const [selectedCity, setSelectedCity] = useState("");
+    const [selectedCity, setSelectedCity] = useState("manila");
     const [loading, setLoading] = useState(true);
-
-    const handleSearch = async () => {
-        setLoading(true);
-        setLoading(false);
-    };
     const [location, setLocation] = useState({
         latitude: 14.5995,
         longitude: 120.9842,
     });
+
+    const fetchEstablishments = async () => {
+        setLoading(true);
+        try {
+            const data = await searchEstablishments(location.latitude, location.longitude, searchTerm, selectedCity);
+            setEstablishments(data.data.establishments);
+        } catch (error) {
+            alert("Error fetching establishments");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -51,14 +58,7 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
                 const data = await getIPBasedLocation();
                 setLocation({ latitude: data.latitude, longitude: data.longitude });
             } finally {
-                const data = await searchEstablishments(
-                    location.latitude,
-                    location.longitude,
-                    searchTerm,
-                    selectedCity,
-                );
-                setEstablishments(data.data.establishments);
-                setLoading(false);
+                fetchEstablishments().then();
             }
         };
         fetchData().then();
@@ -76,7 +76,10 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
                     <View style={styles.formGroup}>
                         <TextComponent variant="label">City</TextComponent>
                         <SelectComponent
-                            items={METRO_MANILA_CITIES.map((city) => ({ label: city.toLowerCase(), value: city }))}
+                            items={METRO_MANILA_CITIES.map((city) => ({
+                                label: city,
+                                value: city.toLowerCase(),
+                            }))}
                             selectedValue={selectedCity}
                             onValueChange={(city) => {
                                 setSelectedCity(city);
@@ -84,7 +87,7 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
                         />
                     </View>
                 </View>
-                <ButtonComponent onPress={handleSearch} title="Search" />
+                <ButtonComponent onPress={fetchEstablishments} title="Search" />
             </View>
 
             {loading ? (
@@ -92,9 +95,7 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
             ) : establishments.length === 0 ? (
                 <View style={styles.noResults}>
                     <MaterialCommunityIcons name={"car"} size={64} color={"#6b7280"} />
-                    <TextComponent style={{ textAlign: "center" }}>
-                        No parking establishments found nearby
-                    </TextComponent>
+                    <TextComponent style={{ textAlign: "center" }}>No parking establishments found...</TextComponent>
                 </View>
             ) : (
                 <View style={styles.results}>
