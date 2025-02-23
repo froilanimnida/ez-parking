@@ -44,6 +44,11 @@ export const trendAnalysisReport = async () => {
     return await axiosInstance.get(`${root}/trends`);
 };
 
-export const paymentStatsReport = async () => {
+export const paymentStatsReport = async (start_date?: Date | undefined, end_date?: Date | undefined) => {
+    if (start_date !== undefined && end_date !== undefined) {
+        return await axiosInstance.get(
+            `${root}/payment-stats?start_date=${start_date.toISOString().split("T")[0]}&end_date=${end_date.toISOString().split("T")[0]}`,
+        );
+    }
     return await axiosInstance.get(`${root}/payment-stats`);
 };
