@@ -11,6 +11,7 @@ import { addParkingSlot, getParkingSlotsParkingManager, getVehicleTypes } from "
 import { ParkingSlot } from "@lib/models/parkingSlot";
 import { VehicleType } from "@lib/models/vehicleTypes";
 import CheckboxComponent from "@/components/CheckboxComponent";
+import LinkComponent from "@components/LinkComponent";
 
 const slotFeatures = [
     {
@@ -36,8 +37,6 @@ const slotFeatures = [
 ];
 const slotStatus = [
     { label: "open", value: "open" },
-    { label: "occupied", value: "occupied" },
-    { label: "reserved", value: "reserved" },
     { label: "closed", value: "closed" },
 ];
 
@@ -57,32 +56,41 @@ const Slots = () => {
     }>({
         slot_code: "",
         is_premium: false,
-        floor_level: "",
+        floor_level: "1",
         vehicle_type_id: 0,
         slot_features: "standard",
         slot_status: "open",
         is_active: true,
-        base_price_per_hour: "",
-        base_price_per_day: "",
-        base_price_per_month: "",
-        price_multiplier: "",
+        base_price_per_hour: "0",
+        base_price_per_day: "0",
+        base_price_per_month: "0",
+        price_multiplier: "1",
     });
     const [isFetching, setIsFetching] = useState(true);
     const [vehicleTypes, setVehicleTypes] = useState<VehicleType[]>([]);
     const [slots, setSlots] = useState<
         (ParkingSlot & { vehicle_type_code: string; vehicle_type_name: string; vehicle_type_size: string })[]
     >([]);
+    const fetchSlots = async () => {
+        setIsFetching(true);
+        try {
+            const slots = await getParkingSlotsParkingManager();
+            setSlots(slots.data.data);
+        } catch (error) {
+            alert("Failed to fetch data");
+        } finally {
+            setIsFetching(false);
+        }
+    };
 
     useEffect(() => {
         try {
             const fetchData = async () => {
-                let slots = await getParkingSlotsParkingManager();
                 let vehicleTypes = await getVehicleTypes();
-                setIsFetching(false);
-                setSlots(slots.data.data);
                 setVehicleTypes(vehicleTypes.data.data);
             };
-            fetchData();
+            fetchData().then();
+            fetchSlots().then();
         } catch (error) {
             alert("Failed to fetch data");
         }
@@ -94,23 +102,30 @@ const Slots = () => {
 
     const addSlot = async () => {
         try {
+            for (const slot of slots) {
+                if (slot.slot_code === formData.slot_code) {
+                    alert("Slot code already exists");
+                    return;
+                }
+            }
             const result = await addParkingSlot(formData);
             setFormData({
                 slot_code: "",
                 is_premium: false,
-                floor_level: "",
+                floor_level: "1",
                 vehicle_type_id: 0,
                 slot_features: "standard",
                 slot_status: "open",
                 is_active: true,
-                base_price_per_hour: "",
-                base_price_per_day: "",
-                base_price_per_month: "",
-                price_multiplier: "",
+                base_price_per_hour: "0",
+                base_price_per_day: "0",
+                base_price_per_month: "0",
+                price_multiplier: "1",
             });
 
             if (result.status === 201) {
                 alert("Slot added successfully");
+                fetchSlots().then();
             } else {
                 alert("Failed to add slot");
             }
@@ -122,6 +137,8 @@ const Slots = () => {
     return (
         <ResponsiveContainer>
             <>
+                <LinkComponent label="← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="./" />
+
                 <TextComponent variant="h1" bold style={styles.sectionTitle}>
                     Parking Slot Settings
                 </TextComponent>

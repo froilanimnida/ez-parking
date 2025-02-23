@@ -47,7 +47,7 @@ const reportCards: ReportCard[] = [
     },
     {
         title: "Payment Analytics",
-        description: "Analyze payment methods and patterns",
+        description: "Analyze payment transactions",
         icon: "credit-card-outline",
         route: "../reports/payment-stats",
     },
