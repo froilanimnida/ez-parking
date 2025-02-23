@@ -8,6 +8,7 @@ import { View, StyleSheet } from "react-native";
 import PlatformType from "@lib/helper/platform";
 import ButtonComponent from "@components/ButtonComponent";
 import LoadingComponent from "@components/reusable/LoadingComponent";
+import CardComponent from "@components/CardComponent";
 
 const Revenue = () => {
     const [startDate, setStartDate] = useState<Date>(new Date());
@@ -58,7 +59,7 @@ const Revenue = () => {
             </View>
             {loading && <LoadingComponent text={"Loading revenue report..."} />}
             {!loading && (
-                <View style={styles.dataContainer}>
+                <CardComponent header={"Revenue Report"}>
                     <TextComponent variant="h2" style={styles.dataTitle}>
                         Revenue Report
                     </TextComponent>
@@ -78,7 +79,7 @@ const Revenue = () => {
                         <TextComponent style={styles.dataLabel}>Total Transactions:</TextComponent>
                         <TextComponent style={styles.dataValue}>{revenueData.total_transactions}</TextComponent>
                     </View>
-                </View>
+                </CardComponent>
             )}
         </ResponsiveContainer>
     );
@@ -89,16 +90,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         marginBottom: 16,
-    },
-    dataContainer: {
-        padding: 16,
-        backgroundColor: "#f9fafb",
-        borderRadius: 8,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
     },
     dataTitle: {
         marginBottom: 16,

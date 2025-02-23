@@ -19,7 +19,12 @@ export const peakHoursReport = async () => {
     return await axiosInstance.get(`${root}/peak-hours`);
 };
 
-export const vehicleDistributionReport = async () => {
+export const vehicleDistributionReport = async (start_date?: Date | undefined, end_date?: Date | undefined) => {
+    if (start_date !== undefined && end_date !== undefined) {
+        return await axiosInstance.get(
+            `${root}/vehicle-dist?start_date=${start_date.toISOString().split("T")[0]}&end_date=${end_date.toISOString().split("T")[0]}`,
+        );
+    }
     return await axiosInstance.get(`${root}/vehicle-dist`);
 };
 

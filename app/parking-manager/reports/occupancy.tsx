@@ -5,6 +5,7 @@ import { occupancyReport } from "@lib/api/reports";
 import LoadingComponent from "@components/reusable/LoadingComponent";
 import { View, StyleSheet } from "react-native";
 import LinkComponent from "@components/LinkComponent";
+import CardComponent from "@components/CardComponent";
 
 const Occupancy = () => {
     const [loading, setLoading] = useState(true);
@@ -40,7 +41,7 @@ const Occupancy = () => {
             {loading ? (
                 <LoadingComponent text="Fetching occupancy report..." />
             ) : (
-                <View style={styles.dataContainer}>
+                <CardComponent header={"Occupancy Report"}>
                     <View style={styles.dataRow}>
                         <TextComponent style={styles.dataLabel}>Available Slots:</TextComponent>
                         <TextComponent style={styles.dataValue}>{occupancyData.available_slots}</TextComponent>
@@ -57,7 +58,7 @@ const Occupancy = () => {
                         <TextComponent style={styles.dataLabel}>Total Slots:</TextComponent>
                         <TextComponent style={styles.dataValue}>{occupancyData.total_slots}</TextComponent>
                     </View>
-                </View>
+                </CardComponent>
             )}
         </ResponsiveContainer>
     );
@@ -67,16 +68,6 @@ const styles = StyleSheet.create({
     header: {
         marginBottom: 24,
         paddingHorizontal: 16,
-    },
-    dataContainer: {
-        padding: 16,
-        backgroundColor: "#f9fafb",
-        borderRadius: 8,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
     },
     dataRow: {
         flexDirection: "row",
