@@ -9,7 +9,7 @@ import type { EstablishmentDocument } from "@lib/models/establishmentDocument";
 import type { User } from "@/lib/models/user";
 import CardComponent from "@/components/CardComponent";
 import TextComponent from "@/components/TextComponent";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { approveEstablishment, getEstablishment } from "@/lib/api/admin";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import LinkComponent from "@/components/LinkComponent";
@@ -36,7 +36,6 @@ const EstablishmentDetails = () => {
         try {
             await approveEstablishment(uuid);
             alert("Establishment approved successfully");
-            router.reload();
         } catch {
             alert("An error occurred");
         } finally {
@@ -47,22 +46,12 @@ const EstablishmentDetails = () => {
         try {
             const response = await getDocument(bucketPath);
             const binaryData = response.data;
-
-            // Create a blob from the binary data
             const blob = new Blob([binaryData], { type: "application/octet-stream" });
-
-            // Create a link element
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
             link.download = filename;
-
-            // Append the link to the body
             document.body.appendChild(link);
-
-            // Programmatically click the link to trigger the download
             link.click();
-
-            // Remove the link from the document
             document.body.removeChild(link);
         } catch (error) {
             console.error("Error downloading document:", error);
@@ -83,17 +72,9 @@ const EstablishmentDetails = () => {
         };
         fetchEstablishment().then();
     }, []);
-    const addSlot = () => {
-        alert("Add slot");
-    };
-
     return (
         <ResponsiveContainer>
-            <LinkComponent
-                label="← Back to Dashboard"
-                style={{ width: "auto", marginBottom: 16 }}
-                href="../../admin/establishments"
-            />
+            <LinkComponent label="← Back to Establishments" style={{ width: "auto", marginBottom: 16 }} href="./" />
             <CardComponent header="Establishment Details" subHeader="Review and manage this parking establishment">
                 <TextComponent>View and manage the details of this parking establishment.</TextComponent>
             </CardComponent>
@@ -337,10 +318,14 @@ const EstablishmentDetails = () => {
                             ))}
                         </View>
                     </CardComponent>
-                    <ButtonComponent onPress={addSlot} title="Add Slot" variant="primary" />
-                    <View style={{ flexDirection: "row", gap: 16 }}>
+                    {/*<ButtonComponent onPress={addSlot} title="Add Slot" variant="primary" />*/}
+                    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 16, justifyContent: "space-between" }}>
                         {establishment.slots.map((slot) => (
-                            <CardComponent key={slot.slot_id} header={`Slot Code: ${slot.slot_code}`}>
+                            <CardComponent
+                                key={slot.slot_id}
+                                header={`Slot Code: ${slot.slot_code}`}
+                                style={{ flexBasis: "48%", marginBottom: 16 }}
+                            >
                                 <View>
                                     <View style={styles.field}>
                                         <TextComponent variant="label">Slot ID</TextComponent>
@@ -376,11 +361,25 @@ const EstablishmentDetails = () => {
                                     </View>
                                     <View style={styles.field}>
                                         <TextComponent variant="label">Created At</TextComponent>
-                                        <TextComponent variant="body">{slot.created_at}</TextComponent>
+                                        <TextComponent variant="body">
+                                            {new Date(slot.created_at).toLocaleDateString("en-US", {
+                                                weekday: "long",
+                                                year: "numeric",
+                                                month: "long",
+                                                day: "numeric",
+                                            })}
+                                        </TextComponent>
                                     </View>
                                     <View style={styles.field}>
                                         <TextComponent variant="label">Updated At</TextComponent>
-                                        <TextComponent variant="body">{slot.updated_at}</TextComponent>
+                                        <TextComponent variant="body">
+                                            {new Date(slot.updated_at).toLocaleDateString("en-US", {
+                                                weekday: "long",
+                                                year: "numeric",
+                                                month: "long",
+                                                day: "numeric",
+                                            })}
+                                        </TextComponent>
                                     </View>
                                     <View style={styles.field}>
                                         <TextComponent variant="label">Base Price Per Hour</TextComponent>

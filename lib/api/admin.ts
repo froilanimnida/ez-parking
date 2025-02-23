@@ -35,7 +35,7 @@ export const getAllUsers = async () => {
 };
 
 export const approveEstablishment = async (establishmentUuid: string) => {
-    return await axiosInstance.post(`${root}/approve-establishment`, {
+    return await axiosInstance.patch(`${root}/approve-establishment`, {
         establishment_uuid: establishmentUuid,
     });
 };

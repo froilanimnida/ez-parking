@@ -62,7 +62,7 @@ const Establishments = () => {
 
     return (
         <ResponsiveContainer>
-            <LinkComponent label="← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="../" />
+            <LinkComponent label="← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="./" />
             <View style={styles.header}>
                 <TextComponent bold variant="h1">
                     Parking Establishments

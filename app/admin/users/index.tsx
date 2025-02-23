@@ -24,7 +24,7 @@ const Users = () => {
             setUsers(data.data.data);
             setLoading(false);
         };
-        fetchData();
+        fetchData().then();
     }, []);
 
     const filteredUsers = users.filter((user) => {
@@ -37,7 +37,7 @@ const Users = () => {
 
     return (
         <ResponsiveContainer>
-            <LinkComponent label="← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="../" />
+            <LinkComponent label="← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="./" />
             <View style={styles.filters}>
                 <TextInputComponent
                     customStyles={styles.searchInput}

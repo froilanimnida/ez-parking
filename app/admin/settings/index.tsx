@@ -39,7 +39,7 @@ const AdminSettings = () => {
 
     return (
         <ResponsiveContainer>
-            <LinkComponent label=" ← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="../user" />
+            <LinkComponent label=" ← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="./" />
             {isLoading || isUpdating ? (
                 <LoadingComponent text="Loading..." />
             ) : (
