@@ -6,7 +6,12 @@ export const occupancyReport = async () => {
     return await axiosInstance.get(`${root}/occupancy`);
 };
 
-export const revenueReport = async () => {
+export const revenueReport = async (start_date?: Date | undefined, end_date?: Date | undefined) => {
+    if (start_date !== undefined && end_date !== undefined) {
+        return await axiosInstance.get(
+            `${root}/revenue?start_date=${start_date.toISOString().split("T")[0]}&end_date=${end_date.toISOString().split("T")[0]}`,
+        );
+    }
     return await axiosInstance.get(`${root}/revenue`);
 };
 
