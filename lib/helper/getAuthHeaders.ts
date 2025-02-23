@@ -28,3 +28,11 @@ export default async function getAuthHeaders() {
         return {};
     }
 }
+
+export async function setAuthHeaders(key: string, value: string) {
+    try {
+        await SecureStore.setItemAsync(key, value);
+    } catch (error) {
+        console.error("Error setting auth headers:", error);
+    }
+}

@@ -229,3 +229,7 @@ export const updateEstablishmentSchedules = async ({
         operating_hour: transformedHours,
     });
 };
+
+export const getProfile = async () => {
+    return await axiosInstance.get(`${root}/profile`);
+};

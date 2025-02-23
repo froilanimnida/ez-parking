@@ -25,10 +25,6 @@ export const verifyToken = async () => {
     return await axiosInstance.post(`${root}/verify-token`);
 };
 
-export const protectedRoute = async () => {
-    return await axiosInstance.post(`${root}/protected-route`);
-};
-
 export const refreshToken = async () => {
     return await axiosInstance.post(`${root}/refresh-token`);
 };

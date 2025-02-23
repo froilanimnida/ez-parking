@@ -1,7 +1,6 @@
 import axios, { type AxiosError, AxiosRequestHeaders } from "axios";
-import * as SecureStore from "expo-secure-store";
 import PlatformType from "./helper/platform";
-import getAuthHeaders from "@lib/helper/getAuthHeaders";
+import getAuthHeaders, { setAuthHeaders } from "@lib/helper/getAuthHeaders";
 import type ApiValidationError from "./models/validationError";
 import type { SimplifiedValidationError } from "./models/validationError";
 
@@ -16,19 +15,16 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
     async (value) => {
+        const authTokens = await getAuthHeaders();
         if (PlatformType() !== "web") {
-            const access_token_cookie = await SecureStore.getItemAsync("access_token_cookie");
-            const csrf_access_token = await SecureStore.getItemAsync("csrf_access_token");
-            const csrf_refresh_token = await SecureStore.getItemAsync("csrf_refresh_token");
-            const refresh_token_cookie = await SecureStore.getItemAsync("refresh_token_cookie");
-            value.headers["access_token_cookie"] = access_token_cookie;
-            value.headers["csrf_access_token"] = csrf_access_token;
-            value.headers["refresh_token_cookie"] = refresh_token_cookie;
-            value.headers["csrf_refresh_token"] = csrf_refresh_token;
+            value.headers["access_token_cookie"] = authTokens.access_token_cookie;
+            value.headers["csrf_access_token"] = authTokens.csrf_access_token;
+            value.headers["refresh_token_cookie"] = authTokens.refresh_token_cookie;
+            value.headers["csrf_refresh_token"] = authTokens.csrf_refresh_token;
             return value;
         }
-        if (document.cookie != undefined) {
-            value.headers["csrf_refresh_token"] = document.cookie.split("csrf_refresh_token=")[1].split(";")[0];
+        if (document.cookie) {
+            value.headers["csrf_refresh_token"] = authTokens.csrf_refresh_token;
             value.headers["csrf_access_token"] = document.cookie.split("csrf_access_token=")[1].split(";")[0];
         }
         return value;
@@ -62,7 +58,7 @@ axiosInstance.interceptors.response.use(
                     const [key, value] = cookieValue.split("=");
                     if (key && value) {
                         try {
-                            await SecureStore.setItemAsync(key, value);
+                            await setAuthHeaders(key, value);
                         } catch (err) {
                             console.error(`Failed to store cookie ${key}:`, err);
                         }
