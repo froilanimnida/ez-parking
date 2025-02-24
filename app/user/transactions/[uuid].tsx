@@ -16,6 +16,7 @@ import type { Address } from "@lib/models/address";
 import type { ParkingEstablishment } from "@lib/models/parkingEstablishment";
 import type { ParkingSlot } from "@lib/models/parkingSlot";
 import type { Transaction } from "@lib/models/transaction";
+import * as WebBrowser from "expo-web-browser";
 
 interface TransactionDetailsType {
     address_info: Address;
@@ -31,6 +32,12 @@ interface TransactionDetailsType {
     transaction_data: Transaction;
     user_plate_number: string;
 }
+
+const WebViewContainer = ({ uri }: { uri: string }) => (
+    <View style={{ height: 500 }}>
+        <WebView source={{ uri }} style={{ flex: 1 }} />
+    </View>
+);
 
 const TransactionDetails = () => {
     const [transactionDetails, setTransactionDetails] = useState<TransactionDetailsType | null>(null);
@@ -98,6 +105,11 @@ const TransactionDetails = () => {
         } catch {
             alert("Error cancelling transaction.");
         }
+    };
+    const openBrowser = async () => {
+        await WebBrowser.openBrowserAsync(
+            `https://ez-parking.expo.app/directions?latitude=${establishmentLatitude}&longitude=${establishmentLongitude}`,
+        );
     };
     const birdsEyeMapUrl = transactionDetails?.establishment_info.name
         ? satelliteMapURL(establishmentLatitude!, establishmentLongitude!, transactionDetails.establishment_info.name)
@@ -229,7 +241,7 @@ const TransactionDetails = () => {
                                     href={`https://www.waze.com/ul?ll=${transactionDetails.establishment_info.latitude},${transactionDetails.establishment_info.longitude}&navigate=yes`}
                                     label="Waze"
                                 />
-                                {/* <LinkComponent href="./">Our Map</LinkComponent> */}
+                                <ButtonComponent title="Get Directions" onPress={openBrowser} />
                             </View>
                         </View>
                     </CardComponent>
@@ -329,14 +341,15 @@ const TransactionDetails = () => {
                         {PlatformType() === "web" ? (
                             <iframe src={normalMapUrl} style={{ width: "100%", height: 500 }} />
                         ) : (
-                            <WebView source={{ uri: normalMapUrl }} style={{ flex: 1 }} />
+                            <WebViewContainer uri={normalMapUrl} />
                         )}
                     </CardComponent>
+
                     <CardComponent header="Location Details Birds Eye View">
                         {PlatformType() === "web" ? (
                             <iframe src={birdsEyeMapUrl} style={{ width: "100%", height: 500 }} />
                         ) : (
-                            <WebView source={{ uri: birdsEyeMapUrl }} style={{ flex: 1 }} />
+                            <WebViewContainer uri={birdsEyeMapUrl} />
                         )}
                     </CardComponent>
 
