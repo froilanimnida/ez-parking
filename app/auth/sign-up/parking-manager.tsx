@@ -34,7 +34,6 @@ import { OSMMapURL } from "@lib/helper/mapViewFunction";
 
 const ParkingManagerSignUp = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [query, setQuery] = useState("");
     const [userInformation, setUserInformation] = useState<ParkingOwnerInformation>({
         email: "",
         first_name: "",
@@ -107,7 +106,7 @@ const ParkingManagerSignUp = () => {
                 return;
             }
 
-            const location = await getUserLocation().catch(() => null);
+            const location = await getUserLocation();
             if (!location) {
                 alert("Could not get your location. Please try again.");
                 return;
@@ -115,8 +114,8 @@ const ParkingManagerSignUp = () => {
 
             setParkingEstablishmentData((prev) => ({
                 ...prev,
-                latitude: location.latitude,
-                longitude: location.longitude,
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
             }));
         } catch (error) {
             console.error("Error getting current location:", error);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Pressable, Image, Modal, Alert, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, Pressable, Image, Modal, ActivityIndicator } from "react-native";
 import WebView from "react-native-webview";
 import CardComponent from "@/components/CardComponent";
 import PlatformType from "@lib/helper/platform";
@@ -11,18 +11,13 @@ import { router, useLocalSearchParams } from "expo-router";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import calculateDistance from "@/lib/helper/calculateDistance";
-import {
-    normalMapURL,
-    OSMMapURL,
-    satelliteMapURL,
-    SatteliteMap,
-    threeDimensionalMapURL,
-} from "@/lib/helper/mapViewFunction";
+import { normalMapURL, OSMMapURL, SatteliteMap, threeDimensionalMapURL } from "@/lib/helper/mapViewFunction";
 import type { Address } from "@lib/models/address";
 import type { ParkingEstablishment } from "@lib/models/parkingEstablishment";
 import type { ParkingSlot } from "@lib/models/parkingSlot";
 import type { Transaction } from "@lib/models/transaction";
 import * as WebBrowser from "expo-web-browser";
+import { getUserLocation } from "@lib/helper/location";
 
 interface TransactionDetailsType {
     address_info: Address;
@@ -55,22 +50,11 @@ const TransactionDetails = () => {
         setTransactionDetails(null);
         setIsFetching(true);
         setLoadingLocation(true);
-
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                setUserLatitude(position.coords.latitude);
-                setUserLongitude(position.coords.longitude);
-                setLoadingLocation(false);
-            },
-            () => {
-                Alert.alert("Error getting user location");
-                setLoadingLocation(false);
-            },
-            { enableHighAccuracy: true },
-        );
-
         const fetchTransactionDetails = async () => {
             try {
+                const location = await getUserLocation();
+                setUserLatitude(location.coords.latitude);
+                setUserLongitude(location.coords.longitude);
                 const response = await viewTransaction(uuid);
                 setTransactionDetails(response.data.transaction);
                 setEstablishmentLatitude(response.data.transaction?.establishment_info?.latitude);

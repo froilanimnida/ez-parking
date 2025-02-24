@@ -66,7 +66,7 @@ const TextNavigation = () => {
 
         const id = setInterval(async () => {
             const location = await getUserLocation();
-            const { latitude, longitude } = location;
+            const { latitude, longitude } = location.coords;
             checkNextStep(latitude, longitude, steps);
         }, 5000);
 

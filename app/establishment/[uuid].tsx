@@ -11,7 +11,7 @@ import type { PaymentMethod } from "@lib/models/paymentMethod";
 import type { ParkingSlot } from "@lib/models/parkingSlot";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import PlatformType from "@lib/helper/platform";
-import { RelativePathString, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { fetchEstablishmentInfo } from "@/lib/api/establishment";
 import LinkComponent from "@/components/LinkComponent";
 import ButtonComponent from "@/components/ButtonComponent";
@@ -56,11 +56,8 @@ const EstablishmentOverview = () => {
             const getEstablishmentInfo = async () => {
                 try {
                     const result = await fetchEstablishmentInfo(uuid);
-                    const currentLocation = await getUserLocation().catch(() => ({
-                        latitude: 14.5995,
-                        longitude: 120.9842,
-                    }));
-                    setUserLocation(currentLocation);
+                    const currentLocation = await getUserLocation();
+                    setUserLocation(currentLocation.coords);
                     setEstablishment(result.data.establishment);
                 } catch (error) {
                     console.error("Error fetching establishment info:", error);

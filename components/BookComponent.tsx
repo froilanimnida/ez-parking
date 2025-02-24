@@ -53,7 +53,12 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
 
             try {
                 let location = await getUserLocation();
-                location ? setLocation({ latitude: location.latitude, longitude: location.longitude }) : null;
+                location
+                    ? setLocation({
+                          latitude: location.coords.latitude,
+                          longitude: location.coords.longitude,
+                      })
+                    : null;
             } catch (error) {
                 const data = await getIPBasedLocation();
                 setLocation({ latitude: data.latitude, longitude: data.longitude });

@@ -1,5 +1,4 @@
 import * as Location from "expo-location";
-import PlatformType from "@lib/helper/platform";
 import axios from "axios";
 
 export async function getReverseGeocoding(latitude: number, longitude: number) {
@@ -36,42 +35,7 @@ export const askLocationPermission = async () => {
 };
 
 export const getUserLocation = async () => {
-    try {
-        if (PlatformType() === "web") {
-            const position = await new Promise((resolve, reject) => {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => resolve(position),
-                    (error) => reject(error),
-                    {
-                        enableHighAccuracy: true,
-                        maximumAge: 0,
-                    },
-                );
-            });
-            if (!position) {
-                return {
-                    latitude: 14.5995,
-                    longitude: 120.9842,
-                };
-            }
-            // @ts-ignore
-            return { latitude: position.coords.latitude, longitude: position.coords.longitude };
-        }
-        const { coords } = await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.BestForNavigation,
-            distanceInterval: 1,
-            mayShowUserSettingsDialog: true,
-        });
-        return {
-            latitude: coords.latitude,
-            longitude: coords.longitude,
-        };
-    } catch (error) {
-        return {
-            latitude: 14.5995,
-            longitude: 120.9842,
-        };
-    }
+    return await Location.getCurrentPositionAsync({});
 };
 
 export const turnByTurnNavigation = async (
