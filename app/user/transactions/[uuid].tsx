@@ -8,11 +8,36 @@ import LinkComponent from "@/components/LinkComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import { cancelTransaction, viewTransaction } from "@/lib/api/transaction";
 import { router, useLocalSearchParams } from "expo-router";
-import type { TransactionDetailsType } from "@/lib/models/userRoleTypes";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import calculateDistance from "@/lib/helper/calculateDistance";
-import { threeDimensionalMapURL, normalMapURL, satelliteMapURL } from "@/lib/helper/mapViewFunction";
+import {
+    normalMapURL,
+    OSMMapURL,
+    satelliteMapURL,
+    SatteliteMap,
+    threeDimensionalMapURL,
+} from "@/lib/helper/mapViewFunction";
+import type { Address } from "@lib/models/address";
+import type { ParkingEstablishment } from "@lib/models/parkingEstablishment";
+import type { ParkingSlot } from "@lib/models/parkingSlot";
+import type { Transaction } from "@lib/models/transaction";
+import * as WebBrowser from "expo-web-browser";
+
+interface TransactionDetailsType {
+    address_info: Address;
+    contact_number: string;
+    establishment_info: ParkingEstablishment;
+    qr_code: string;
+    slot_info: ParkingSlot & {
+        vehicle_type_code: string;
+        vehicle_type_id: number;
+        vehicle_type_name: string;
+        vehicle_type_size: string;
+    };
+    transaction_data: Transaction;
+    user_plate_number: string;
+}
 
 const TransactionDetails = () => {
     const [transactionDetails, setTransactionDetails] = useState<TransactionDetailsType | null>(null);
@@ -41,7 +66,7 @@ const TransactionDetails = () => {
                 Alert.alert("Error getting user location");
                 setLoadingLocation(false);
             },
-            { enableHighAccuracy: true }
+            { enableHighAccuracy: true },
         );
 
         const fetchTransactionDetails = async () => {
@@ -58,7 +83,7 @@ const TransactionDetails = () => {
             }
         };
 
-        fetchTransactionDetails();
+        fetchTransactionDetails().then();
 
         return () => {
             setTransactionDetails(null);
@@ -81,20 +106,27 @@ const TransactionDetails = () => {
             alert("Error cancelling transaction.");
         }
     };
-
-    const threeDimensionMap = transactionDetails?.establishment_info.name
-        ? threeDimensionalMapURL(
-              establishmentLatitude!,
-              establishmentLongitude!,
-              transactionDetails.establishment_info.name
-          )
-        : "";
-    const birdsEyeMapUrl = transactionDetails?.establishment_info.name
-        ? satelliteMapURL(establishmentLatitude!, establishmentLongitude!, transactionDetails.establishment_info.name)
-        : "";
-    const normalMapUrl = transactionDetails?.establishment_info.name
-        ? normalMapURL(establishmentLatitude!, establishmentLongitude!, transactionDetails.establishment_info.name)
-        : "";
+    const openBrowser = async () => {
+        await WebBrowser.openBrowserAsync(
+            `https://ez-parking.expo.app/directions?latitude=${establishmentLatitude}&longitude=${establishmentLongitude}`,
+        );
+    };
+    const mapUrl3D =
+        (transactionDetails &&
+            threeDimensionalMapURL(
+                transactionDetails.establishment_info.latitude,
+                transactionDetails.establishment_info.longitude,
+                transactionDetails.establishment_info.name,
+            )) ||
+        "";
+    const mapUrl =
+        (transactionDetails &&
+            normalMapURL(
+                transactionDetails.establishment_info.latitude,
+                transactionDetails.establishment_info.longitude,
+                transactionDetails.establishment_info.name,
+            )) ||
+        "";
     const distanceKm =
         transactionDetails?.slot_info?.slot_status === "reserved"
             ? calculateDistance(establishmentLatitude!, establishmentLongitude!, userLatitude, userLongitude).toFixed(1)
@@ -118,14 +150,14 @@ const TransactionDetails = () => {
                                         transactionDetails.transaction_data?.payment_status === "PAID"
                                             ? styles.badgeSuccess
                                             : transactionDetails.transaction_data.payment_status === "PARTIALLY_PAID"
-                                            ? styles.badgeWarning
-                                            : transactionDetails.transaction_data.payment_status === "OVERDUE"
-                                            ? styles.badgeError
-                                            : styles.badgeGray,
+                                              ? styles.badgeWarning
+                                              : transactionDetails.transaction_data.payment_status === "OVERDUE"
+                                                ? styles.badgeError
+                                                : styles.badgeGray,
                                     ]}
                                 >
                                     <TextComponent style={styles.badgeText}>
-                                        {transactionDetails.transaction_data.payment_status}
+                                        {transactionDetails.transaction_data.payment_status.toUpperCase()} PAYMENT
                                     </TextComponent>
                                 </View>
                             )}
@@ -135,14 +167,14 @@ const TransactionDetails = () => {
                                     transactionDetails.transaction_data.status === "active"
                                         ? styles.badgeInfo
                                         : transactionDetails.transaction_data.status === "completed"
-                                        ? styles.badgeSuccess
-                                        : transactionDetails.transaction_data.status === "cancelled"
-                                        ? styles.badgeError
-                                        : styles.badgeWarning,
+                                          ? styles.badgeSuccess
+                                          : transactionDetails.transaction_data.status === "cancelled"
+                                            ? styles.badgeError
+                                            : styles.badgeWarning,
                                 ]}
                             >
                                 <TextComponent style={styles.badgeText}>
-                                    {transactionDetails.transaction_data.status}
+                                    {transactionDetails.transaction_data.status.toUpperCase()} TRANSACTION
                                 </TextComponent>
                             </View>
                         </View>
@@ -210,7 +242,7 @@ const TransactionDetails = () => {
                                     href={`https://maps.google.com/maps?width=100%25&height=600&hl=en&q=${
                                         transactionDetails.establishment_info.latitude
                                     },${transactionDetails.establishment_info.longitude}+(${encodeURIComponent(
-                                        transactionDetails.establishment_info.name
+                                        transactionDetails.establishment_info.name,
                                     )})&t=&z=14&ie=UTF8&iwloc=B&output=embed`}
                                     label="Google Maps"
                                 />
@@ -219,19 +251,18 @@ const TransactionDetails = () => {
                                     href={`https://www.waze.com/ul?ll=${transactionDetails.establishment_info.latitude},${transactionDetails.establishment_info.longitude}&navigate=yes`}
                                     label="Waze"
                                 />
-                                {/* <LinkComponent href="./">Our Map</LinkComponent> */}
+                                <ButtonComponent title="Get Directions" onPress={openBrowser} />
                             </View>
                         </View>
                     </CardComponent>
 
                     <CardComponent header="Timing Details">
-
                         <View style={styles.lineRow}>
                             <TextComponent style={styles.lineLabel}>Scheduled Entry Time</TextComponent>
                             <TextComponent style={styles.lineValue}>
                                 {transactionDetails.transaction_data.scheduled_entry_time
                                     ? new Date(
-                                          transactionDetails.transaction_data.scheduled_entry_time
+                                          transactionDetails.transaction_data.scheduled_entry_time,
                                       ).toLocaleString()
                                     : "Not Available"}
                             </TextComponent>
@@ -247,18 +278,19 @@ const TransactionDetails = () => {
                         <View style={styles.lineRow}>
                             <TextComponent style={styles.lineLabel}>Entry Time</TextComponent>
                             <TextComponent style={styles.lineValue}>
-                                {transactionDetails.transaction_data.entry_time !== "Not Available"
+                                {transactionDetails.transaction_data.entry_time !== null
                                     ? new Date(transactionDetails.transaction_data.entry_time).toLocaleString()
-                                    : "Not Available"}
+                                    : "N/A"}
                             </TextComponent>
                         </View>
 
                         <View style={styles.lineRow}>
                             <TextComponent style={styles.lineLabel}>Exit Time</TextComponent>
                             <TextComponent style={styles.lineValue}>
-                                {transactionDetails.transaction_data.exit_time !== "Not Available"
+                                {transactionDetails.transaction_data.exit_time &&
+                                transactionDetails.transaction_data.status != "completed"
                                     ? new Date(transactionDetails.transaction_data.exit_time).toLocaleString()
-                                    : "Not Available"}
+                                    : "N/A"}
                             </TextComponent>
                         </View>
                         <View style={styles.lineRow}>
@@ -305,9 +337,11 @@ const TransactionDetails = () => {
                                         source={{ uri: `data:image/png;base64,${transactionDetails.qr_code}` }}
                                         style={{ width: "50%", marginBottom: 16, aspectRatio: 1, height: "auto" }}
                                     />
-                                    <Pressable style={styles.qrButton} onPress={() => setIsModalOpen(true)}>
-                                        <TextComponent style={styles.qrButtonText}>View Larger</TextComponent>
-                                    </Pressable>
+                                    <ButtonComponent
+                                        style={styles.qrButton}
+                                        onPress={() => setIsModalOpen(true)}
+                                        title={"View Larger"}
+                                    />
                                     <TextComponent style={{ fontSize: 12, color: "#6b7280", marginTop: 4 }}>
                                         Show this QR code to the parking attendant
                                     </TextComponent>
@@ -316,24 +350,34 @@ const TransactionDetails = () => {
                         )}
 
                     <CardComponent header="Location Details">
-                        {PlatformType() === "web" ? (
-                            <iframe src={normalMapUrl} style={{ width: "100%", height: "100%" }} />
+                        {PlatformType() !== "web" ? (
+                            <WebView
+                                source={{
+                                    uri: OSMMapURL(
+                                        transactionDetails.establishment_info.latitude,
+                                        transactionDetails.establishment_info.longitude,
+                                    ),
+                                }}
+                                style={{ height: 500 }}
+                            />
                         ) : (
-                            <WebView source={{ uri: normalMapUrl }} style={{ flex: 1 }} />
+                            <iframe title={transactionDetails.establishment_info.name} src={mapUrl} height={500} />
                         )}
                     </CardComponent>
-                    <CardComponent header="Location Details (Satellite)">
-                        {PlatformType() === "web" ? (
-                            <iframe src={birdsEyeMapUrl} style={{ width: "100%", height: "100%" }} />
+
+                    <CardComponent header="Location Details Birds Eye View">
+                        {PlatformType() !== "web" ? (
+                            <WebView
+                                source={{
+                                    uri: SatteliteMap(
+                                        transactionDetails.establishment_info.latitude,
+                                        transactionDetails.establishment_info.longitude,
+                                    ),
+                                }}
+                                style={{ height: 500, flex: 1 }}
+                            />
                         ) : (
-                            <WebView source={{ uri: birdsEyeMapUrl }} style={{ flex: 1 }} />
-                        )}
-                    </CardComponent>
-                    <CardComponent header="Location Details (3D)">
-                        {PlatformType() === "web" ? (
-                            <iframe src={threeDimensionMap} style={{ width: "100%", height: "100%" }} />
-                        ) : (
-                            <WebView source={{ uri: threeDimensionMap }} style={{ flex: 1 }} />
+                            <iframe title={transactionDetails.establishment_info.name} src={mapUrl3D} height={500} />
                         )}
                     </CardComponent>
 

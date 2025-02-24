@@ -1,5 +1,5 @@
 import axiosInstance from "../axiosInstance";
-import type { ParkingSlot } from "../models/parking-slot";
+import type { ParkingSlot } from "../models/parkingSlot";
 
 const parkingSlotRoot = "/slot" as const;
 

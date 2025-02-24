@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { tabsConfig } from "@/lib/config/TabsConfig";
+import { tabsConfig } from "@lib/config/tabsConfig";
 
 export default function AdminLayout() {
     return (

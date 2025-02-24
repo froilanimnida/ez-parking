@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, Linking } from "react-native";
 import WebView from "react-native-webview";
-import { OperatingHour } from "@/lib/models/operating-hour";
-import { PaymentMethod } from "@/lib/models/payment-method";
-import type { ParkingSlot } from "@/lib/models/parking-slot";
+import { OperatingHour } from "@lib/models/operatingHour";
+import { PaymentMethod } from "@lib/models/paymentMethod";
+import type { ParkingSlot } from "@lib/models/parkingSlot";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import LinkComponent from "@/components/LinkComponent";
 import CardComponent from "@/components/CardComponent";
@@ -68,7 +68,7 @@ const EstablishmentView = () => {
             }
         };
 
-        fetchEstablishment();
+        fetchEstablishment().then();
     }, [uuid]);
 
     const mapUrl = useMemo(() => {
@@ -77,7 +77,7 @@ const EstablishmentView = () => {
         return `https://maps.google.com/maps?width=100%25&height=600&hl=en&q=${
             establishmentData.establishment.latitude
         },${establishmentData.establishment.longitude}+(${encodeURIComponent(
-            establishmentData.establishment.name
+            establishmentData.establishment.name,
         )})&t=&z=14&ie=UTF8&iwloc=B&output=embed`;
     }, [establishmentData?.establishment]);
 
@@ -159,6 +159,14 @@ const EstablishmentView = () => {
                             <View style={styles.mapLinks}>
                                 <ButtonComponent title="Google Maps" onPress={() => openNavigation("google")} />
                                 <ButtonComponent title="Waze" onPress={() => openNavigation("waze")} />
+                                {/*<ButtonComponent*/}
+                                {/*    title="Get Directions"*/}
+                                {/*    onPress={() =>*/}
+                                {/*        Linking.openURL(*/}
+                                {/*            `https://ez-parking.expo.dev/directions?latitude=${establishment?.establishment.latitude}&longitude=${establishment?.establishment.longitude}`,*/}
+                                {/*        )*/}
+                                {/*    }*/}
+                                {/*/>*/}
                             </View>
                         </View>
                         <CardComponent
@@ -167,11 +175,7 @@ const EstablishmentView = () => {
                             customStyles={styles.mapContainer}
                         >
                             {PlatformType() === "web" ? (
-                                <iframe
-                                    width="100%"
-                                    height="100%"
-                                    src={mapUrl}
-                                />
+                                <iframe width="100%" height="100%" src={mapUrl} />
                             ) : (
                                 <WebView source={{ uri: mapUrl }} style={{ flex: 1 }} />
                             )}

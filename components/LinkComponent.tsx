@@ -1,5 +1,5 @@
 import React from "react";
-import { View } from "react-native";
+import { StyleProp, TextStyle, View } from "react-native";
 import { Link, type ExternalPathString, type RelativePathString } from "expo-router";
 import { BaseComponentProps } from "@/lib/types/ui";
 import { baseStyles } from "@/styles/components";
@@ -57,7 +57,7 @@ const LinkComponent: React.FC<LinkProps> = ({
     ];
 
     return (
-        <Link href={href} style={linkStyles} target={target}>
+        <Link href={href} style={linkStyles as StyleProp<TextStyle>} target={target}>
             {content}
         </Link>
     );

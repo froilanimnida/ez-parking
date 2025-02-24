@@ -12,6 +12,7 @@ import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { loginUser, verifyOTP } from "@/lib/api/auth";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
+import React from "react";
 
 const LoginForm = () => {
     const [showOtpForm, setShowOtpForm] = useState(false);
@@ -28,9 +29,19 @@ const LoginForm = () => {
         setTimer(300);
     };
     useEffect(() => {
-        if (timer === 0) {
+        let interval: NodeJS.Timeout | null = null;
+        if (timer > 0) {
+            interval = setInterval(() => {
+                setTimer((prevTimer) => prevTimer - 1);
+            }, 1000);
+        } else {
             setShowOtpForm(false);
         }
+        return () => {
+            if (interval) {
+                clearInterval(interval);
+            }
+        };
     }, [timer]);
 
     const nextParams = local.next as RelativePathString | ExternalPathString;
@@ -39,6 +50,7 @@ const LoginForm = () => {
         const checkAuthStatus = async () => {
             try {
                 const auth = await isAuthenticated();
+                console.log(auth);
 
                 if (auth.loggedIn && auth.role) {
                     if (nextParams && auth.role === "user") {
@@ -54,7 +66,7 @@ const LoginForm = () => {
             }
         };
 
-        checkAuthStatus();
+        checkAuthStatus().then();
         return () => {
             setIsChecking(false);
         };
@@ -62,7 +74,7 @@ const LoginForm = () => {
 
     const handleOtpOnChange = (otp: string) => {
         if (otp.length === 6) {
-            handleOTP(otp);
+            handleOTP(otp).then();
         }
     };
     const handleLogin = async () => {
