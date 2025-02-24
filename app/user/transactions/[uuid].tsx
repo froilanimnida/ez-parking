@@ -11,7 +11,13 @@ import { router, useLocalSearchParams } from "expo-router";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import calculateDistance from "@/lib/helper/calculateDistance";
-import { normalMapURL, satelliteMapURL } from "@/lib/helper/mapViewFunction";
+import {
+    normalMapURL,
+    OSMMapURL,
+    satelliteMapURL,
+    SatteliteMap,
+    threeDimensionalMapURL,
+} from "@/lib/helper/mapViewFunction";
 import type { Address } from "@lib/models/address";
 import type { ParkingEstablishment } from "@lib/models/parkingEstablishment";
 import type { ParkingSlot } from "@lib/models/parkingSlot";
@@ -32,12 +38,6 @@ interface TransactionDetailsType {
     transaction_data: Transaction;
     user_plate_number: string;
 }
-
-const WebViewContainer = ({ uri }: { uri: string }) => (
-    <View style={{ height: 500 }}>
-        <WebView source={{ uri }} style={{ flex: 1 }} />
-    </View>
-);
 
 const TransactionDetails = () => {
     const [transactionDetails, setTransactionDetails] = useState<TransactionDetailsType | null>(null);
@@ -111,12 +111,22 @@ const TransactionDetails = () => {
             `https://ez-parking.expo.app/directions?latitude=${establishmentLatitude}&longitude=${establishmentLongitude}`,
         );
     };
-    const birdsEyeMapUrl = transactionDetails?.establishment_info.name
-        ? satelliteMapURL(establishmentLatitude!, establishmentLongitude!, transactionDetails.establishment_info.name)
-        : "";
-    const normalMapUrl = transactionDetails?.establishment_info.name
-        ? normalMapURL(establishmentLatitude!, establishmentLongitude!, transactionDetails.establishment_info.name)
-        : "";
+    const mapUrl3D =
+        (transactionDetails &&
+            threeDimensionalMapURL(
+                transactionDetails.establishment_info.latitude,
+                transactionDetails.establishment_info.longitude,
+                transactionDetails.establishment_info.name,
+            )) ||
+        "";
+    const mapUrl =
+        (transactionDetails &&
+            normalMapURL(
+                transactionDetails.establishment_info.latitude,
+                transactionDetails.establishment_info.longitude,
+                transactionDetails.establishment_info.name,
+            )) ||
+        "";
     const distanceKm =
         transactionDetails?.slot_info?.slot_status === "reserved"
             ? calculateDistance(establishmentLatitude!, establishmentLongitude!, userLatitude, userLongitude).toFixed(1)
@@ -327,9 +337,11 @@ const TransactionDetails = () => {
                                         source={{ uri: `data:image/png;base64,${transactionDetails.qr_code}` }}
                                         style={{ width: "50%", marginBottom: 16, aspectRatio: 1, height: "auto" }}
                                     />
-                                    <Pressable style={styles.qrButton} onPress={() => setIsModalOpen(true)}>
-                                        <TextComponent style={styles.qrButtonText}>View Larger</TextComponent>
-                                    </Pressable>
+                                    <ButtonComponent
+                                        style={styles.qrButton}
+                                        onPress={() => setIsModalOpen(true)}
+                                        title={"View Larger"}
+                                    />
                                     <TextComponent style={{ fontSize: 12, color: "#6b7280", marginTop: 4 }}>
                                         Show this QR code to the parking attendant
                                     </TextComponent>
@@ -338,18 +350,34 @@ const TransactionDetails = () => {
                         )}
 
                     <CardComponent header="Location Details">
-                        {PlatformType() === "web" ? (
-                            <iframe src={normalMapUrl} style={{ width: "100%", height: 500 }} />
+                        {PlatformType() !== "web" ? (
+                            <WebView
+                                source={{
+                                    uri: OSMMapURL(
+                                        transactionDetails.establishment_info.latitude,
+                                        transactionDetails.establishment_info.longitude,
+                                    ),
+                                }}
+                                style={{ height: 500 }}
+                            />
                         ) : (
-                            <WebViewContainer uri={normalMapUrl} />
+                            <iframe title={transactionDetails.establishment_info.name} src={mapUrl} height={500} />
                         )}
                     </CardComponent>
 
                     <CardComponent header="Location Details Birds Eye View">
-                        {PlatformType() === "web" ? (
-                            <iframe src={birdsEyeMapUrl} style={{ width: "100%", height: 500 }} />
+                        {PlatformType() !== "web" ? (
+                            <WebView
+                                source={{
+                                    uri: SatteliteMap(
+                                        transactionDetails.establishment_info.latitude,
+                                        transactionDetails.establishment_info.longitude,
+                                    ),
+                                }}
+                                style={{ height: 500, flex: 1 }}
+                            />
                         ) : (
-                            <WebViewContainer uri={birdsEyeMapUrl} />
+                            <iframe title={transactionDetails.establishment_info.name} src={mapUrl3D} height={500} />
                         )}
                     </CardComponent>
 
