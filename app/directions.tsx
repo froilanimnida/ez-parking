@@ -16,6 +16,7 @@ const actionIcons = {
     keep: "arrow-up",
     arrive: "flag-checkered",
     head: "arrow-up",
+    roundaboutExit: "format-rotate-90",
 };
 
 const TextNavigation = () => {

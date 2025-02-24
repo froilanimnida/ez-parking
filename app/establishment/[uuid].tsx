@@ -18,6 +18,7 @@ import ButtonComponent from "@/components/ButtonComponent";
 import { normalMapURL, OSMMapURL, SatteliteMap, threeDimensionalMapURL } from "@/lib/helper/mapViewFunction";
 import { getUserLocation } from "@lib/helper/location";
 import WebView from "react-native-webview";
+import * as WebBrowser from "expo-web-browser";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;
@@ -40,6 +41,12 @@ const EstablishmentOverview = () => {
         longitude: 120.9842,
     });
     const [fetching, setIsFetching] = useState(true);
+
+    const openBrowser = async () => {
+        await WebBrowser.openBrowserAsync(
+            `https://ez-parking.expo.app/directions?latitude=${establishment?.establishment.latitude}&longitude=${establishment?.establishment.longitude}`,
+        );
+    };
 
     useEffect(() => {
         let mounted = true;
@@ -178,12 +185,7 @@ const EstablishmentOverview = () => {
                                         )
                                     }
                                 />
-                                <LinkComponent
-                                    label="Get Directions"
-                                    href={
-                                        `/directions?latitude=${establishment?.establishment.latitude}&longitude=${establishment?.establishment.longitude}` as RelativePathString
-                                    }
-                                />
+                                <ButtonComponent title="Get Directions" onPress={openBrowser} />
                             </View>
                         </View>
                         <View style={styles.mapContainer}>
