@@ -268,9 +268,9 @@ const TransactionDetails = () => {
                         <View style={styles.lineRow}>
                             <TextComponent style={styles.lineLabel}>Entry Time</TextComponent>
                             <TextComponent style={styles.lineValue}>
-                                {transactionDetails.transaction_data.entry_time !== "Not Available"
+                                {transactionDetails.transaction_data.entry_time !== null
                                     ? new Date(transactionDetails.transaction_data.entry_time).toLocaleString()
-                                    : "Not Available"}
+                                    : "N/A"}
                             </TextComponent>
                         </View>
 
