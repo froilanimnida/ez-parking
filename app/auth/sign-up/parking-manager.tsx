@@ -480,29 +480,29 @@ const ParkingManagerSignUp = () => {
                                 )}
                             </View>
                         ))}
+                        <InfoContainer />
+                    </View>
+                    <View style={styles.submitContainer}>
+                        <View style={styles.checkboxContainer}>
+                            <CheckboxComponent
+                                placeholder="I agree to the terms and conditions"
+                                value={agreed}
+                                onValueChange={setAgreed}
+                            />
+                            <CheckboxComponent
+                                placeholder="I certify that my parking facility complies with local zoning laws"
+                                value={zoningCompliance}
+                                onValueChange={setZoningCompliance}
+                            />
+                        </View>
+                        <ButtonComponent
+                            title={isSubmitting ? "Submitting..." : "Submit Registration"}
+                            onPress={handleSubmit}
+                            disabled={isSubmitting || !agreed || !zoningCompliance}
+                            style={styles.submitButton}
+                        />
                     </View>
                 </CardComponent>
-                <InfoContainer />
-                <View style={styles.submitContainer}>
-                    <View style={styles.checkboxContainer}>
-                        <CheckboxComponent
-                            placeholder="I agree to the terms and conditions"
-                            value={agreed}
-                            onValueChange={setAgreed}
-                        />
-                        <CheckboxComponent
-                            placeholder="I certify that my parking facility complies with local zoning laws"
-                            value={zoningCompliance}
-                            onValueChange={setZoningCompliance}
-                        />
-                    </View>
-                    <ButtonComponent
-                        title={isSubmitting ? "Submitting..." : "Submit Registration"}
-                        onPress={handleSubmit}
-                        disabled={isSubmitting || !agreed || !zoningCompliance}
-                        style={styles.submitButton}
-                    />
-                </View>
             </View>
         </ResponsiveContainer>
     );
@@ -547,7 +547,6 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     submitContainer: {
-        width: "95%",
         flex: 1,
         alignItems: "center",
         justifyContent: "center",

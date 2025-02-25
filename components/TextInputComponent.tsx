@@ -1,7 +1,6 @@
 import { StyleSheet, TextInput, type KeyboardTypeOptions } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { useFonts } from "expo-font";
-import { baseStyles } from "@/styles/components";
 
 interface TextInputProps {
     placeholder?: string;
@@ -36,13 +35,23 @@ const TextInputComponent = ({
     autoCapitalize = "sentences",
     autoFocus = false,
 }: TextInputProps) => {
+    const [focused, setFocused] = useState(false);
+
     useFonts({
         Inter: require("./../assets/fonts/InterVariable.ttf"),
     });
+
     return (
         <TextInput
             maxLength={maxLength}
-            style={[customStyles, styles.input]}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            style={[
+                styles.input,
+                customStyles,
+                { borderColor: focused && editable ? "rgb(79 70 229)" : "rgb(209 213 219)" },
+                { backgroundColor: editable ? "transparent" : "#F3F4F6" },
+            ]}
             placeholder={placeholder}
             ref={ref}
             value={value}
@@ -66,10 +75,11 @@ const styles = StyleSheet.create({
         width: "100%",
         height: 48,
         borderRadius: 8,
-        backgroundColor: "#F9FAFB",
         paddingLeft: 16,
         marginBottom: 16,
-        borderColor: baseStyles.primary.backgroundColor,
-        borderWidth: 2,
+        borderWidth: 1,
+        borderColor: "rgb(209 213 219)", // Set default border color
+        boxShadow: "0px 1px 2px 0px rgba(0, 0, 0, 0.1)",
+        elevation: 2,
     },
 });

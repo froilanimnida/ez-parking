@@ -219,9 +219,6 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     input: {
-        borderWidth: 1,
-        borderColor: "#E5E7EB",
-        borderRadius: 8,
         padding: 12,
         marginBottom: 16,
     },

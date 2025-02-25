@@ -4,10 +4,10 @@ import * as SecureStore from "expo-secure-store";
 export default async function getAuthHeaders() {
     try {
         if (PlatformType() === "web") {
-            if (document.cookie) {
+            if (document.cookie.includes("csrf_access_token=") && document.cookie.includes("csrf_refresh_token=")) {
                 return {
-                    csrf_access_token: document.cookie.split("csrf_access_token=")[1].split(";")[0],
-                    csrf_refresh_token: document.cookie.split("csrf_refresh_token=")[1].split(";")[0],
+                    csrf_access_token: document.cookie.split("csrf_access_token=")[1]?.split(";")[0] || null,
+                    csrf_refresh_token: document.cookie.split("csrf_refresh_token=")[1]?.split(";")[0] || null,
                 };
             }
             return {};

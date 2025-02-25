@@ -13,7 +13,9 @@ const CardComponent = ({ header, subHeader, children, customStyles }: CardCompon
     return (
         <View style={[styles.container, customStyles]}>
             <View style={styles.headerContainer}>
-                <TextComponent style={styles.headerText}>{header}</TextComponent>
+                <TextComponent variant="h3" style={styles.headerText}>
+                    {header}
+                </TextComponent>
                 {subHeader && <TextComponent style={styles.subHeader}>{subHeader}</TextComponent>}
             </View>
             <View>{children}</View>

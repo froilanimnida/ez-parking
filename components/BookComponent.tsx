@@ -36,7 +36,7 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
         try {
             const data = await searchEstablishments(location.latitude, location.longitude, searchTerm, selectedCity);
             setEstablishments(data.data.establishments);
-        } catch (error) {
+        } catch {
             alert("Error fetching establishments");
         } finally {
             setLoading(false);
@@ -53,13 +53,11 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
 
             try {
                 let location = await getUserLocation();
-                location
-                    ? setLocation({
-                          latitude: location.coords.latitude,
-                          longitude: location.coords.longitude,
-                      })
-                    : null;
-            } catch (error) {
+                setLocation({
+                    latitude: location.coords.latitude,
+                    longitude: location.coords.longitude,
+                });
+            } catch {
                 const data = await getIPBasedLocation();
                 setLocation({ latitude: data.latitude, longitude: data.longitude });
             } finally {
