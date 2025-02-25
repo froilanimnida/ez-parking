@@ -117,7 +117,14 @@ const TransactionDetails = () => {
             : null;
     return (
         <ResponsiveContainer>
-            <LinkComponent style={{ marginBottom: 16 }} href="../transactions" label="← Back to Transaction" />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent
+                    style={{ marginBottom: 16 }}
+                    href="../transactions"
+                    label="← Back to Transaction"
+                    variant={"outline"}
+                />
+            </View>
             {isFetching && <LoadingComponent text="Fetching transaction details..." />}
 
             {!isFetching && transactionDetails && (
@@ -216,28 +223,6 @@ const TransactionDetails = () => {
                                 )}
                             </View>
                         )}
-
-                        {/* Direction Links */}
-                        <View style={styles.lineRow}>
-                            <TextComponent style={styles.lineLabel}>Get Directions</TextComponent>
-                            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-                                <LinkComponent
-                                    style={{ marginRight: 16 }}
-                                    href={`https://maps.google.com/maps?width=100%25&height=600&hl=en&q=${
-                                        transactionDetails.establishment_info.latitude
-                                    },${transactionDetails.establishment_info.longitude}+(${encodeURIComponent(
-                                        transactionDetails.establishment_info.name,
-                                    )})&t=&z=14&ie=UTF8&iwloc=B&output=embed`}
-                                    label="Google Maps"
-                                />
-                                <LinkComponent
-                                    style={{ marginRight: 16 }}
-                                    href={`https://www.waze.com/ul?ll=${transactionDetails.establishment_info.latitude},${transactionDetails.establishment_info.longitude}&navigate=yes`}
-                                    label="Waze"
-                                />
-                                <ButtonComponent title="Get Directions" onPress={openBrowser} />
-                            </View>
-                        </View>
                     </CardComponent>
 
                     <CardComponent header="Timing Details">
@@ -332,6 +317,25 @@ const TransactionDetails = () => {
                                 </View>
                             </CardComponent>
                         )}
+                    <CardComponent header="Directions">
+                        <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+                            <LinkComponent
+                                style={{ marginRight: 16 }}
+                                href={`https://maps.google.com/maps?width=100%25&height=600&hl=en&q=${
+                                    transactionDetails.establishment_info.latitude
+                                },${transactionDetails.establishment_info.longitude}+(${encodeURIComponent(
+                                    transactionDetails.establishment_info.name,
+                                )})&t=&z=14&ie=UTF8&iwloc=B&output=embed`}
+                                label="Google Maps"
+                            />
+                            <LinkComponent
+                                style={{ marginRight: 16 }}
+                                href={`https://www.waze.com/ul?ll=${transactionDetails.establishment_info.latitude},${transactionDetails.establishment_info.longitude}&navigate=yes`}
+                                label="Waze"
+                            />
+                            <ButtonComponent title="Get Directions" onPress={openBrowser} />
+                        </View>
+                    </CardComponent>
 
                     <CardComponent header="Location Details">
                         {PlatformType() !== "web" ? (

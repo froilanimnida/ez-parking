@@ -188,21 +188,6 @@ const EstablishmentOverview = () => {
                                 <ButtonComponent title="Get Directions" onPress={openBrowser} />
                             </View>
                         </View>
-                        {/*<View style={styles.mapContainer}>*/}
-                        {/*    {PlatformType() !== "web" ? (*/}
-                        {/*        <WebView*/}
-                        {/*            source={{*/}
-                        {/*                uri: OSMMapURL(*/}
-                        {/*                    establishment.establishment.latitude,*/}
-                        {/*                    establishment.establishment.longitude,*/}
-                        {/*                ),*/}
-                        {/*            }}*/}
-                        {/*            style={{ height: 500 }}*/}
-                        {/*        />*/}
-                        {/*    ) : (*/}
-                        {/*        <iframe title={establishment.establishment.name} src={mapUrl} height={500} />*/}
-                        {/*    )}*/}
-                        {/*</View>*/}
                     </CardComponent>
                     <CardComponent header="Location Details">
                         {PlatformType() !== "web" ? (

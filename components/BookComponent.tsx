@@ -13,8 +13,9 @@ import SelectComponent from "./SelectComponent";
 import { METRO_MANILA_CITIES } from "@/lib/types/models/common/constants";
 import type { CITY } from "@/lib/types/models/common/constants";
 import ButtonComponent from "@components/ButtonComponent";
+import { useDebounce } from "@lib/function/debounce";
 
-export interface EstablishmentQuery extends ParkingEstablishment {
+interface EstablishmentQuery extends ParkingEstablishment {
     open_slots: number;
     total_slots: number;
     reserved_slot: number;
@@ -31,10 +32,17 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
         longitude: 120.9842,
     });
 
+    const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
     const fetchEstablishments = async () => {
         setLoading(true);
         try {
-            const data = await searchEstablishments(location.latitude, location.longitude, searchTerm, selectedCity);
+            const data = await searchEstablishments(
+                location.latitude,
+                location.longitude,
+                debouncedSearchTerm,
+                selectedCity,
+            );
             setEstablishments(data.data.establishments);
         } catch {
             alert("Error fetching establishments");
@@ -66,6 +74,12 @@ const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
         };
         fetchData().then();
     }, []);
+
+    useEffect(() => {
+        if (debouncedSearchTerm) {
+            fetchEstablishments().then();
+        }
+    }, [debouncedSearchTerm]);
 
     return (
         <View style={{ flex: 1, gap: 16 }}>
