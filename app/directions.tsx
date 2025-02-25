@@ -33,7 +33,7 @@ const TextNavigation = () => {
                 return;
             }
             const location = await getUserLocation();
-            const { latitude, longitude } = location;
+            const { latitude, longitude } = location.coords;
             const endLat = urlSearchParams.latitude;
             const endLon = urlSearchParams.longitude;
 

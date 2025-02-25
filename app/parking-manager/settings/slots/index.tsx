@@ -1,4 +1,4 @@
-import { StyleSheet, View, TextInput } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import TextComponent from "@/components/TextComponent";
 import ButtonComponent from "@/components/ButtonComponent";
@@ -137,7 +137,14 @@ const Slots = () => {
     return (
         <ResponsiveContainer>
             <>
-                <LinkComponent label="← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="./" />
+                <View style={{ alignSelf: "flex-start" }}>
+                    <LinkComponent
+                        label="← Back to Dashboard"
+                        style={{ width: "auto", marginBottom: 16 }}
+                        href="./"
+                        variant="outline"
+                    />
+                </View>
 
                 <TextComponent variant="h1" bold style={styles.sectionTitle}>
                     Parking Slot Settings
@@ -147,8 +154,7 @@ const Slots = () => {
                     <View style={styles.formGrid}>
                         <View style={styles.inputGroup}>
                             <TextComponent style={styles.label}>Slot Code *</TextComponent>
-                            <TextInput
-                                style={styles.input}
+                            <TextInputComponent
                                 value={formData.slot_code}
                                 onChangeText={(text) => setFormDataValue("slot_code", text)}
                             />
@@ -248,15 +254,16 @@ const Slots = () => {
                             />
                         </View>
                     </View>
-
-                    <ButtonComponent
-                        title="Add Slot"
-                        onPress={() => {
-                            addSlot();
-                        }}
-                        variant="primary"
-                        style={styles.submitButton}
-                    />
+                    <View style={{ alignSelf: "flex-end" }}>
+                        <ButtonComponent
+                            title="Add Slot"
+                            onPress={() => {
+                                addSlot().then();
+                            }}
+                            variant="primary"
+                            style={styles.submitButton}
+                        />
+                    </View>
                 </CardComponent>
             </>
 
@@ -332,9 +339,6 @@ const styles = StyleSheet.create({
         fontWeight: "500",
     },
     input: {
-        borderWidth: 1,
-        borderColor: "#E5E7EB",
-        borderRadius: 8,
         padding: 12,
     },
     picker: {
@@ -351,7 +355,6 @@ const styles = StyleSheet.create({
         gap: 16,
     },
     slotCard: {
-        width: "47%",
         padding: 16,
         borderLeftWidth: 4,
     },

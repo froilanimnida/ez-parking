@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
-import Checkbox from "expo-checkbox";
+import CheckboxComponent from "@components/CheckboxComponent";
 import TextComponent from "@components/TextComponent";
 import ButtonComponent from "@components/ButtonComponent";
 import CardComponent from "@/components/CardComponent";
@@ -127,11 +127,7 @@ const LoginForm = () => {
                 <View style={styles.body}>
                     {!showOtpForm ? (
                         <View style={styles.loginForm}>
-                            <CardComponent
-                                header="Welcome back"
-                                subHeader="Please enter your registered email address"
-                                customStyles={{ gap: 16 }}
-                            >
+                            <CardComponent header="Welcome back" subHeader="Please enter your registered email address">
                                 <TextInputComponent
                                     customStyles={styles.input}
                                     placeholder="Email address"
@@ -140,10 +136,12 @@ const LoginForm = () => {
                                     onChangeText={setEmail}
                                     autoCapitalize="none"
                                 />
-                                <View style={styles.checkbox}>
-                                    <Checkbox onValueChange={setRememberMe} value={rememberMe} color="#4F46E5" />
-                                    <TextComponent>Remember me</TextComponent>
-                                </View>
+                                <CheckboxComponent
+                                    onValueChange={setRememberMe}
+                                    value={rememberMe}
+                                    placeholder="Remember me"
+                                    customStyles={{ marginVertical: 16 }}
+                                />
                                 <ButtonComponent
                                     title="Continue"
                                     onPress={handleLogin}
@@ -151,7 +149,19 @@ const LoginForm = () => {
                                     loading={loggingIn}
                                     disabled={!isEmailValid(email) || loggingIn}
                                 />
-                                <LinkComponent href="./sign-up" label="Create user account" variant="text" />
+                                <View style={{ alignSelf: "center" }}>
+                                    <LinkComponent
+                                        href="./sign-up"
+                                        label="Create user account"
+                                        variant="outline"
+                                        style={{
+                                            marginTop: 16,
+                                            width: "100%",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                        }}
+                                    />
+                                </View>
                             </CardComponent>
                         </View>
                     ) : (
@@ -159,29 +169,28 @@ const LoginForm = () => {
                             <CardComponent
                                 header="Verify your email"
                                 subHeader={`Enter the 6-digit code sent to ${email}`}
-                                children={
-                                    <>
-                                        <View style={styles.otpContainer}>
-                                            <TextInputComponent
-                                                customStyles={styles.otpInput}
-                                                maxLength={6}
-                                                keyboardType="number-pad"
-                                                onChangeText={handleOtpOnChange}
-                                            />
-                                        </View>
-
-                                        <TextComponent style={styles.timerText}>
-                                            Get new code in {timer} seconds
-                                        </TextComponent>
-                                        <ButtonComponent
-                                            title="Resend Code"
-                                            onPress={startTimer}
-                                            variant="primary"
-                                            disabled={timer > 0}
+                            >
+                                <>
+                                    <View style={styles.otpContainer}>
+                                        <TextInputComponent
+                                            customStyles={styles.otpInput}
+                                            maxLength={6}
+                                            keyboardType="number-pad"
+                                            onChangeText={handleOtpOnChange}
                                         />
-                                    </>
-                                }
-                            />
+                                    </View>
+
+                                    <TextComponent style={styles.timerText}>
+                                        Get new code in {timer} seconds
+                                    </TextComponent>
+                                    <ButtonComponent
+                                        title="Resend Code"
+                                        onPress={startTimer}
+                                        variant="primary"
+                                        disabled={timer > 0}
+                                    />
+                                </>
+                            </CardComponent>
                         </View>
                     )}
                 </View>

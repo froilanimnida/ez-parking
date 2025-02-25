@@ -41,7 +41,9 @@ const VehicleTypes = () => {
     };
     return (
         <ResponsiveContainer>
-            <LinkComponent style={{ width: "auto", marginBottom: 16 }} href="../admin" label="← Back to Dashboard" />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent variant="outline" style={{ marginBottom: 16 }} href="./" label="← Back to Dashboard" />
+            </View>
             <TextComponent bold variant="h1" style={styles.header}>
                 Vehicle Types
             </TextComponent>

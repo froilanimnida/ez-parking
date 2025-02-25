@@ -7,7 +7,6 @@ const baseStyles = StyleSheet.create({
         height: "auto",
         width: "auto",
         justifyContent: "center",
-        elevation: 5,
         borderRadius: 6,
     },
     xs: {

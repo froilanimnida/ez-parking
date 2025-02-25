@@ -88,7 +88,14 @@ const ScanQRCode = () => {
 
     return (
         <ResponsiveContainer>
-            <LinkComponent label="← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="../" />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent
+                    label="← Back to Dashboard"
+                    style={{ width: "auto", marginBottom: 16 }}
+                    href="/parking-manager"
+                    variant={"outline"}
+                />
+            </View>
             <View style={styles.content}>
                 <CardComponent header="Scan QR Code" subHeader="Scan the QR code">
                     <View style={{ height: 600, width: "100%" }}>
@@ -101,13 +108,15 @@ const ScanQRCode = () => {
                         )}
                     </View>
 
-                    <ButtonComponent
-                        title="Upload QR Code Image"
-                        onPress={pickImage}
-                        variant="primary"
-                        style={{ marginTop: 16 }}
-                        icon={<MaterialCommunityIcons color={"#fff"} name="upload" size={24} />}
-                    />
+                    <View style={{ alignSelf: "flex-end" }}>
+                        <ButtonComponent
+                            title="Upload QR Code Image"
+                            onPress={pickImage}
+                            variant="primary"
+                            style={{ marginTop: 16 }}
+                            icon={<MaterialCommunityIcons color={"#fff"} name="upload" size={24} />}
+                        />
+                    </View>
 
                     {scanSuccess && (
                         <View style={styles.successMessage}>
@@ -126,7 +135,6 @@ const ScanQRCode = () => {
 const styles = StyleSheet.create({
     content: {
         padding: 16,
-        maxWidth: 1280,
     },
     scanner: {
         width: "100%",

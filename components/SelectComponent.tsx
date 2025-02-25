@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { Picker } from "@react-native-picker/picker";
 import { useFonts } from "expo-font";
 
@@ -15,12 +15,15 @@ const SelectComponent = ({ items, selectedValue, onValueChange, placeholder, cus
     useFonts({
         Inter: require("./../assets/fonts/InterVariable.ttf"),
     });
+    const [focused, setFocused] = useState(false);
     return (
         <Picker
             selectedValue={selectedValue}
             onValueChange={onValueChange}
-            style={[customStyles, styles.picker]}
+            style={[customStyles, styles.picker, focused && { outlineColor: "rgb(79 70 229)" }]}
             placeholder={placeholder}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
         >
             {items.map((item, index) => (
                 <Picker.Item

@@ -201,11 +201,14 @@ const SlotInfo = () => {
 
     return (
         <ResponsiveContainer>
-            <LinkComponent
-                href={`../../../user/book/${establishment_uuid}`}
-                style={styles.backLink}
-                label="← Back to Dashboard"
-            />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent
+                    href={`../../../user/book/${establishment_uuid}`}
+                    style={styles.backLink}
+                    label="← Back to Dashboard"
+                    variant="outline"
+                />
+            </View>
             {loading || !transactionCheckoutInfo ? (
                 <LoadingComponent text="Loading..." />
             ) : (
@@ -356,28 +359,29 @@ const SlotInfo = () => {
                             placeholder="I also agree that the establishment has the right to charge me for any damages
                         incurred during my stay if the establishment can prove that I am responsible."
                         />
-
-                        <ButtonComponent
-                            style={styles.confirmButton}
-                            title={
-                                transactionCheckoutInfo?.has_ongoing_transaction
-                                    ? "You have an ongoing transaction"
-                                    : isSubmitting
-                                      ? "Confirming..."
-                                      : "Confirm Booking"
-                            }
-                            disabled={
-                                transactionCheckoutInfo?.has_ongoing_transaction ||
-                                isSubmitting ||
-                                !agreed ||
-                                !terms ||
-                                duration <= 0 ||
-                                transactionCheckoutInfo?.slot_info.slot_status !== "open"
-                            }
-                            onPress={() => {
-                                handleConfirmBooking();
-                            }}
-                        />
+                        <View style={{ alignSelf: "flex-end" }}>
+                            <ButtonComponent
+                                style={styles.confirmButton}
+                                title={
+                                    transactionCheckoutInfo?.has_ongoing_transaction
+                                        ? "You have an ongoing transaction"
+                                        : isSubmitting
+                                          ? "Confirming..."
+                                          : "Confirm Booking"
+                                }
+                                disabled={
+                                    transactionCheckoutInfo?.has_ongoing_transaction ||
+                                    isSubmitting ||
+                                    !agreed ||
+                                    !terms ||
+                                    duration <= 0 ||
+                                    transactionCheckoutInfo?.slot_info.slot_status !== "open"
+                                }
+                                onPress={() => {
+                                    handleConfirmBooking().then();
+                                }}
+                            />
+                        </View>
                     </CardComponent>
                 </>
             )}

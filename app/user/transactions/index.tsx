@@ -92,7 +92,14 @@ const Transactions = () => {
 
     return (
         <ResponsiveContainer>
-            <LinkComponent style={{ width: "auto", marginBottom: 16 }} href="../user" label="← Back to Dashboard" />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent
+                    variant="outline"
+                    style={{ marginBottom: 16 }}
+                    href="../user"
+                    label="← Back to Dashboard"
+                />
+            </View>
             <TextComponent bold style={styles.title}>
                 My Transactions
             </TextComponent>

@@ -8,6 +8,7 @@ import ButtonComponent from "@components/ButtonComponent";
 import LoadingComponent from "@components/reusable/LoadingComponent";
 import { View, StyleSheet } from "react-native";
 import CardComponent from "@components/CardComponent";
+import LinkComponent from "@components/LinkComponent";
 
 const PaymentStatistics = () => {
     const [loading, setLoading] = useState(true);
@@ -41,6 +42,14 @@ const PaymentStatistics = () => {
 
     return (
         <ResponsiveContainer>
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent
+                    label="← Back to Reports"
+                    style={{ width: "auto", marginBottom: 16 }}
+                    href="/parking-manager/report"
+                    variant={"outline"}
+                />
+            </View>
             <TextComponent bold variant="h1" style={styles.header}>
                 Payment Statistics Report
             </TextComponent>

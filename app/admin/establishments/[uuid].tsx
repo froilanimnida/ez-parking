@@ -74,7 +74,14 @@ const EstablishmentDetails = () => {
     }, []);
     return (
         <ResponsiveContainer>
-            <LinkComponent label="← Back to Establishments" style={{ width: "auto", marginBottom: 16 }} href="./" />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent
+                    variant="outline"
+                    style={{ marginBottom: 16 }}
+                    href="./"
+                    label="← Back to Establishments"
+                />
+            </View>
             <CardComponent header="Establishment Details" subHeader="Review and manage this parking establishment">
                 <TextComponent>View and manage the details of this parking establishment.</TextComponent>
             </CardComponent>

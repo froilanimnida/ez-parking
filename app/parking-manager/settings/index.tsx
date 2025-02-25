@@ -12,6 +12,7 @@ import { type Address } from "@lib/models/address";
 import { type CompanyProfile } from "@lib/models/companyProfile";
 import { type ParkingEstablishment } from "@lib/models/parkingEstablishment";
 import LoadingComponent from "@components/reusable/LoadingComponent";
+import LinkComponent from "@components/LinkComponent";
 
 export default function Settings() {
     const [loading, setLoading] = useState(true);
@@ -50,6 +51,14 @@ export default function Settings() {
 
     return (
         <ResponsiveContainer>
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent
+                    label="← Back to Dashboard"
+                    style={{ width: "auto", marginBottom: 16 }}
+                    href="../../parking-manager"
+                    variant="outline"
+                />
+            </View>
             <View style={styles.header}>
                 <TextComponent bold variant="h1">
                     Account Settings
@@ -196,11 +205,15 @@ export default function Settings() {
                     </View>
                 </CardComponent>
             )}
-
-            <TouchableOpacity style={styles.button} onPress={handleSave} disabled={isUpdating}>
-                <TextComponent style={styles.buttonText}>{isUpdating ? "Saving..." : "Save Changes"}</TextComponent>
-            </TouchableOpacity>
-            <ButtonComponent onPress={() => logoutCurrentUser()} title="Logout" variant="destructive" />
+            <View style={{ flexDirection: "column", justifyContent: "space-between", alignSelf: "flex-end" }}>
+                <ButtonComponent
+                    style={styles.button}
+                    onPress={handleSave}
+                    disabled={isUpdating}
+                    title={isUpdating ? "Saving..." : "Save Changes"}
+                />
+                <ButtonComponent onPress={() => logoutCurrentUser()} title="Logout" variant="destructive" />
+            </View>
         </ResponsiveContainer>
     );
 }

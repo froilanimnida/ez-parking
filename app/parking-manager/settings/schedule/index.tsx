@@ -133,12 +133,18 @@ const ParkingEstablishmentSchedule = () => {
 
     return (
         <ResponsiveContainer>
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent
+                    label="← Back to Reports"
+                    style={{ width: "auto", marginBottom: 16 }}
+                    href="/parking-manager"
+                    variant={"outline"}
+                />
+            </View>
             {isLoading ? (
                 <LoadingComponent text="Loading..." />
             ) : (
                 <>
-                    <LinkComponent label="← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="../" />
-
                     <CardComponent
                         header="Operating Hours"
                         subHeader="Set your parking establishment's operating hours"
@@ -159,7 +165,6 @@ const ParkingEstablishmentSchedule = () => {
                                 />
                                 <TextComponent style={styles.switchLabel}>Open 24/7</TextComponent>
                             </View>
-                            <ButtonComponent onPress={updateSchedule} title="Save Changes" variant="primary" />
                         </View>
                         {parkingData?.is_24_7 != true ? (
                             <View style={styles.scheduleContainer}>
@@ -186,6 +191,9 @@ const ParkingEstablishmentSchedule = () => {
                         ) : (
                             <TextComponent>Open 24/7</TextComponent>
                         )}
+                        <View style={{ marginTop: 20, alignSelf: "flex-end" }}>
+                            <ButtonComponent onPress={updateSchedule} title="Save Changes" variant="primary" />
+                        </View>
                     </CardComponent>
                 </>
             )}

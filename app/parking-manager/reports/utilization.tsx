@@ -40,7 +40,14 @@ const Utilization = () => {
 
     return (
         <ResponsiveContainer>
-            <LinkComponent label="← Back to Reports" style={{ width: "auto", marginBottom: 16 }} href="./" />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent
+                    label="← Back to Reports"
+                    style={{ width: "auto", marginBottom: 16 }}
+                    href="/parking-manager/report"
+                    variant={"outline"}
+                />
+            </View>
             <View style={styles.filterContainer}>
                 {PlatformType() === "web" ? (
                     <>

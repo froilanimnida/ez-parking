@@ -46,10 +46,11 @@ const SlotCard = ({ slotInfo, slotUuid, isGuest, establishmentUuid }: SlotCardPr
         <CardComponent customStyles={[getBorderColor()]} header={slotInfo.slot_code}>
             <View style={styles.header}>
                 <TextComponent style={getStatusBadgeStyle()}>{slotInfo.slot_status}</TextComponent>
+                {slotInfo.is_premium && <Text style={styles.premiumBadge}>Premium</Text>}
             </View>
             <View style={styles.infoContainer}>
                 <TextComponent style={styles.infoText}>Floor: {slotInfo.floor_level}</TextComponent>
-                <TextComponent style={styles.infoText}>Accommodates: {slotInfo.vehicle_type_name}</TextComponent>
+                <TextComponent style={styles.infoText}>Type: {slotInfo.vehicle_type_name}</TextComponent>
                 <TextComponent style={styles.infoText}>Size: {slotInfo.vehicle_type_size}</TextComponent>
 
                 {slotInfo.slot_status === "open" && (
@@ -57,18 +58,24 @@ const SlotCard = ({ slotInfo, slotUuid, isGuest, establishmentUuid }: SlotCardPr
                         <View style={styles.rateRow}>
                             <View style={styles.rateContainer}>
                                 <TextComponent style={styles.rateText}>PHP{slotInfo.base_price_per_hour}</TextComponent>
-                                <TextComponent style={styles.rateTypeText}>per hour</TextComponent>
+                                <TextComponent style={styles.rateTypeText}>/ hour</TextComponent>
                             </View>
-                            <View style={styles.rateContainer}>
-                                <TextComponent style={styles.rateText}>PHP{slotInfo.base_price_per_day}</TextComponent>
-                                <TextComponent style={styles.rateTypeText}>per day</TextComponent>
-                            </View>
-                            <View style={styles.rateContainer}>
-                                <TextComponent style={styles.rateText}>
-                                    PHP{slotInfo.base_price_per_month}
-                                </TextComponent>
-                                <TextComponent style={styles.rateTypeText}>per month</TextComponent>
-                            </View>
+                            {Number(slotInfo.base_price_per_day) > 0 && (
+                                <View style={styles.rateContainer}>
+                                    <TextComponent style={styles.rateText}>
+                                        PHP{slotInfo.base_price_per_day}
+                                    </TextComponent>
+                                    <TextComponent style={styles.rateTypeText}>/ day</TextComponent>
+                                </View>
+                            )}
+                            {Number(slotInfo.base_price_per_month) > 0 && (
+                                <View style={styles.rateContainer}>
+                                    <TextComponent style={styles.rateText}>
+                                        PHP{slotInfo.base_price_per_month}
+                                    </TextComponent>
+                                    <TextComponent style={styles.rateTypeText}>/ month</TextComponent>
+                                </View>
+                            )}
                         </View>
 
                         <LinkComponent
@@ -84,44 +91,37 @@ const SlotCard = ({ slotInfo, slotUuid, isGuest, establishmentUuid }: SlotCardPr
                         />
                     </>
                 )}
-
-                {slotInfo.is_premium && <Text style={styles.premiumBadge}>Premium</Text>}
             </View>
         </CardComponent>
     );
 };
-
 const styles = StyleSheet.create({
     borderOpen: {
-        borderLeftColor: "green",
+        borderLeftColor: "#16a34a", // Green for available
+        borderLeftWidth: 6,
     },
     borderReserved: {
-        borderLeftColor: "orange",
+        borderLeftColor: "#f59e0b", // Orange for reserved
+        borderLeftWidth: 6,
     },
     borderOccupied: {
-        borderLeftColor: "red",
+        borderLeftColor: "#dc2626", // Red for occupied
+        borderLeftWidth: 6,
     },
     header: {
         flexDirection: "row",
-        marginBottom: 8,
-    },
-    rateContainer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
         alignItems: "center",
-        marginTop: 8,
-    },
-    slotCode: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: "#111827",
+        justifyContent: "center",
+        marginBottom: 8,
     },
     statusBadge: {
         borderRadius: 16,
-        paddingHorizontal: 8,
+        paddingHorizontal: 10,
         paddingVertical: 4,
         fontSize: 12,
         fontWeight: "600",
+        textTransform: "capitalize",
+        overflow: "hidden",
     },
     statusOpen: {
         backgroundColor: "#dcfce7",
@@ -136,20 +136,27 @@ const styles = StyleSheet.create({
         color: "#991b1b",
     },
     infoContainer: {
-        marginTop: 8,
+        marginTop: 10,
+        paddingHorizontal: 16,
     },
     infoText: {
         fontSize: 14,
         color: "#374151",
-        marginBottom: 4,
+        marginBottom: 6,
     },
     rateRow: {
         flexDirection: "column",
-        marginTop: 8,
+        gap: 6,
+        marginTop: 10,
+    },
+    rateContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
     },
     rateText: {
         fontSize: 16,
-        fontWeight: "600",
+        fontWeight: "bold",
         color: "#16a34a",
     },
     rateTypeText: {
@@ -158,10 +165,10 @@ const styles = StyleSheet.create({
         textTransform: "capitalize",
     },
     bookButton: {
-        marginTop: 8,
+        marginTop: 12,
         backgroundColor: "#16a34a",
-        borderRadius: 4,
-        paddingVertical: 10,
+        borderRadius: 8,
+        paddingVertical: 12,
         alignItems: "center",
         justifyContent: "center",
         alignSelf: "center",
@@ -170,17 +177,17 @@ const styles = StyleSheet.create({
     bookButtonText: {
         color: "#ffffff",
         fontSize: 14,
-        fontWeight: "600",
+        fontWeight: "bold",
     },
     premiumBadge: {
-        marginTop: 8,
         backgroundColor: "#f3e8ff",
         color: "#6b21a8",
         fontSize: 12,
-        paddingHorizontal: 8,
+        paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 16,
-        alignSelf: "flex-start",
+        alignSelf: "flex-start", // Prevents stretching
+        fontWeight: "bold",
     },
 });
 

@@ -104,11 +104,14 @@ const EstablishmentOverview = () => {
 
     return (
         <ResponsiveContainer>
-            <LinkComponent
-                style={{ width: "auto", marginBottom: 16 }}
-                href="../establishment"
-                label="← Back to Search"
-            />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent
+                    variant="outline"
+                    style={{ marginBottom: 16 }}
+                    href=".././establishment"
+                    label="← Back to Search"
+                />
+            </View>
             {fetching && <LoadingComponent text="Fetching the establishment details" />}
             {establishment != null && !fetching && (
                 <>
@@ -185,38 +188,52 @@ const EstablishmentOverview = () => {
                                 <ButtonComponent title="Get Directions" onPress={openBrowser} />
                             </View>
                         </View>
-                        <View style={styles.mapContainer}>
-                            {PlatformType() !== "web" ? (
-                                <WebView
-                                    source={{
-                                        uri: OSMMapURL(
-                                            establishment.establishment.latitude,
-                                            establishment.establishment.longitude,
-                                        ),
-                                    }}
-                                    style={{ height: 500 }}
-                                />
-                            ) : (
-                                <iframe title={establishment.establishment.name} src={mapUrl} height={500} />
-                            )}
-                        </View>
+                        {/*<View style={styles.mapContainer}>*/}
+                        {/*    {PlatformType() !== "web" ? (*/}
+                        {/*        <WebView*/}
+                        {/*            source={{*/}
+                        {/*                uri: OSMMapURL(*/}
+                        {/*                    establishment.establishment.latitude,*/}
+                        {/*                    establishment.establishment.longitude,*/}
+                        {/*                ),*/}
+                        {/*            }}*/}
+                        {/*            style={{ height: 500 }}*/}
+                        {/*        />*/}
+                        {/*    ) : (*/}
+                        {/*        <iframe title={establishment.establishment.name} src={mapUrl} height={500} />*/}
+                        {/*    )}*/}
+                        {/*</View>*/}
                     </CardComponent>
-                    <CardComponent customStyles={styles.card} header="Location | Top View">
-                        <View style={styles.mapContainer}>
-                            {PlatformType() !== "web" ? (
-                                <WebView
-                                    source={{
-                                        uri: SatteliteMap(
-                                            establishment.establishment.latitude,
-                                            establishment.establishment.longitude,
-                                        ),
-                                    }}
-                                    style={{ height: 500, flex: 1 }}
-                                />
-                            ) : (
-                                <iframe title={establishment.establishment.name} src={mapUrl3D} height={500} />
-                            )}
-                        </View>
+                    <CardComponent header="Location Details">
+                        {PlatformType() !== "web" ? (
+                            <WebView
+                                source={{
+                                    uri: OSMMapURL(
+                                        establishment.establishment.latitude,
+                                        establishment.establishment.longitude,
+                                    ),
+                                }}
+                                style={{ height: 500 }}
+                            />
+                        ) : (
+                            <iframe title={establishment.establishment.name} src={mapUrl} height={500} />
+                        )}
+                    </CardComponent>
+
+                    <CardComponent header="Location Details Birds Eye View">
+                        {PlatformType() !== "web" ? (
+                            <WebView
+                                source={{
+                                    uri: SatteliteMap(
+                                        establishment.establishment.latitude,
+                                        establishment.establishment.longitude,
+                                    ),
+                                }}
+                                style={{ height: 500, flex: 1 }}
+                            />
+                        ) : (
+                            <iframe title={establishment.establishment.name} src={mapUrl3D} height={500} />
+                        )}
                     </CardComponent>
 
                     <CardComponent customStyles={styles.card} header="Operating Hours">

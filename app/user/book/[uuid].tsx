@@ -93,7 +93,14 @@ const EstablishmentView = () => {
 
     return (
         <ResponsiveContainer>
-            <LinkComponent label="← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="../../user" />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent
+                    variant="outline"
+                    label="← Back to Dashboard"
+                    style={{ width: "auto", marginBottom: 16 }}
+                    href="../../user"
+                />
+            </View>
             {!loading && establishmentData && (
                 <>
                     <CardComponent

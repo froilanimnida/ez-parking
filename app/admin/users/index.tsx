@@ -37,7 +37,9 @@ const Users = () => {
 
     return (
         <ResponsiveContainer>
-            <LinkComponent label="← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="./" />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent variant="outline" style={{ marginBottom: 16 }} href="./" label="← Back to Dashboard" />
+            </View>
             <View style={styles.filters}>
                 <TextInputComponent
                     customStyles={styles.searchInput}

@@ -1,4 +1,4 @@
-import { StyleSheet, TextInput, type KeyboardTypeOptions } from "react-native";
+import { StyleSheet, TextInput, type KeyboardTypeOptions, Platform } from "react-native";
 import React, { useState } from "react";
 import { useFonts } from "expo-font";
 
@@ -49,8 +49,15 @@ const TextInputComponent = ({
             style={[
                 styles.input,
                 customStyles,
-                { borderColor: focused && editable ? "rgb(79 70 229)" : "rgb(209 213 219)" },
-                { backgroundColor: editable ? "transparent" : "#F3F4F6" },
+                Platform.select({
+                    web: {
+                        outlineColor: focused && editable ? "rgb(79 70 229)" : "rgb(209 213 219)",
+                        outlineWidth: 2,
+                    },
+                    default: {
+                        borderColor: focused && editable ? "rgb(79 70 229)" : "rgb(209 213 219)",
+                    },
+                }),
             ]}
             placeholder={placeholder}
             ref={ref}
@@ -75,11 +82,9 @@ const styles = StyleSheet.create({
         width: "100%",
         height: 48,
         borderRadius: 8,
-        paddingLeft: 16,
+        paddingLeft: 24,
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: "rgb(209 213 219)", // Set default border color
-        boxShadow: "0px 1px 2px 0px rgba(0, 0, 0, 0.1)",
-        elevation: 2,
+        borderColor: "rgb(209 213 219)",
     },
 });

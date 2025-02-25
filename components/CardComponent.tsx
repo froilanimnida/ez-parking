@@ -13,7 +13,7 @@ const CardComponent = ({ header, subHeader, children, customStyles }: CardCompon
     return (
         <View style={[styles.container, customStyles]}>
             <View style={styles.headerContainer}>
-                <TextComponent variant="h3" style={styles.headerText}>
+                <TextComponent variant="h3" bold style={styles.headerText}>
                     {header}
                 </TextComponent>
                 {subHeader && <TextComponent style={styles.subHeader}>{subHeader}</TextComponent>}
@@ -39,7 +39,6 @@ const styles = StyleSheet.create({
     },
     headerText: {
         fontSize: 18,
-        fontWeight: "bold",
         marginBottom: 8,
     },
     subHeader: {

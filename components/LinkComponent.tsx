@@ -13,28 +13,30 @@ interface LinkProps extends BaseComponentProps {
     target?: "_self" | "_blank";
 }
 
-const LinkComponent: React.FC<LinkProps> = ({
+const LinkComponent = ({
     href,
     label,
     asChild = false,
     style,
     textStyle,
     variant = "primary",
-    size = "md",
     disabled = false,
     icon,
     target = "_self",
     iconPosition = "left",
-    fullWidth = false,
     children,
-}) => {
+}: LinkProps) => {
     useFonts({
         Inter: require("./../assets/fonts/InterVariable.ttf"),
     });
     const content = children || (
         <>
             {icon && iconPosition === "left" && <View style={baseStyles.iconLeft}>{icon}</View>}
-            {label && <TextComponent style={[baseStyles[`${variant}Text`], textStyle]}>{label}</TextComponent>}
+            {label && (
+                <TextComponent bold style={[baseStyles[`${variant}Text`], textStyle]}>
+                    {label}
+                </TextComponent>
+            )}
             {icon && iconPosition === "right" && <View style={baseStyles.iconRight}>{icon}</View>}
         </>
     );
@@ -48,10 +50,15 @@ const LinkComponent: React.FC<LinkProps> = ({
     }
 
     const linkStyles = [
-        baseStyles.container,
-        baseStyles[size],
+        {
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 6,
+            paddingHorizontal: 20,
+            paddingVertical: 12,
+        },
         variant !== "text" && baseStyles[variant],
-        fullWidth && baseStyles.fullWidth,
         disabled && baseStyles.disabled,
         style,
     ];

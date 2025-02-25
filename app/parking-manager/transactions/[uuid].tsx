@@ -35,7 +35,14 @@ const TransactionDetails = () => {
     }, [uuid]);
     return (
         <ResponsiveContainer>
-            <LinkComponent label="← Back to Transactions" style={{ width: "auto", marginBottom: 16 }} href="./" />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent
+                    variant="outline"
+                    style={{ marginBottom: 16 }}
+                    href="./"
+                    label="← Back to Transactions"
+                />
+            </View>
             <TextComponent bold variant="h1" style={styles.title}>
                 Transaction Details
             </TextComponent>

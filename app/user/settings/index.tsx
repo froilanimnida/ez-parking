@@ -45,7 +45,14 @@ export default function UserProfileScreen() {
     };
     return (
         <ResponsiveContainer>
-            <LinkComponent label=" ← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="../user" />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent
+                    variant="outline"
+                    label=" ← Back to Dashboard"
+                    style={{ width: "auto", marginBottom: 16 }}
+                    href="../user"
+                />
+            </View>
             {isLoading ? (
                 <LoadingComponent text="Loading user profile..." />
             ) : (
@@ -110,8 +117,13 @@ export default function UserProfileScreen() {
                                 <TextComponent style={styles.label}>Phone Number</TextComponent>
                                 <TextInputComponent customStyles={styles.input} value={userData.phone_number} />
                             </View>
-
-                            <ButtonComponent title="Save Changes" onPress={() => handleSubmit()} disabled={isLoading} />
+                            <View style={{ alignSelf: "flex-end" }}>
+                                <ButtonComponent
+                                    title="Save Changes"
+                                    onPress={() => handleSubmit()}
+                                    disabled={isLoading}
+                                />
+                            </View>
                         </CardComponent>
 
                         <View style={styles.infoWrapper}>
@@ -148,8 +160,13 @@ export default function UserProfileScreen() {
                                     </TextComponent>
                                 </View>
                             </CardComponent>
-
-                            <ButtonComponent onPress={() => logoutCurrentUser()} title="Logout" variant="destructive" />
+                            <View style={{ alignSelf: "flex-end" }}>
+                                <ButtonComponent
+                                    onPress={() => logoutCurrentUser()}
+                                    title="Logout"
+                                    variant="destructive"
+                                />
+                            </View>
                         </View>
                     </>
                 )
@@ -210,10 +227,6 @@ const styles = StyleSheet.create({
     formGroup: { marginBottom: 12 },
     label: { fontSize: 14, color: "#374151", marginBottom: 4 },
     input: {
-        borderWidth: 1,
-        borderColor: "#d1d5db",
-        borderRadius: 4,
-        padding: 8,
         fontSize: 14,
         color: "#111827",
     },

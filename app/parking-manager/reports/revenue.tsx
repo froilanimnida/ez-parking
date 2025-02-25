@@ -38,7 +38,15 @@ const Revenue = () => {
 
     return (
         <ResponsiveContainer>
-            <LinkComponent label="← Back to Reports" style={{ width: "auto", marginBottom: 16 }} href="./" />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent
+                    label="← Back to Reports"
+                    style={{ width: "auto", marginBottom: 16 }}
+                    href="/parking-manager/report"
+                    variant={"outline"}
+                />
+            </View>
+            <TextComponent variant="h1">Revenue Report</TextComponent>
             <View style={styles.filterContainer}>
                 {PlatformType() === "web" ? (
                     <>
