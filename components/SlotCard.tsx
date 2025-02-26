@@ -80,7 +80,7 @@ const SlotCard = ({ slotInfo, slotUuid, isGuest, establishmentUuid }: SlotCardPr
 
                         <LinkComponent
                             style={styles.bookButton}
-                            label="Book Slot"
+                            label="Reserve Now"
                             href={
                                 isGuest
                                     ? (`../auth/login?next=${encodeURIComponent(

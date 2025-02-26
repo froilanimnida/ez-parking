@@ -13,6 +13,10 @@ interface EstablishmentItem {
         verified: boolean;
         open_slots: number;
         total_slots: number;
+        price_range: {
+            min_hourly_price: number;
+            max_hourly_price: number;
+        };
     };
 }
 
@@ -62,6 +66,14 @@ const EstablishmentItem = ({ userLat, userLong, establishment, guest }: Establis
                 <View style={styles.detailRow}>
                     <MaterialCommunityIcons name="car-outline" size={20} color="#6B7280" />
                     <TextComponent style={styles.detailText}>{establishment.open_slots} Open slots</TextComponent>
+                </View>
+                {/*    New Price Range*/}
+                <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="wallet" size={20} color="#6B7280" />
+                    <TextComponent style={styles.detailText}>
+                        Price Range PHP {establishment.price_range.min_hourly_price} - PHP{" "}
+                        {establishment.price_range.max_hourly_price}
+                    </TextComponent>
                 </View>
             </View>
 

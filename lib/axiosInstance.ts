@@ -6,7 +6,8 @@ import type { SimplifiedValidationError } from "./models/validationError";
 
 const axiosInstance = axios.create({
     withCredentials: true,
-    baseURL: "https://ez-parking-system-pr-54.onrender.com/api/v1",
+    baseURL: "https://ez-parking-system-pr-57.onrender.com/api/v1",
+    // baseURL: "https://ez-parking-system.onrender.com/api/v1",
     // baseURL: "https://localhost:5000/api/v1",
     headers: {
         Accept: "application/json",

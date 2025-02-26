@@ -19,6 +19,7 @@ import { normalMapURL, OSMMapURL, SatteliteMap, threeDimensionalMapURL } from "@
 import { getUserLocation } from "@lib/helper/location";
 import WebView from "react-native-webview";
 import * as WebBrowser from "expo-web-browser";
+import calculateDistance from "@lib/helper/calculateDistance";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;
@@ -188,12 +189,26 @@ const EstablishmentOverview = () => {
                                 <ButtonComponent title="Get Directions" onPress={openBrowser} />
                             </View>
                         </View>
+                        <View>
+                            <TextComponent>
+                                {calculateDistance(
+                                    userLocation.latitude,
+                                    userLocation.longitude,
+                                    establishment.establishment.latitude,
+                                    establishment.establishment.longitude,
+                                )}{" "}
+                                km away
+                            </TextComponent>
+                            {/*    todo: add the here api estimate*/}
+                        </View>
                     </CardComponent>
                     <CardComponent header="Location Details">
                         {PlatformType() !== "web" ? (
                             <WebView
                                 source={{
                                     uri: OSMMapURL(
+                                        userLocation.latitude,
+                                        userLocation.longitude,
                                         establishment.establishment.latitude,
                                         establishment.establishment.longitude,
                                     ),
@@ -201,7 +216,16 @@ const EstablishmentOverview = () => {
                                 style={{ height: 500 }}
                             />
                         ) : (
-                            <iframe title={establishment.establishment.name} src={mapUrl} height={500} />
+                            <iframe
+                                title={establishment.establishment.name}
+                                src={OSMMapURL(
+                                    userLocation.latitude,
+                                    userLocation.longitude,
+                                    establishment.establishment.latitude,
+                                    establishment.establishment.longitude,
+                                )}
+                                height={500}
+                            />
                         )}
                     </CardComponent>
 

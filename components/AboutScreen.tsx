@@ -34,10 +34,6 @@ const developers = [
 const About = () => {
     return (
         <>
-            <TextComponent variant="h1" bold style={styles.title}>
-                About Us
-            </TextComponent>
-
             <CardComponent customStyles={styles.section} header="About EZ Parking">
                 <TextComponent style={styles.paragraph}>
                     Welcome to EZ Parking, your premier parking solution designed to make finding available parking

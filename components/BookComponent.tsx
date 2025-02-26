@@ -20,6 +20,10 @@ interface EstablishmentQuery extends ParkingEstablishment {
     total_slots: number;
     reserved_slot: number;
     occupied_slots: number;
+    price_range: {
+        min_hourly_price: number;
+        max_hourly_price: number;
+    };
 }
 
 const EstablishmentSearch = ({ guest }: { guest: boolean }) => {

@@ -30,7 +30,7 @@ import { OperatingSchedule } from "@lib/models/operatingHour";
 import { askLocationPermission, getUserLocation } from "@lib/helper/location";
 import PlatformType from "@lib/helper/platform";
 import WebView from "react-native-webview";
-import { OSMMapURL } from "@lib/helper/mapViewFunction";
+import { parkingManagerMapOSM } from "@lib/helper/mapViewFunction";
 
 const ParkingManagerSignUp = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -334,7 +334,7 @@ const ParkingManagerSignUp = () => {
                             {PlatformType() !== "web" ? (
                                 <WebView
                                     source={{
-                                        uri: OSMMapURL(
+                                        uri: parkingManagerMapOSM(
                                             parkingEstablishmentData.latitude,
                                             parkingEstablishmentData.longitude,
                                         ),
@@ -343,7 +343,7 @@ const ParkingManagerSignUp = () => {
                             ) : (
                                 <iframe
                                     title={parkingEstablishmentData.name}
-                                    src={OSMMapURL(
+                                    src={parkingManagerMapOSM(
                                         parkingEstablishmentData.latitude,
                                         parkingEstablishmentData.longitude,
                                     )}

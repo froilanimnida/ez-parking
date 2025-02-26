@@ -342,6 +342,8 @@ const TransactionDetails = () => {
                             <WebView
                                 source={{
                                     uri: OSMMapURL(
+                                        userLatitude,
+                                        userLongitude,
                                         transactionDetails.establishment_info.latitude,
                                         transactionDetails.establishment_info.longitude,
                                     ),

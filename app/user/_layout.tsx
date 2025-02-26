@@ -15,7 +15,7 @@ export default function UserLayout() {
             <Tabs.Screen
                 name="book/index"
                 options={{
-                    title: "Book",
+                    title: "Parking",
                     tabBarIcon: ({ color }) => <MaterialCommunityIcons name="book" color={color} size={20} />,
                 }}
             />
