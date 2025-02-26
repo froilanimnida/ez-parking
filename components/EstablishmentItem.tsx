@@ -5,10 +5,15 @@ import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import calculateDistance from "@/lib/function/calculateDistance";
 import LinkComponent from "./LinkComponent";
-import type { ParkingEstablishment } from "@/lib/models/parking-establishment";
+import type { ParkingEstablishment } from "@lib/models/parkingEstablishment";
+import ButtonComponent from "@components/ButtonComponent";
 
 interface EstablishmentItem {
-    establishment: ParkingEstablishment;
+    establishment: ParkingEstablishment & {
+        verified: boolean;
+        open_slots: number;
+        total_slots: number;
+    };
 }
 
 interface EstablishmentItemProps extends EstablishmentItem {
@@ -49,6 +54,15 @@ const EstablishmentItem = ({ userLat, userLong, establishment, guest }: Establis
                     <MaterialCommunityIcons name="map-marker-distance" size={20} color="#6B7280" />
                     <TextComponent style={styles.detailText}>{distance.toFixed(1)} km away</TextComponent>
                 </View>
+
+                <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="car-outline" size={20} color="#6B7280" />
+                    <TextComponent style={styles.detailText}>{establishment.total_slots} Total slots</TextComponent>
+                </View>
+                <View style={styles.detailRow}>
+                    <MaterialCommunityIcons name="car-outline" size={20} color="#6B7280" />
+                    <TextComponent style={styles.detailText}>{establishment.open_slots} Open slots</TextComponent>
+                </View>
             </View>
 
             {establishment.facilities && (
@@ -62,12 +76,12 @@ const EstablishmentItem = ({ userLat, userLong, establishment, guest }: Establis
             )}
 
             <View style={styles.footer}>
-                {/* <TextComponent style={styles.slots}>
+                <TextComponent style={styles.slots}>
                     <TextComponent style={styles.slotsAvailable}>{establishment.open_slots}</TextComponent>/
                     {establishment.total_slots} slots available
-                </TextComponent> */}
+                </TextComponent>
                 <View style={styles.actions}>
-                    <TouchableOpacity
+                    <ButtonComponent
                         style={styles.directionsButton}
                         onPress={() => {
                             const url = `https://www.google.com/maps/dir/?api=1&destination=${establishment.latitude},${establishment.longitude}`;
@@ -75,7 +89,7 @@ const EstablishmentItem = ({ userLat, userLong, establishment, guest }: Establis
                         }}
                     >
                         <TextComponent style={styles.directionsText}>Directions</TextComponent>
-                    </TouchableOpacity>
+                    </ButtonComponent>
                     {guest ? (
                         <LinkComponent href={`../establishment/${establishment.uuid}`} asChild>
                             <TouchableOpacity style={styles.detailsButton}>

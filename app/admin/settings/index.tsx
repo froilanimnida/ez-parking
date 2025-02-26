@@ -1,42 +1,33 @@
 import { StyleSheet, View } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import TextInputComponent from "@/components/TextInputComponent";
 import ButtonComponent from "@/components/ButtonComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
-
-interface UserData {
-    user_id: number;
-    uuid: string;
-    nickname: string;
-    first_name: string;
-    middle_name: string;
-    last_name: string;
-    suffix: string;
-    email: string;
-    phone_number: string;
-    role: string;
-    created_at: string;
-    is_verified: boolean;
-}
+import { logoutCurrentUser } from "@lib/credentialsManager";
+import LinkComponent from "@components/LinkComponent";
+import LoadingComponent from "@components/reusable/LoadingComponent";
+import { User } from "@lib/models/user";
+import { fetchProfile } from "@lib/api/user";
 
 const AdminSettings = () => {
-    const [userData, setUserData] = useState<UserData>({
-        user_id: 1,
-        uuid: "550e8400-e29b-41d4-a716-446655440000",
-        nickname: "admin123",
-        first_name: "Admin",
-        middle_name: "",
-        last_name: "User",
-        suffix: "",
-        email: "admin@example.com",
-        phone_number: "+1234567890",
-        role: "admin",
-        created_at: "2024-03-27T10:00:00",
-        is_verified: true,
-    });
+    const [userData, setUserData] = useState<User>();
     const [isUpdating, setIsUpdating] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    useEffect(() => {
+        setIsLoading(false);
+        const fetchData = async () => {
+            try {
+                const response = await fetchProfile();
+                setUserData(response.data.message);
+            } catch {
+                alert("Failed to fetch user data.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+    }, []);
 
     const handleSave = async () => {
         setIsUpdating(true);
@@ -48,145 +39,155 @@ const AdminSettings = () => {
 
     return (
         <ResponsiveContainer>
-            <TextComponent bold variant="h1" style={styles.header}>
-                Account Settings
-            </TextComponent>
-
-            <CardComponent
-                customStyles={styles.section}
-                header="System Information"
-                subHeader="View your system details"
-            >
-                <View style={styles.grid}>
-                    <TextInputComponent
-                        placeholder="User ID"
-                        value={String(userData.user_id)}
-                        editable={false}
-                        customStyles={styles.disabledInput}
-                    />
-                    <TextInputComponent
-                        placeholder="UUID"
-                        value={userData.uuid}
-                        editable={false}
-                        customStyles={styles.disabledInput}
-                    />
-                    <TextInputComponent
-                        placeholder="Role"
-                        value={userData.role}
-                        editable={false}
-                        customStyles={styles.disabledInput}
-                    />
-                    <TextInputComponent
-                        placeholder="Member Since"
-                        value={new Date(userData.created_at).toLocaleDateString()}
-                        editable={false}
-                        customStyles={styles.disabledInput}
-                    />
-                </View>
-            </CardComponent>
-
-            {/* Personal Information */}
-            <CardComponent
-                customStyles={styles.section}
-                header="Personal Information"
-                subHeader="Update your personal details"
-            >
-                <View style={styles.grid}>
-                    <TextInputComponent
-                        placeholder="Enter your first name"
-                        value={userData.first_name}
-                        onChangeText={(text) => setUserData({ ...userData, first_name: text })}
-                    />
-                    <TextInputComponent
-                        placeholder="Enter your middle name"
-                        value={userData.middle_name}
-                        onChangeText={(text) => setUserData({ ...userData, middle_name: text })}
-                    />
-                    <TextInputComponent
-                        placeholder="Enter your last name"
-                        value={userData.last_name}
-                        onChangeText={(text) => setUserData({ ...userData, last_name: text })}
-                    />
-                    <TextInputComponent
-                        placeholder="Enter your suffix"
-                        value={userData.suffix}
-                        onChangeText={(text) => setUserData({ ...userData, suffix: text })}
-                    />
-                    <TextInputComponent
-                        placeholder="Enter your nickname"
-                        value={userData.nickname}
-                        onChangeText={(text) => setUserData({ ...userData, nickname: text })}
-                    />
-                </View>
-            </CardComponent>
-
-            <CardComponent
-                customStyles={styles.section}
-                header="Contact Information"
-                subHeader="Update your contact details"
-            >
-                <View style={styles.grid}>
-                    <TextInputComponent
-                        placeholder="Enter your email address"
-                        value={userData.email}
-                        editable={false}
-                        customStyles={styles.disabledInput}
-                    />
-                    <TextInputComponent
-                        placeholder="Enter your phone number"
-                        value={userData.phone_number}
-                        onChangeText={(text) => setUserData({ ...userData, phone_number: text })}
-                    />
-                </View>
-            </CardComponent>
-
-            <View style={styles.buttonContainer}>
-                <ButtonComponent
-                    onPress={handleSave}
-                    disabled={isUpdating}
-                    loading={isUpdating}
-                    title={`${isUpdating}` ? "Saving..." : "Save Changes"}
-                />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent variant="outline" style={{ marginBottom: 16 }} href="./" label="← Back" />
             </View>
+            {isLoading || isUpdating ? (
+                <LoadingComponent text="Loading..." />
+            ) : (
+                userData && (
+                    <>
+                        <CardComponent
+                            header="User Profile"
+                            subHeader="Edit your profile information"
+                            customStyles={styles.card}
+                        >
+                            <View style={styles.headerRow}>
+                                <View style={styles.avatarContainer}>
+                                    <TextComponent style={styles.avatarText}>
+                                        {userData.first_name?.charAt(0)}
+                                        {userData.last_name?.charAt(0)}
+                                    </TextComponent>
+                                </View>
+                                <View>
+                                    <TextComponent style={styles.headerName}>
+                                        {userData.first_name} {userData.last_name}
+                                    </TextComponent>
+                                    {userData.nickname && (
+                                        <TextComponent style={styles.headerNickname}>
+                                            @{userData.nickname}
+                                        </TextComponent>
+                                    )}
+                                </View>
+                            </View>
+                        </CardComponent>
+
+                        <CardComponent
+                            header="Edit Profile"
+                            customStyles={styles.card}
+                            subHeader="Update your profile information"
+                        >
+                            <View style={styles.formGroup}>
+                                <TextComponent style={styles.label}>First Name</TextComponent>
+                                <TextInputComponent customStyles={styles.input} value={userData.first_name} />
+                            </View>
+                            <View style={styles.formGroup}>
+                                <TextComponent style={styles.label}>Last Name</TextComponent>
+                                <TextInputComponent customStyles={styles.input} value={userData.last_name} />
+                            </View>
+                            <View style={styles.formGroup}>
+                                <TextComponent style={styles.label}>Middle Name</TextComponent>
+                                <TextInputComponent customStyles={styles.input} value={userData.middle_name} />
+                            </View>
+                            <View style={styles.formGroup}>
+                                <TextComponent style={styles.label}>Suffix</TextComponent>
+                                <TextInputComponent customStyles={styles.input} value={userData.suffix ?? ""} />
+                            </View>
+                            <View style={styles.formGroup}>
+                                <TextComponent style={styles.label}>Nickname</TextComponent>
+                                <TextInputComponent customStyles={styles.input} value={userData.nickname ?? ""} />
+                            </View>
+
+                            <ButtonComponent title="Save Changes" onPress={() => alert("Saved")} disabled={isLoading} />
+                        </CardComponent>
+
+                        <View style={styles.infoWrapper}>
+                            <CardComponent header="Account Information">
+                                <TextComponent style={styles.sectionTitle}>Account Information</TextComponent>
+                                <View style={styles.infoItem}>
+                                    <TextComponent style={styles.infoLabel}>Email</TextComponent>
+                                    <TextComponent style={styles.infoValue}>{userData.email}</TextComponent>
+                                </View>
+                                <View style={styles.infoItem}>
+                                    <TextComponent style={styles.infoLabel}>Role</TextComponent>
+                                    <TextComponent style={styles.infoValue}>{userData.role}</TextComponent>
+                                </View>
+                            </CardComponent>
+
+                            <CardComponent header="Account Details">
+                                <TextComponent style={styles.sectionTitle}>Account Details</TextComponent>
+                                <View style={styles.infoItem}>
+                                    <TextComponent style={styles.infoLabel}>Account ID</TextComponent>
+                                    <TextComponent style={styles.infoValue}>{userData.uuid}</TextComponent>
+                                </View>
+                                <View style={styles.infoItem}>
+                                    <TextComponent style={styles.infoLabel}>Verification Status</TextComponent>
+                                    <TextComponent style={styles.infoValue}>
+                                        {userData.is_verified ? "Verified" : "Not Verified"}
+                                    </TextComponent>
+                                </View>
+                            </CardComponent>
+                        </View>
+                    </>
+                )
+            )}
+            <ButtonComponent onPress={() => logoutCurrentUser()} title="Logout" variant="destructive" />
         </ResponsiveContainer>
     );
 };
 
 const styles = StyleSheet.create({
-    content: {
-        padding: 16,
-        maxWidth: 768,
-        width: "100%",
-        alignSelf: "center",
+    card: {
+        marginBottom: 16,
     },
-    header: {
-        marginBottom: 24,
+    headerRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
     },
-    title: {
+    avatarContainer: {
+        width: 64,
+        height: 64,
+        backgroundColor: "#c7d2fe",
+        borderRadius: 32,
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 16,
+    },
+    avatarText: {
         fontSize: 24,
+        fontWeight: "bold",
+        color: "#4f46e5",
+    },
+    headerName: {
+        fontSize: 18,
         fontWeight: "bold",
         color: "#111827",
     },
-    subtitle: {
+    headerNickname: {
         fontSize: 14,
-        color: "#6B7280",
-        marginTop: 4,
+        color: "#6b7280",
     },
-    section: {
-        marginBottom: 24,
-        padding: 16,
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: "600",
+        marginBottom: 12,
+        color: "#111827",
     },
-    grid: {
-        gap: 16,
+    formGroup: { marginBottom: 12 },
+    label: { fontSize: 14, color: "#374151", marginBottom: 4 },
+    input: {
+        borderWidth: 1,
+        borderColor: "#d1d5db",
+        borderRadius: 4,
+        padding: 8,
+        fontSize: 14,
+        color: "#111827",
     },
-    disabledInput: {
-        backgroundColor: "#F3F4F6",
-    },
-    buttonContainer: {
-        marginTop: 24,
-        color: "#fff",
-        alignItems: "flex-end",
-    },
+    buttonRow: { alignItems: "flex-end" },
+    infoWrapper: { flexDirection: "column", gap: 16 },
+    infoItem: { marginBottom: 12 },
+    infoLabel: { fontSize: 12, color: "#6b7280" },
+    infoValue: { fontSize: 14, color: "#111827" },
 });
-
 export default AdminSettings;

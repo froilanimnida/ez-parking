@@ -6,7 +6,7 @@ import ButtonComponent from "@/components/ButtonComponent";
 import TextInputComponent from "@/components/TextInputComponent";
 import SelectComponent from "@/components/SelectComponent";
 import CheckboxComponent from "@/components/CheckboxComponent";
-import type { VehicleType } from "@/lib/models/vehicle-types";
+import type { VehicleType } from "@lib/models/vehicleTypes";
 import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { getVehicleTypes } from "@/lib/api/admin";
@@ -41,7 +41,9 @@ const VehicleTypes = () => {
     };
     return (
         <ResponsiveContainer>
-            <LinkComponent style={{ width: "auto", marginBottom: 16 }} href="../admin" label="← Back to Dashboard" />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent variant="outline" style={{ marginBottom: 16 }} href="./" label="← Back to Dashboard" />
+            </View>
             <TextComponent bold variant="h1" style={styles.header}>
                 Vehicle Types
             </TextComponent>

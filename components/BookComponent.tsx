@@ -1,160 +1,132 @@
 import React, { useEffect, useState } from "react";
-import { View, ScrollView, StyleSheet, Animated, Modal, Pressable } from "react-native";
-import * as Location from "expo-location";
+import { View, StyleSheet } from "react-native";
 import EstablishmentItem from "@/components/EstablishmentItem";
 import TextComponent from "@/components/TextComponent";
-import type { ParkingEstablishment } from "@/lib/models/parking-establishment";
-import type { PricingPlan } from "@/lib/models/pricing-plan";
+import type { ParkingEstablishment } from "@lib/models/parkingEstablishment";
 import TextInputComponent from "@/components/TextInputComponent";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import PlatformType from "@lib/helper/platform";
-import { getNearbyEstablishments } from "@/lib/api/establishment";
-import { askLocationPermission, getIPBasedLocation } from "@lib/helper/location";
+import { searchEstablishments } from "@/lib/api/establishment";
+import { askLocationPermission, getIPBasedLocation, getUserLocation } from "@lib/helper/location";
 import LoadingComponent from "./reusable/LoadingComponent";
 import SelectComponent from "./SelectComponent";
-import { METRO_MANILA_CITIES } from "@/lib/models/cities";
+import { METRO_MANILA_CITIES } from "@/lib/types/models/common/constants";
 import type { CITY } from "@/lib/types/models/common/constants";
-export interface EstablishmentQuery extends ParkingEstablishment {
+import ButtonComponent from "@components/ButtonComponent";
+import { useDebounce } from "@lib/function/debounce";
+
+interface EstablishmentQuery extends ParkingEstablishment {
     open_slots: number;
     total_slots: number;
     reserved_slot: number;
     occupied_slots: number;
-    pricing_plans: PricingPlan[];
 }
-
-const getNearestEstablishments = async (latitude: number, longitude: number) =>
-    await getNearbyEstablishments(latitude, longitude);
 
 const EstablishmentSearch = ({ guest }: { guest: boolean }) => {
     const [establishments, setEstablishments] = useState<EstablishmentQuery[]>([]);
-    const [modalVisible, setModalVisible] = useState(false);
     const [searchTerm, setSearchTerm] = useState<CITY>("");
-    const [selectedCity, setSelectedCity] = useState("");
-    const [recentSearches, setRecentSearches] = useState([]);
+    const [selectedCity, setSelectedCity] = useState("manila");
     const [loading, setLoading] = useState(true);
-
-    const animation = new Animated.Value(0);
-
-    const handleSearch = async () => {
-        setLoading(true);
-
-        setLoading(false);
-    };
-
-    const expandSearchBar = () => {
-        setModalVisible(true);
-        Animated.spring(animation, {
-            toValue: 1,
-            useNativeDriver: true,
-        }).start();
-    };
     const [location, setLocation] = useState({
         latitude: 14.5995,
         longitude: 120.9842,
     });
 
+    const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+    const fetchEstablishments = async () => {
+        setLoading(true);
+        try {
+            const data = await searchEstablishments(
+                location.latitude,
+                location.longitude,
+                debouncedSearchTerm,
+                selectedCity,
+            );
+            setEstablishments(data.data.establishments);
+        } catch {
+            alert("Error fetching establishments");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        (async () => {
+        const fetchData = async () => {
             let status = await askLocationPermission();
             if (!status) {
                 const data = await getIPBasedLocation();
                 setLocation({ latitude: data.latitude, longitude: data.longitude });
-                return;
             }
 
             try {
-                let location = await Location.getCurrentPositionAsync({
-                    accuracy: Location.Accuracy.BestForNavigation,
-                });
+                let location = await getUserLocation();
                 setLocation({
                     latitude: location.coords.latitude,
                     longitude: location.coords.longitude,
                 });
-            } catch (error) {
+            } catch {
                 const data = await getIPBasedLocation();
                 setLocation({ latitude: data.latitude, longitude: data.longitude });
+            } finally {
+                fetchEstablishments().then();
             }
-            const data = await getNearestEstablishments(location.latitude, location.longitude);
-            setEstablishments(data.data.establishments);
-            setLoading(false);
-        })();
+        };
+        fetchData().then();
     }, []);
+
+    useEffect(() => {
+        if (debouncedSearchTerm) {
+            fetchEstablishments().then();
+        }
+    }, [debouncedSearchTerm]);
 
     return (
         <View style={{ flex: 1, gap: 16 }}>
             <View style={styles.header}>
-                <Pressable onPress={expandSearchBar}>
-                    <View style={styles.searchBarContainer}>
-                        <View style={styles.searchBar}>
-                            <MaterialCommunityIcons name="magnify" size={20} color="#4b5563" />
-                            <TextComponent style={styles.searchText}>Where to park?</TextComponent>
-                        </View>
+                <TextComponent style={{ fontSize: 24, fontWeight: "600" }}>Find Parking</TextComponent>
+                <View style={styles.searchBarContainer}>
+                    <View style={styles.formGroup}>
+                        <TextComponent variant="label">Location</TextComponent>
+                        <TextInputComponent placeholder={"Where to park"} onChangeText={setSearchTerm} />
                     </View>
-                </Pressable>
-
-                <Modal animationType="slide" visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
-                    <View style={styles.modalContainer}>
-                        <View style={styles.modalHeader}>
-                            <Pressable onPress={() => setModalVisible(false)} style={styles.backButton}>
-                                <MaterialCommunityIcons name="arrow-left" size={24} color="#000" />
-                            </Pressable>
-                            <View style={styles.citySelectContainer}>
-                                <TextInputComponent
-                                    placeholder="Search parking locations"
-                                    value={searchTerm}
-                                    onChangeText={setSearchTerm}
-                                    autoFocus
-                                />
-                            </View>
-                            <SelectComponent
-                                items={METRO_MANILA_CITIES.map((city) => ({ label: city.toLowerCase(), value: city }))}
-                                selectedValue={selectedCity}
-                                onValueChange={(city) => {
-                                    setSelectedCity(city);
-                                }}
-                                placeholder="Select City"
-                            />
-                        </View>
-                        <ScrollView style={styles.modalContent}>
-                            {recentSearches.map((search, index) => (
-                                <Pressable
-                                    key={index}
-                                    style={styles.recentSearchItem}
-                                    onPress={() => {
-                                        setSearchTerm(search);
-                                        handleSearch();
-                                        setModalVisible(false);
-                                    }}
-                                >
-                                    <MaterialCommunityIcons name="clock-time-four-outline" size={24} color="#6b7280" />
-                                    <TextComponent style={styles.recentSearchText}>{search}</TextComponent>
-                                </Pressable>
-                            ))}
-                        </ScrollView>
+                    <View style={styles.formGroup}>
+                        <TextComponent variant="label">City</TextComponent>
+                        <SelectComponent
+                            items={METRO_MANILA_CITIES.map((city) => ({
+                                label: city,
+                                value: city.toLowerCase(),
+                            }))}
+                            selectedValue={selectedCity}
+                            onValueChange={(city) => {
+                                setSelectedCity(city);
+                            }}
+                        />
                     </View>
-                </Modal>
+                </View>
+                <ButtonComponent onPress={fetchEstablishments} title="Search" />
             </View>
 
-            {/* Main Content */}
-            <ScrollView style={styles.content}>
-                {loading ? (
-                    <LoadingComponent text="Searching for nearby parking establishments..." />
-                ) : establishments.length === 0 ? (
-                    <View style={styles.noResults}>{/* No results UI */}</View>
-                ) : (
-                    <View style={styles.results}>
-                        {establishments.map((establishment) => (
-                            <EstablishmentItem
-                                guest={guest}
-                                key={establishment.establishment_id}
-                                establishment={establishment}
-                                userLat={location.latitude}
-                                userLong={location.longitude}
-                            />
-                        ))}
-                    </View>
-                )}
-            </ScrollView>
+            {loading ? (
+                <LoadingComponent text="Searching for nearby parking establishments..." />
+            ) : establishments.length === 0 ? (
+                <View style={styles.noResults}>
+                    <MaterialCommunityIcons name={"car"} size={64} color={"#6b7280"} />
+                    <TextComponent style={{ textAlign: "center" }}>No parking establishments found...</TextComponent>
+                </View>
+            ) : (
+                <View style={styles.results}>
+                    {establishments.map((establishment) => (
+                        <EstablishmentItem
+                            guest={guest}
+                            key={establishment.establishment_id}
+                            establishment={establishment}
+                            userLat={location.latitude}
+                            userLong={location.longitude}
+                        />
+                    ))}
+                </View>
+            )}
         </View>
     );
 };
@@ -226,7 +198,10 @@ const styles = StyleSheet.create({
     },
     searchBarContainer: {
         marginTop: 8,
-        paddingHorizontal: 16,
+        width: "100%",
+        flexDirection: "row",
+        gap: 16,
+        flex: 1,
     },
     searchBar: {
         flexDirection: "row",
@@ -274,5 +249,9 @@ const styles = StyleSheet.create({
         marginLeft: 12,
         fontSize: 16,
         color: "#111827",
+    },
+    formGroup: {
+        gap: 8,
+        flex: 1,
     },
 });

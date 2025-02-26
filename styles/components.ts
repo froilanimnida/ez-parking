@@ -7,26 +7,22 @@ const baseStyles = StyleSheet.create({
         height: "auto",
         width: "auto",
         justifyContent: "center",
+        borderRadius: 6,
     },
     xs: {
         padding: 6,
-        borderRadius: 6,
     },
     sm: {
         padding: 8,
-        borderRadius: 6,
     },
     md: {
         padding: 12,
-        borderRadius: 8,
     },
     lg: {
         padding: 16,
-        borderRadius: 8,
     },
     xl: {
         padding: 20,
-        borderRadius: 12,
     },
     textXs: {
         fontSize: 12,
@@ -43,7 +39,6 @@ const baseStyles = StyleSheet.create({
     textXl: {
         fontSize: 20,
     },
-    // Variants
     primary: {
         backgroundColor: "#4F46E5",
         color: "white",
@@ -75,7 +70,7 @@ const baseStyles = StyleSheet.create({
     outlineText: { color: "#374151" },
     ghostText: { color: "#374151" },
     disabled: {
-        opacity: 0.5,
+        backgroundColor: "rgb(209 213 219)",
     },
     iconLeft: {
         marginRight: 8,

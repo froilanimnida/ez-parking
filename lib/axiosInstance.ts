@@ -1,51 +1,8 @@
-import axios, {type AxiosError, AxiosRequestHeaders} from "axios";
-import * as SecureStore from "expo-secure-store";
+import axios, { type AxiosError, AxiosRequestHeaders } from "axios";
 import PlatformType from "./helper/platform";
-import { type RelativePathString } from "expo-router";
-import getAuthHeaders from "@lib/helper/getAuthHeaders";
+import getAuthHeaders, { setAuthHeaders } from "@lib/helper/getAuthHeaders";
 import type ApiValidationError from "./models/validationError";
 import type { SimplifiedValidationError } from "./models/validationError";
-import {UserRole} from "@lib/types/models/common/constants";
-
-
-async function verifyAndGetRole(
-    authToken: string | undefined | null,
-    xsrfToken: string | undefined | null,
-    csrf_refresh_token: string | undefined | null,
-    refresh_token_cookie: string | undefined | null
-): Promise<UserRole | null> {
-    if (!authToken) return null;
-    try {
-        const result = await axiosInstance.post(
-            `/auth/verify-token`,
-            {},
-            {
-                headers: {
-                    access_token_cookie: authToken,
-                    csrf_access_token: xsrfToken || "",
-                    refresh_token_cookie: refresh_token_cookie || "",
-                    csrf_refresh_token: csrf_refresh_token || "",
-                },
-            }
-        );
-        return result.data.role as UserRole;
-    } catch {
-        return null;
-    }
-}
-
-export function getRedirectPath(role: UserRole): RelativePathString {
-    switch (role) {
-        case "admin":
-            return "/admin" as RelativePathString;
-        case "parking_manager":
-            return "/parking-manager" as RelativePathString;
-        case "user":
-            return "/user" as RelativePathString;
-        default:
-            return "/" as RelativePathString;
-    }
-}
 
 const axiosInstance = axios.create({
     withCredentials: true,
@@ -58,30 +15,23 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
     async (value) => {
-        const requestUrl = value.url;
-        if (requestUrl?.endsWith("/login")) {
-            if (PlatformType() !== "web") {
-                const access_token_cookie = await SecureStore.getItemAsync("access_token_cookie");
-                const csrf_access_token = await SecureStore.getItemAsync("csrf_access_token");
-                const csrf_refresh_token = await SecureStore.getItemAsync("csrf_refresh_token");
-                const refresh_token_cookie = await SecureStore.getItemAsync("refresh_token_cookie");
-                const userRole = await verifyAndGetRole(
-                    access_token_cookie,
-                    csrf_access_token,
-                    csrf_refresh_token,
-                    refresh_token_cookie
-                );
-                if (userRole) {
-                    value.url = getRedirectPath(userRole);
-                }
-            }
+        const authTokens = await getAuthHeaders();
+        if (PlatformType() !== "web") {
+            value.headers["access_token_cookie"] = authTokens.access_token_cookie;
+            value.headers["csrf_access_token"] = authTokens.csrf_access_token;
+            value.headers["refresh_token_cookie"] = authTokens.refresh_token_cookie;
+            value.headers["csrf_refresh_token"] = authTokens.csrf_refresh_token;
             return value;
+        }
+        if (document.cookie) {
+            value.headers["csrf_refresh_token"] = authTokens.csrf_refresh_token;
+            value.headers["csrf_access_token"] = document.cookie.split("csrf_access_token=")[1].split(";")[0];
         }
         return value;
     },
     async (error) => {
         return Promise.reject(error);
-    }
+    },
 );
 
 axiosInstance.interceptors.request.use(
@@ -93,7 +43,7 @@ axiosInstance.interceptors.request.use(
         }
         return config;
     },
-    (error) => Promise.reject(error)
+    (error) => Promise.reject(error),
 );
 
 axiosInstance.interceptors.response.use(
@@ -108,7 +58,7 @@ axiosInstance.interceptors.response.use(
                     const [key, value] = cookieValue.split("=");
                     if (key && value) {
                         try {
-                            await SecureStore.setItemAsync(key, value);
+                            await setAuthHeaders(key, value);
                         } catch (err) {
                             console.error(`Failed to store cookie ${key}:`, err);
                         }
@@ -142,7 +92,7 @@ axiosInstance.interceptors.response.use(
             return Promise.reject(simplifiedError);
         }
         return Promise.reject(error);
-    }
+    },
 );
 
 export default axiosInstance;

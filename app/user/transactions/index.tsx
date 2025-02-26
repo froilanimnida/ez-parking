@@ -2,7 +2,7 @@ import { StyleSheet, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
-import { ParkingSlot } from "@/lib/models/parking-slot";
+import { ParkingSlot } from "@lib/models/parkingSlot";
 import TextInputComponent from "@/components/TextInputComponent";
 import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
@@ -60,32 +60,54 @@ interface UserTransaction extends ParkingSlot {
 const Transactions = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [transactions, setTransactions] = useState<UserTransaction[]>([]);
+    const [filteredTransactions, setFilteredTransactions] = useState<UserTransaction[]>([]);
     const [fetching, setFetching] = useState(true);
+
     useEffect(() => {
         const fetchTransactions = async () => {
             try {
-                fetchUserTransactions().then((response) => {
-                    setFetching(false);
-                    setTransactions(response.transactions);
-                });
+                const response = await fetchUserTransactions();
+                setTransactions(response.transactions);
+                setFilteredTransactions(response.transactions);
+                setFetching(false);
             } catch (error) {
                 console.error("Error fetching transactions");
+                setFetching(false);
             }
         };
-        fetchTransactions();
+        fetchTransactions().then();
     }, []);
+
+    // Filter transactions when search term changes
+    useEffect(() => {
+        const filtered = transactions.filter((transaction) =>
+            transaction.slot_code.toLowerCase().includes(searchTerm.toLowerCase().trim()),
+        );
+        setFilteredTransactions(filtered);
+    }, [searchTerm, transactions]);
+
+    const handleSearch = (text: string) => {
+        setSearchTerm(text);
+    };
 
     return (
         <ResponsiveContainer>
-            <LinkComponent style={{ width: "auto", marginBottom: 16 }} href="../user" label="← Back to Dashboard" />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent
+                    variant="outline"
+                    style={{ marginBottom: 16 }}
+                    href="../user"
+                    label="← Back to Dashboard"
+                />
+            </View>
             <TextComponent bold style={styles.title}>
                 My Transactions
             </TextComponent>
             <TextInputComponent
                 customStyles={styles.searchInput}
                 value={searchTerm}
-                onChangeText={setSearchTerm}
-                placeholder="Search by slot code or vehicle type..."
+                onChangeText={handleSearch}
+                placeholder="Search by slot code..."
             />
 
             <View style={styles.transactionList}>
@@ -94,7 +116,12 @@ const Transactions = () => {
                         <LoadingComponent text="Crunching your latest transaction..." />
                     </View>
                 )}
-                {transactions.map((transaction) => (
+                {!fetching && filteredTransactions.length === 0 && (
+                    <View style={styles.noResults}>
+                        <TextComponent>No transactions found</TextComponent>
+                    </View>
+                )}
+                {filteredTransactions.map((transaction) => (
                     <CardComponent key={transaction.uuid} customStyles={styles.card} header="Transaction Details">
                         <View style={styles.cardHeader}>
                             <LinkComponent
@@ -220,6 +247,11 @@ const styles = StyleSheet.create({
     },
     titleContainer: {
         marginBottom: 24,
+    },
+    noResults: {
+        padding: 16,
+        alignItems: "center",
+        justifyContent: "center",
     },
     title: {
         fontSize: 24,

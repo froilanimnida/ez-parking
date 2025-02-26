@@ -10,8 +10,8 @@ import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { getEstablishments } from "@/lib/api/admin";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import LinkComponent from "@/components/LinkComponent";
-import type { ParkingEstablishment } from "@/lib/models/parking-establishment";
-import type { CompanyProfile } from "@/lib/models/company-profile";
+import type { ParkingEstablishment } from "@lib/models/parkingEstablishment";
+import type { CompanyProfile } from "@lib/models/companyProfile";
 import { ADMIN_ESTABLISHMENT_FILTERS } from "@/lib/types/models/common/constants";
 
 interface Establishment {
@@ -20,21 +20,51 @@ interface Establishment {
 }
 
 const Establishments = () => {
-    const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved" | "rejected" | string>("all");
+    const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved" | string>("all");
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(true);
     const [establishments, setEstablishments] = useState<Establishment[]>([]);
+    const [filteredEstablishments, setFilteredEstablishments] = useState<Establishment[]>([]);
+
     useEffect(() => {
         const getEstablishmentData = async () => {
             const res = await getEstablishments();
-            setEstablishments(res.data.data as Establishment[]);
+            const data = res.data.data as Establishment[];
+            setEstablishments(data);
+            setFilteredEstablishments(data);
             setLoading(false);
         };
-        getEstablishmentData();
+        getEstablishmentData().then();
     }, []);
+
+    useEffect(() => {
+        const filtered = establishments.filter((establishment) => {
+            const matchesSearch = establishment.establishment.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+            const matchesStatus =
+                statusFilter === "all" ||
+                (statusFilter === "approved" && establishment.establishment.verified) ||
+                (statusFilter === "pending" && !establishment.establishment.verified);
+
+            return matchesSearch && matchesStatus;
+        });
+
+        setFilteredEstablishments(filtered);
+    }, [searchQuery, statusFilter, establishments]);
+
+    const handleSearch = (text: string) => {
+        setSearchQuery(text);
+    };
+
+    const handleFilter = (value: string) => {
+        setStatusFilter(value);
+    };
+
     return (
         <ResponsiveContainer>
-            <LinkComponent label="← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="../" />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent variant="outline" style={{ marginBottom: 16 }} href="./" label="← Back to Dashboard" />
+            </View>
             <View style={styles.header}>
                 <TextComponent bold variant="h1">
                     Parking Establishments
@@ -47,23 +77,25 @@ const Establishments = () => {
                         items={ADMIN_ESTABLISHMENT_FILTERS.map((filter) => {
                             return { label: filter.toUpperCase(), value: filter };
                         })}
-                        onValueChange={setStatusFilter}
+                        onValueChange={handleFilter}
                         selectedValue={statusFilter}
                     />
                 </View>
                 <TextInputComponent
                     placeholder="Search establishments..."
                     value={searchQuery}
-                    onChangeText={setSearchQuery}
+                    onChangeText={handleSearch}
                 />
             </View>
 
             <View style={styles.grid}>
                 {loading && establishments.length === 0 && <LoadingComponent text="Fetching establishments..." />}
-                {establishments.map((establishment, index) => (
-                    <CardComponent key={index} customStyles={styles.card} header="Establishment Details">
+                {!loading && filteredEstablishments.length === 0 && (
+                    <TextComponent style={styles.noResults}>No establishments found</TextComponent>
+                )}
+                {filteredEstablishments.map((establishment, index) => (
+                    <CardComponent key={index} customStyles={styles.card} header={establishment.establishment.name}>
                         <View style={styles.cardHeader}>
-                            <TextComponent variant="h3">{establishment.establishment.name}</TextComponent>
                             <View
                                 style={[
                                     styles.badge,
@@ -111,6 +143,11 @@ const Establishments = () => {
 const styles = StyleSheet.create({
     header: {
         marginBottom: 16,
+    },
+    noResults: {
+        textAlign: "center",
+        color: "#6B7280",
+        padding: 16,
     },
     subtitle: {
         color: "#6B7280",

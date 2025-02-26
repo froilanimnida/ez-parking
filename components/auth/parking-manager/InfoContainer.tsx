@@ -50,7 +50,6 @@ const styles = StyleSheet.create({
         backgroundColor: "#EFF6FF",
         borderRadius: 8,
         padding: 16,
-        width: "95%",
         marginBottom: 40,
     },
     infoHeader: {

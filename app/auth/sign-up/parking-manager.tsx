@@ -1,5 +1,5 @@
 import { StyleSheet, View } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ButtonComponent from "@/components/ButtonComponent";
 import * as DocumentPicker from "expo-document-picker";
 import TextInputComponent from "@/components/TextInputComponent";
@@ -9,7 +9,6 @@ import TextComponent from "@/components/TextComponent";
 import CheckboxComponent from "@/components/CheckboxComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import LocationPicker from "@/components/auth/parking-manager/LocationPicker";
 import {
     ParkingCompanyProfile,
     ParkingPaymentMethodData,
@@ -19,7 +18,7 @@ import {
 } from "@/lib/models/parkingManagerSignUpTypes";
 import OperatingHoursForm from "@/components/auth/parking-manager/OperatingHoursForm";
 import { parkingManagerSignUp } from "@/lib/api/parkingManager";
-import { METRO_MANILA_CITIES } from "@/lib/models/cities";
+import { METRO_MANILA_CITIES } from "@lib/types/models/common/constants";
 import PaymentMethods from "@/components/auth/parking-manager/PaymentMethods";
 import ParkingOwnerInfoCard from "@/components/auth/parking-manager/ParkingOwnerInfoCard";
 import FacilitiesAndAmenitiesCard from "@/components/auth/parking-manager/FacilitiesAndAmenitiesCard";
@@ -27,10 +26,14 @@ import { ParkingOperatingHoursData } from "@/lib/models/parkingManagerSignUpType
 import type { DocumentInfo, Documents } from "@/lib/types/documents";
 import { Image } from "react-native";
 import InfoContainer from "@/components/auth/parking-manager/InfoContainer";
+import { OperatingSchedule } from "@lib/models/operatingHour";
+import { askLocationPermission, getUserLocation } from "@lib/helper/location";
+import PlatformType from "@lib/helper/platform";
+import WebView from "react-native-webview";
+import { OSMMapURL } from "@lib/helper/mapViewFunction";
 
 const ParkingManagerSignUp = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [query, setQuery] = useState("");
     const [userInformation, setUserInformation] = useState<ParkingOwnerInformation>({
         email: "",
         first_name: "",
@@ -55,11 +58,11 @@ const ParkingManagerSignUp = () => {
 
     const [parkingEstablishmentData, setParkingEstablishmentData] = useState<ParkingEstablishmentData>({
         space_type: "",
-        space_layout: "",
+        space_layout: "parallel",
         custom_layout: "",
         dimensions: "",
         is24_7: false,
-        access_info: "no_specific_access",
+        access_info: "no_special_access",
         custom_access: "",
         name: "",
         lighting: "",
@@ -70,7 +73,7 @@ const ParkingManagerSignUp = () => {
         nearby_landmarks: "",
     });
 
-    const [operatingHours, setOperatingHours] = useState({
+    const [operatingHours, setOperatingHours] = useState<OperatingSchedule>({
         monday: { enabled: false, open: "", close: "" },
         tuesday: { enabled: false, open: "", close: "" },
         wednesday: { enabled: false, open: "", close: "" },
@@ -88,13 +91,37 @@ const ParkingManagerSignUp = () => {
     });
 
     let [documents, setDocuments] = useState<Documents>({
-        govId: null,
-        parkingPhotos: [],
-        proofOfOwnership: null,
-        businessCert: null,
-        birCert: null,
-        liabilityInsurance: null,
+        gov_id: null,
+        parking_photos: [],
+        proof_of_ownership: null,
+        business_cert: null,
+        bir_cert: null,
+        liability_insurance: null,
     });
+    const getMyLocation = async () => {
+        try {
+            const status = await askLocationPermission();
+            if (!status) {
+                alert("Permission to access location was denied");
+                return;
+            }
+
+            const location = await getUserLocation();
+            if (!location) {
+                alert("Could not get your location. Please try again.");
+                return;
+            }
+
+            setParkingEstablishmentData((prev) => ({
+                ...prev,
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+            }));
+        } catch (error) {
+            console.error("Error getting current location:", error);
+            alert("Error getting current location. Please try again.");
+        }
+    };
 
     const handleParkingOwnerInfo = (key: string, value: string) => {
         setUserInformation({ ...userInformation, [key]: value });
@@ -129,37 +156,11 @@ const ParkingManagerSignUp = () => {
         setPaymentMethodData({ ...paymentMethodData, [key]: value });
     };
 
-    const searchLocation = async () => {
-        if (!query) {
-            alert("Please enter an address above to search");
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
-            );
-            const data = await response.json();
-            if (data.length > 0) {
-                const { lat, lon } = data[0];
-                setParkingEstablishmentData((prev) => ({
-                    ...prev,
-                    latitude: parseFloat(lat),
-                    longitude: parseFloat(lon),
-                }));
-            } else {
-                alert("Location not found. Please enter a valid address");
-            }
-        } catch {
-            alert("An error occurred while searching for the location");
-        }
-    };
-
     const handleDocumentPick = async (type: keyof Documents) => {
         try {
             let result;
 
-            if (type === "parkingPhotos") {
+            if (type === "parking_photos") {
                 // Handle multiple photo selection
                 result = await DocumentPicker.getDocumentAsync({
                     type: ["image/*"],
@@ -177,13 +178,12 @@ const ParkingManagerSignUp = () => {
 
                     setDocuments((prev) => ({
                         ...prev,
-                        parkingPhotos: [...(prev.parkingPhotos || []), ...newPhotos],
+                        parking_photos: [...(prev.parking_photos || []), ...newPhotos],
                     }));
                 }
-                return; // Early return after handling photos
+                return;
             }
 
-            // Handle single file selection for other documents
             result = await DocumentPicker.getDocumentAsync({
                 type: ["application/pdf", "image/*"],
                 copyToCacheDirectory: true,
@@ -216,7 +216,7 @@ const ParkingManagerSignUp = () => {
 
     // Update your remove document handler
     const handleRemoveDocument = (type: keyof Documents) => {
-        if (type === "parkingPhotos") {
+        if (type === "parking_photos") {
             setDocuments((prev) => ({
                 ...prev,
                 [type]: [],
@@ -231,7 +231,6 @@ const ParkingManagerSignUp = () => {
 
     const [agreed, setAgreed] = useState(false);
     const handleSubmit = async () => {
-        setIsSubmitting(true);
         try {
             const result = await parkingManagerSignUp(
                 userInformation,
@@ -240,15 +239,18 @@ const ParkingManagerSignUp = () => {
                 parkingEstablishmentData,
                 operatingHours,
                 paymentMethodData,
-                documents
+                documents,
             );
             if (result.status === 201) {
                 alert("Registration successful. Please wait for approval.");
             } else {
                 alert("An error occurred while submitting the form. Please try again.");
             }
-        } catch {
+        } catch (e) {
+            console.log(e);
             alert("An error occurred while submitting the form. Please try again.");
+        } finally {
+            setIsSubmitting(false);
         }
     };
     const [zoningCompliance, setZoningCompliance] = useState(false);
@@ -284,13 +286,13 @@ const ParkingManagerSignUp = () => {
                     customStyles={{ width: "95%" }}
                 >
                     <View style={styles.form}>
-                        <TextInputComponent
-                            placeholder="Search for address to get coordinates and map data"
-                            value={query}
-                            onChangeText={(value) => setQuery(value)}
-                        />
+                        {/*<TextInputComponent*/}
+                        {/*    placeholder="Search for address to get coordinates and map data"*/}
+                        {/*    value={query}*/}
+                        {/*    onChangeText={(value) => setQuery(value)}*/}
+                        {/*/>*/}
 
-                        <ButtonComponent onPress={searchLocation} title="Search" />
+                        {/*<ButtonComponent onPress={searchLocation} title="Search" />*/}
 
                         <TextInputComponent
                             placeholder="Street Address"
@@ -329,30 +331,37 @@ const ParkingManagerSignUp = () => {
                         </View>
 
                         <View style={styles.mapContainer}>
-                            <LocationPicker
-                                initialLatitude={parkingEstablishmentData.latitude}
-                                initialLongitude={parkingEstablishmentData.longitude}
-                                onLocationChange={(latitude: number, longitude: number) => {
-                                    setParkingEstablishmentData((prev) => ({
-                                        ...prev,
-                                        latitude,
-                                        longitude,
-                                    }));
-                                }}
-                            />
+                            {PlatformType() !== "web" ? (
+                                <WebView
+                                    source={{
+                                        uri: OSMMapURL(
+                                            parkingEstablishmentData.latitude,
+                                            parkingEstablishmentData.longitude,
+                                        ),
+                                    }}
+                                />
+                            ) : (
+                                <iframe
+                                    title={parkingEstablishmentData.name}
+                                    src={OSMMapURL(
+                                        parkingEstablishmentData.latitude,
+                                        parkingEstablishmentData.longitude,
+                                    )}
+                                    height={500}
+                                />
+                            )}
                         </View>
 
                         <View style={styles.formGroup}>
                             <TextInputComponent
                                 placeholder="Longitude"
                                 value={String(parkingEstablishmentData.longitude)}
-                                editable={false}
                             />
                             <TextInputComponent
                                 placeholder="Latitude"
                                 value={String(parkingEstablishmentData.latitude)}
-                                editable={false}
                             />
+                            <ButtonComponent onPress={getMyLocation} title="Get My Coordinates" />
                         </View>
 
                         <TextInputComponent
@@ -407,11 +416,11 @@ const ParkingManagerSignUp = () => {
                                         .split(/(?=[A-Z])/)
                                         .join(" ")
                                         .toUpperCase()}
-                                    {type !== "parkingPhotos" ? " (PDF or Image)" : " (Images)"}
+                                    {type !== "parking_photos" ? " (PDF or Image)" : " (Images)"}
                                 </TextComponent>
 
                                 {file ? (
-                                    type === "parkingPhotos" ? (
+                                    type === "parking_photos" ? (
                                         <View style={styles.photoSection}>
                                             <View style={styles.photoGrid}>
                                                 {(file as DocumentInfo[]).map((photo, index) => (
@@ -426,13 +435,13 @@ const ParkingManagerSignUp = () => {
                                             <View style={styles.photoActions}>
                                                 <ButtonComponent
                                                     title="Add More Photos"
-                                                    onPress={() => handleDocumentPick("parkingPhotos")}
+                                                    onPress={() => handleDocumentPick("parking_photos")}
                                                     variant="primary"
                                                 />
                                                 <ButtonComponent
                                                     title="Remove All"
                                                     variant="destructive"
-                                                    onPress={() => handleRemoveDocument("parkingPhotos")}
+                                                    onPress={() => handleRemoveDocument("parking_photos")}
                                                 />
                                             </View>
                                         </View>
@@ -471,29 +480,29 @@ const ParkingManagerSignUp = () => {
                                 )}
                             </View>
                         ))}
+                        <InfoContainer />
+                    </View>
+                    <View style={styles.submitContainer}>
+                        <View style={styles.checkboxContainer}>
+                            <CheckboxComponent
+                                placeholder="I agree to the terms and conditions"
+                                value={agreed}
+                                onValueChange={setAgreed}
+                            />
+                            <CheckboxComponent
+                                placeholder="I certify that my parking facility complies with local zoning laws"
+                                value={zoningCompliance}
+                                onValueChange={setZoningCompliance}
+                            />
+                        </View>
+                        <ButtonComponent
+                            title={isSubmitting ? "Submitting..." : "Submit Registration"}
+                            onPress={handleSubmit}
+                            disabled={isSubmitting || !agreed || !zoningCompliance}
+                            style={styles.submitButton}
+                        />
                     </View>
                 </CardComponent>
-                <InfoContainer />
-                <View style={styles.submitContainer}>
-                    <View style={styles.checkboxContainer}>
-                        <CheckboxComponent
-                            placeholder="I agree to the terms and conditions"
-                            value={agreed}
-                            onValueChange={setAgreed}
-                        />
-                        <CheckboxComponent
-                            placeholder="I certify that my parking facility complies with local zoning laws"
-                            value={zoningCompliance}
-                            onValueChange={setZoningCompliance}
-                        />
-                    </View>
-                    <ButtonComponent
-                        title={isSubmitting ? "Submitting..." : "Submit Registration"}
-                        onPress={handleSubmit}
-                        disabled={isSubmitting || !agreed || !zoningCompliance}
-                        style={styles.submitButton}
-                    />
-                </View>
             </View>
         </ResponsiveContainer>
     );
@@ -538,7 +547,6 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     submitContainer: {
-        width: "95%",
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
@@ -566,7 +574,7 @@ const styles = StyleSheet.create({
         gap: 20,
     },
     mapContainer: {
-        height: 300,
+        height: 700,
         marginVertical: 16,
         borderRadius: 8,
         overflow: "hidden",

@@ -3,12 +3,12 @@ import React, { useEffect, useState } from "react";
 import TextComponent from "@/components/TextComponent";
 import CardComponent from "@/components/CardComponent";
 import type { User } from "@/lib/models/user";
-import ButtonComponent from "@/components/ButtonComponent";
 import TextInputComponent from "@/components/TextInputComponent";
 import SelectComponent from "@/components/SelectComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { getAllUsers } from "@/lib/api/admin";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
+import LinkComponent from "@components/LinkComponent";
 
 const Users = () => {
     const [users, setUsers] = useState<User[]>([]);
@@ -24,7 +24,7 @@ const Users = () => {
             setUsers(data.data.data);
             setLoading(false);
         };
-        fetchData();
+        fetchData().then();
     }, []);
 
     const filteredUsers = users.filter((user) => {
@@ -37,13 +37,9 @@ const Users = () => {
 
     return (
         <ResponsiveContainer>
-            <View style={styles.header}>
-                <TextComponent bold variant="h1">
-                    Users
-                </TextComponent>
-                <ButtonComponent style={styles.exportButton} onPress={() => {}} title="Export Users" />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent variant="outline" style={{ marginBottom: 16 }} href="./" label="← Back to Dashboard" />
             </View>
-
             <View style={styles.filters}>
                 <TextInputComponent
                     customStyles={styles.searchInput}

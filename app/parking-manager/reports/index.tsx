@@ -19,62 +19,69 @@ const reportCards: ReportCard[] = [
         title: "Occupancy Report",
         description: "View current and historical parking space occupancy rates",
         icon: "car-parking-lights",
-        route: "../reports/occupancy",
+        route: "/parking-manager/reports/occupancy",
     },
     {
         title: "Revenue Analysis",
         description: "Track parking revenue and financial performance",
         icon: "cash-register",
-        route: "../reports/revenue",
+        route: "/parking-manager/reports/revenue",
     },
     {
         title: "Peak Hours",
         description: "Analyze busy periods and parking patterns",
         icon: "clock-time-eight",
-        route: "../reports/peak-hours",
+        route: "/parking-manager/reports/peak-hours",
     },
     {
         title: "Vehicle Distribution",
         description: "See the types of vehicles using your facility",
         icon: "car-multiple",
-        route: "../reports/vehicle-dist",
+        route: "/parking-manager/reports/vehicle-dist",
     },
     {
         title: "Duration Statistics",
         description: "View average parking duration metrics",
         icon: "timer-outline",
-        route: "../reports/duration-stats",
+        route: "/parking-manager/reports/duration-stats",
     },
     {
         title: "Payment Analytics",
-        description: "Analyze payment methods and patterns",
+        description: "Analyze payment transactions",
         icon: "credit-card-outline",
-        route: "../reports/payment-stats",
+        route: "/parking-manager/reports/payment-stats",
     },
     {
         title: "Space Utilization",
         description: "Monitor parking space efficiency",
         icon: "parking",
-        route: "../reports/utilization",
+        route: "/parking-manager/reports/utilization",
     },
     {
         title: "Premium Analysis",
         description: "Evaluate premium parking performance",
         icon: "star-outline",
-        route: "../reports/premium-analysis",
+        route: "/parking-manager/reports/premium-analysis",
     },
     {
         title: "Trends & Forecasts",
         description: "View parking trends and predictions",
         icon: "trending-up",
-        route: "../reports/trends",
+        route: "/parking-manager/reports/trends",
     },
 ];
 
 const Reports = () => {
     return (
         <ResponsiveContainer>
-            <LinkComponent label="← Back to Dashboard" style={{ width: "auto", marginBottom: 16 }} href="../" />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent
+                    label="← Back to Dashboard"
+                    style={{ width: "auto", marginBottom: 16 }}
+                    href="../../parking-manager"
+                    variant="outline"
+                />
+            </View>
             <TextComponent bold variant="h1" style={styles.header}>
                 Reports & Analytics
             </TextComponent>

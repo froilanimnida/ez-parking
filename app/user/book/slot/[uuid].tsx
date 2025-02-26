@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import { Address } from "@/lib/models/address";
-import { ParkingEstablishment } from "@/lib/models/parking-establishment";
-import { OperatingHour } from "@/lib/models/operating-hour";
-import { PaymentMethod } from "@/lib/models/payment-method";
-import { ParkingSlot } from "@/lib/models/parking-slot";
+import { ParkingEstablishment } from "@lib/models/parkingEstablishment";
+import { OperatingHour } from "@lib/models/operatingHour";
+import { PaymentMethod } from "@lib/models/paymentMethod";
+import { ParkingSlot } from "@lib/models/parkingSlot";
 import { router, useLocalSearchParams } from "expo-router";
 import LinkComponent from "@/components/LinkComponent";
 import CardComponent from "@/components/CardComponent";
@@ -79,8 +79,8 @@ const SlotInfo = () => {
             pricingType === "hourly"
                 ? transactionCheckoutInfo.slot_info.base_price_per_hour
                 : pricingType === "daily"
-                ? transactionCheckoutInfo.slot_info.base_price_per_day
-                : transactionCheckoutInfo.slot_info.base_price_per_month;
+                  ? transactionCheckoutInfo.slot_info.base_price_per_day
+                  : transactionCheckoutInfo.slot_info.base_price_per_month;
 
         const multiplier = parseFloat(transactionCheckoutInfo.slot_info.price_multiplier || "1");
         const premiumMultiplier = transactionCheckoutInfo.slot_info.is_premium ? 1.2 : 1;
@@ -185,7 +185,7 @@ const SlotInfo = () => {
             scheduled_exit_time: calculateDuration(
                 String(new Date(year, month - 1, day)),
                 duration,
-                pricingType
+                pricingType,
             ).toISOString(),
             amount_due: getCurrentRate() * duration,
             slot_uuid: uuid,
@@ -201,11 +201,14 @@ const SlotInfo = () => {
 
     return (
         <ResponsiveContainer>
-            <LinkComponent
-                href={`../../../user/book/${establishment_uuid}`}
-                style={styles.backLink}
-                label="← Back to Dashboard"
-            />
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent
+                    href={`../../../user/book/${establishment_uuid}`}
+                    style={styles.backLink}
+                    label="← Back to Dashboard"
+                    variant="outline"
+                />
+            </View>
             {loading || !transactionCheckoutInfo ? (
                 <LoadingComponent text="Loading..." />
             ) : (
@@ -252,8 +255,8 @@ const SlotInfo = () => {
                                 {pricingType === "hourly"
                                     ? "(in hours)"
                                     : pricingType === "daily"
-                                    ? "(in days)"
-                                    : "(in months)"}
+                                      ? "(in days)"
+                                      : "(in months)"}
                             </TextComponent>
                             <TextInputComponent
                                 customStyles={styles.input}
@@ -356,28 +359,29 @@ const SlotInfo = () => {
                             placeholder="I also agree that the establishment has the right to charge me for any damages
                         incurred during my stay if the establishment can prove that I am responsible."
                         />
-
-                        <ButtonComponent
-                            style={styles.confirmButton}
-                            title={
-                                transactionCheckoutInfo?.has_ongoing_transaction
-                                    ? "You have an ongoing transaction"
-                                    : isSubmitting
-                                    ? "Confirming..."
-                                    : "Confirm Booking"
-                            }
-                            disabled={
-                                transactionCheckoutInfo?.has_ongoing_transaction ||
-                                isSubmitting ||
-                                !agreed ||
-                                !terms ||
-                                duration <= 0 ||
-                                transactionCheckoutInfo?.slot_info.slot_status !== "reserved"
-                            }
-                            onPress={() => {
-                                handleConfirmBooking();
-                            }}
-                        />
+                        <View style={{ alignSelf: "flex-end" }}>
+                            <ButtonComponent
+                                style={styles.confirmButton}
+                                title={
+                                    transactionCheckoutInfo?.has_ongoing_transaction
+                                        ? "You have an ongoing transaction"
+                                        : isSubmitting
+                                          ? "Confirming..."
+                                          : "Confirm Booking"
+                                }
+                                disabled={
+                                    transactionCheckoutInfo?.has_ongoing_transaction ||
+                                    isSubmitting ||
+                                    !agreed ||
+                                    !terms ||
+                                    duration <= 0 ||
+                                    transactionCheckoutInfo?.slot_info.slot_status !== "open"
+                                }
+                                onPress={() => {
+                                    handleConfirmBooking().then();
+                                }}
+                            />
+                        </View>
                     </CardComponent>
                 </>
             )}

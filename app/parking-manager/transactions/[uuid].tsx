@@ -2,13 +2,14 @@ import { StyleSheet, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { getTransaction } from "@/lib/api/parkingManager";
-import type { ParkingSlot } from "@/lib/models/parking-slot";
+import type { ParkingSlot } from "@lib/models/parkingSlot";
 import type { Transaction } from "@/lib/models/transaction";
 import type { User } from "@/lib/models/user";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import TextComponent from "@/components/TextComponent";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
 import CardComponent from "@/components/CardComponent";
+import LinkComponent from "@components/LinkComponent";
 
 interface TransactionDetailsType {
     slot_info: ParkingSlot & { vehicle_type_name: string; vehicle_type_size: string };
@@ -30,10 +31,18 @@ const TransactionDetails = () => {
                 alert("Error fetching transaction details.");
             }
         };
-        transaction();
+        transaction().then();
     }, [uuid]);
     return (
         <ResponsiveContainer>
+            <View style={{ alignSelf: "flex-start" }}>
+                <LinkComponent
+                    variant="outline"
+                    style={{ marginBottom: 16 }}
+                    href="./"
+                    label="← Back to Transactions"
+                />
+            </View>
             <TextComponent bold variant="h1" style={styles.title}>
                 Transaction Details
             </TextComponent>
@@ -102,26 +111,29 @@ const TransactionDetails = () => {
                                 <TextComponent style={styles.value}>
                                     Entry:{" "}
                                     {new Date(
-                                        transactionDetails?.transaction.scheduled_entry_time ?? ""
+                                        transactionDetails?.transaction.scheduled_entry_time ?? "",
                                     ).toLocaleString()}
                                 </TextComponent>
                                 <TextComponent style={styles.value}>
                                     Exit:{" "}
                                     {new Date(
-                                        transactionDetails?.transaction.scheduled_exit_time ?? ""
+                                        transactionDetails?.transaction.scheduled_exit_time ?? "",
                                     ).toLocaleString()}
                                 </TextComponent>
                             </View>
                             <View style={styles.infoBlock}>
                                 <TextComponent style={styles.label}>Entry Time</TextComponent>
                                 <TextComponent style={styles.value}>
-                                   {transactionDetails?.transaction.entry_time}
+                                    {transactionDetails?.transaction.entry_time}
                                 </TextComponent>
                             </View>
                             <View style={styles.infoBlock}>
                                 <TextComponent style={styles.label}>Exit Time</TextComponent>
                                 <TextComponent style={styles.value}>
-                                    {transactionDetails?.transaction.exit_time ?? "N/A"}
+                                    {transactionDetails?.transaction.exit_time &&
+                                    transactionDetails.transaction.status === "completed"
+                                        ? transactionDetails.transaction.exit_time
+                                        : "N/A"}
                                 </TextComponent>
                             </View>
                             <View style={styles.infoBlock}>
@@ -187,7 +199,6 @@ const styles = StyleSheet.create({
         fontWeight: "600",
     },
     paymentStatus: {
-        color: "#DC2626",
         fontWeight: "600",
     },
 });

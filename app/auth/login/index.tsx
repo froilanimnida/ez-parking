@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
-import Checkbox from "expo-checkbox";
+import CheckboxComponent from "@components/CheckboxComponent";
 import TextComponent from "@components/TextComponent";
 import ButtonComponent from "@components/ButtonComponent";
 import CardComponent from "@/components/CardComponent";
@@ -12,6 +12,7 @@ import LinkComponent from "@/components/LinkComponent";
 import ResponsiveContainer from "@/components/reusable/ResponsiveContainer";
 import { loginUser, verifyOTP } from "@/lib/api/auth";
 import LoadingComponent from "@/components/reusable/LoadingComponent";
+import React from "react";
 
 const LoginForm = () => {
     const [showOtpForm, setShowOtpForm] = useState(false);
@@ -28,9 +29,19 @@ const LoginForm = () => {
         setTimer(300);
     };
     useEffect(() => {
-        if (timer === 0) {
+        let interval: NodeJS.Timeout | null = null;
+        if (timer > 0) {
+            interval = setInterval(() => {
+                setTimer((prevTimer) => prevTimer - 1);
+            }, 1000);
+        } else {
             setShowOtpForm(false);
         }
+        return () => {
+            if (interval) {
+                clearInterval(interval);
+            }
+        };
     }, [timer]);
 
     const nextParams = local.next as RelativePathString | ExternalPathString;
@@ -39,6 +50,7 @@ const LoginForm = () => {
         const checkAuthStatus = async () => {
             try {
                 const auth = await isAuthenticated();
+                console.log(auth);
 
                 if (auth.loggedIn && auth.role) {
                     if (nextParams && auth.role === "user") {
@@ -54,7 +66,7 @@ const LoginForm = () => {
             }
         };
 
-        checkAuthStatus();
+        checkAuthStatus().then();
         return () => {
             setIsChecking(false);
         };
@@ -62,7 +74,7 @@ const LoginForm = () => {
 
     const handleOtpOnChange = (otp: string) => {
         if (otp.length === 6) {
-            handleOTP(otp);
+            handleOTP(otp).then();
         }
     };
     const handleLogin = async () => {
@@ -115,11 +127,7 @@ const LoginForm = () => {
                 <View style={styles.body}>
                     {!showOtpForm ? (
                         <View style={styles.loginForm}>
-                            <CardComponent
-                                header="Welcome back"
-                                subHeader="Please enter your registered email address"
-                                customStyles={{ gap: 16 }}
-                            >
+                            <CardComponent header="Welcome back" subHeader="Please enter your registered email address">
                                 <TextInputComponent
                                     customStyles={styles.input}
                                     placeholder="Email address"
@@ -128,10 +136,12 @@ const LoginForm = () => {
                                     onChangeText={setEmail}
                                     autoCapitalize="none"
                                 />
-                                <View style={styles.checkbox}>
-                                    <Checkbox onValueChange={setRememberMe} value={rememberMe} color="#4F46E5" />
-                                    <TextComponent>Remember me</TextComponent>
-                                </View>
+                                <CheckboxComponent
+                                    onValueChange={setRememberMe}
+                                    value={rememberMe}
+                                    placeholder="Remember me"
+                                    customStyles={{ marginVertical: 16 }}
+                                />
                                 <ButtonComponent
                                     title="Continue"
                                     onPress={handleLogin}
@@ -139,7 +149,19 @@ const LoginForm = () => {
                                     loading={loggingIn}
                                     disabled={!isEmailValid(email) || loggingIn}
                                 />
-                                <LinkComponent href="./sign-up" label="Create user account" variant="text" />
+                                <View style={{ alignSelf: "center" }}>
+                                    <LinkComponent
+                                        href="./sign-up"
+                                        label="Create user account"
+                                        variant="outline"
+                                        style={{
+                                            marginTop: 16,
+                                            width: "100%",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                        }}
+                                    />
+                                </View>
                             </CardComponent>
                         </View>
                     ) : (
@@ -147,29 +169,28 @@ const LoginForm = () => {
                             <CardComponent
                                 header="Verify your email"
                                 subHeader={`Enter the 6-digit code sent to ${email}`}
-                                children={
-                                    <>
-                                        <View style={styles.otpContainer}>
-                                            <TextInputComponent
-                                                customStyles={styles.otpInput}
-                                                maxLength={6}
-                                                keyboardType="number-pad"
-                                                onChangeText={handleOtpOnChange}
-                                            />
-                                        </View>
-
-                                        <TextComponent style={styles.timerText}>
-                                            Get new code in {timer} seconds
-                                        </TextComponent>
-                                        <ButtonComponent
-                                            title="Resend Code"
-                                            onPress={startTimer}
-                                            variant="primary"
-                                            disabled={timer > 0}
+                            >
+                                <>
+                                    <View style={styles.otpContainer}>
+                                        <TextInputComponent
+                                            customStyles={styles.otpInput}
+                                            maxLength={6}
+                                            keyboardType="number-pad"
+                                            onChangeText={handleOtpOnChange}
                                         />
-                                    </>
-                                }
-                            />
+                                    </View>
+
+                                    <TextComponent style={styles.timerText}>
+                                        Get new code in {timer} seconds
+                                    </TextComponent>
+                                    <ButtonComponent
+                                        title="Resend Code"
+                                        onPress={startTimer}
+                                        variant="primary"
+                                        disabled={timer > 0}
+                                    />
+                                </>
+                            </CardComponent>
                         </View>
                     )}
                 </View>
@@ -207,9 +228,6 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     input: {
-        borderWidth: 1,
-        borderColor: "#E5E7EB",
-        borderRadius: 8,
         padding: 12,
         marginBottom: 16,
     },
