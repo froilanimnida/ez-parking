@@ -17,6 +17,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
     async (value) => {
         const authTokens = await getAuthHeaders();
+
         if (PlatformType() !== "web") {
             value.headers["access_token_cookie"] = authTokens.access_token_cookie;
             value.headers["csrf_access_token"] = authTokens.csrf_access_token;
@@ -24,16 +25,24 @@ axiosInstance.interceptors.request.use(
             value.headers["csrf_refresh_token"] = authTokens.csrf_refresh_token;
             return value;
         }
+
         if (document.cookie) {
             value.headers["csrf_refresh_token"] = authTokens.csrf_refresh_token;
-            value.headers["csrf_access_token"] = document.cookie.split("csrf_access_token=")[1].split(";")[0];
+
+            // Ensure the cookie contains "csrf_access_token=" before attempting to split
+            const csrfAccessTokenCookie = document.cookie.split("csrf_access_token=")[1];
+            if (csrfAccessTokenCookie) {
+                value.headers["csrf_access_token"] = csrfAccessTokenCookie.split(";")[0];
+            }
         }
+
         return value;
     },
     async (error) => {
         return Promise.reject(error);
-    },
+    }
 );
+
 
 axiosInstance.interceptors.request.use(
     async (config) => {

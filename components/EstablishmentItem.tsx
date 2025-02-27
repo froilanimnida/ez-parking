@@ -30,7 +30,7 @@ const EstablishmentItem = ({ userLat, userLong, establishment, guest }: Establis
     const distance = calculateDistance(userLat, userLong, establishment.latitude, establishment.longitude);
 
     return (
-        <CardComponent header={`Establishment - ${establishment.name}`} subHeader={establishment.nearby_landmarks}>
+        <CardComponent header={`${establishment.name}`} subHeader={establishment.nearby_landmarks}>
             <View style={styles.header}>
                 {establishment.verified && (
                     <View style={styles.badge}>
