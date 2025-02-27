@@ -18,6 +18,8 @@ import { checkoutTransaction, createTransaction } from "@/lib/api/transaction";
 import ButtonComponent from "@/components/ButtonComponent";
 import { calculatePrice } from "@/lib/helper/calculatePrice";
 import { calculateDuration } from "@/lib/helper/calculateDuration";
+import Platform from "@lib/helper/platform";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 interface Slot extends ParkingSlot {
     vehicle_type_code: string;
@@ -118,7 +120,7 @@ const SlotInfo = () => {
             }
         };
 
-        checkoutInfo();
+        checkoutInfo().then();
 
         return () => {
             mounted = false;
@@ -178,6 +180,7 @@ const SlotInfo = () => {
             setIsSubmitting(false);
             return;
         }
+        console.log(selectedDate);
         const result = await createTransaction({
             duration: duration,
             duration_type: pricingType,
@@ -192,6 +195,7 @@ const SlotInfo = () => {
         });
         setIsSubmitting(false);
         if (!transactionCheckoutInfo?.has_ongoing_transaction && result.status === 201) {
+            // && result.status === 201
             alert("Booking confirmed!");
             router.replace("/user");
         } else {
@@ -266,46 +270,36 @@ const SlotInfo = () => {
                                 placeholder="0"
                             />
                         </View>
-                        <View style={styles.formRow}>
-                            <TextComponent style={styles.formLabel}>Schedule Entry Time </TextComponent>
-                            <View style={{ flexDirection: "row", gap: 8 }}>
-                                <View style={{ flex: 1 }}>
-                                    <TextComponent style={styles.formLabelSmall}>Day</TextComponent>
-                                    <SelectComponent
-                                        items={Array.from({ length: 31 }, (_, i) => ({
-                                            label: String(i + 1),
-                                            value: String(i + 1),
-                                        }))}
-                                        onValueChange={(val) => setDay(Number(val))}
-                                        selectedValue={String(day)}
-                                        placeholder="Select Day"
+                        <View style={{ flexDirection: "row", gap: 8 }}>
+                            {Platform() === "web" ? (
+                                <>
+                                    <TextComponent style={styles.formLabel}>Select Date</TextComponent>
+                                    <input
+                                        type="date"
+                                        value={`${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`}
+                                        onChange={(e) => {
+                                            const date = new Date(e.target.value);
+                                            setDay(date.getDate());
+                                            setMonth(date.getMonth() + 1);
+                                            setYear(date.getFullYear());
+                                        }}
                                     />
-                                </View>
-                                <View style={{ flex: 1 }}>
-                                    <TextComponent style={styles.formLabelSmall}>Month</TextComponent>
-                                    <SelectComponent
-                                        items={Array.from({ length: 12 }, (_, i) => ({
-                                            label: String(i + 1),
-                                            value: String(i + 1),
-                                        }))}
-                                        onValueChange={(val) => setMonth(Number(val))}
-                                        selectedValue={String(month)}
-                                        placeholder="Select Month"
-                                    />
-                                </View>
-                                <View style={{ flex: 1 }}>
-                                    <TextComponent style={styles.formLabelSmall}>Year</TextComponent>
-                                    <SelectComponent
-                                        items={Array.from({ length: 10 }, (_, i) => ({
-                                            label: String(new Date().getFullYear() + i),
-                                            value: String(new Date().getFullYear() + i),
-                                        }))}
-                                        onValueChange={(val) => setYear(Number(val))}
-                                        selectedValue={String(year)}
-                                        placeholder="Select Year"
-                                    />
-                                </View>
-                            </View>
+                                </>
+                            ) : (
+                                <DateTimePicker
+                                    minimumDate={new Date()}
+                                    style={{ width: "100%", height: 100 }}
+                                    value={new Date(year, month - 1, day)}
+                                    mode="date"
+                                    onChange={(event, date) => {
+                                        if (date) {
+                                            setDay(date.getDate());
+                                            setMonth(date.getMonth() + 1);
+                                            setYear(date.getFullYear());
+                                        }
+                                    }}
+                                />
+                            )}
                         </View>
 
                         <View style={styles.formRow}>
