@@ -47,6 +47,8 @@ export const getTransactions = async () => await axiosInstance.get(`${root}/tran
 export const getTransaction = async (transactionUuid: string) =>
     await axiosInstance.get(`${root}/transaction?transaction_uuid=${transactionUuid}`);
 
+export const getSlot = async (slotUuid: string) => await axiosInstance.get(`${root}/slot?slot_uuid=${slotUuid}`)
+
 export const addParkingSlot = async (newSlotData: {
     slot_code: string;
     is_premium: boolean;
